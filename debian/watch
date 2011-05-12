@@ -1,0 +1,6 @@
+# watch control file for uscan
+version=3
+http://code.google.com/p/python-llfuse/downloads/list \
+  http://python-llfuse.googlecode.com/files/llfuse-(.+).tar.bz2 \
+  debian uupdate
+

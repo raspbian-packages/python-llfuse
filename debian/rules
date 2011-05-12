@@ -1,0 +1,103 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+#export DH_VERBOSE=1
+
+PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
+
+build: build-stamp
+
+build-stamp: build_cython \
+             build_sphinx \
+	     $(PYVERS:%=build-python%) \
+             $(PYVERS:%=build-dbg-python%)
+	touch $@
+
+build_cython:
+	dh_testdir
+	python setup.py build_cython
+	touch $@
+
+build_sphinx:
+	dh_testdir
+	# Disabled until Sphinx 1.1 hits the archive or
+	# wishlish bug #63040 is fixed, backporting the required feature
+	#python setup.py build_sphinx
+	touch $@
+
+build-python%: 
+	dh_testdir
+	python$* setup.py build -g
+	touch $@
+
+build-dbg-python%:
+	dh_testdir
+	python$*-dbg setup.py build -g
+	touch $@
+
+install: build install-prereq $(PYVERS:%=install-python%) $(PYVERS:%=install-dbg-python%) 
+
+install-prereq:
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+install-python3%: 
+	python3$* setup.py install --force --root=debian/python3-llfuse \
+                                   --no-compile -O0 --install-layout=deb
+
+install-dbg-python3%: 
+	python3$*-dbg setup.py install --force --root=debian/python3-llfuse-dbg \
+                                       --no-compile -O0 --install-layout=deb
+	find debian/python3-llfuse-dbg ! -type d ! -name '*.so' | xargs rm -f
+	find debian/python3-llfuse-dbg -depth -empty -exec rmdir {} \;
+
+install-python2%: 
+	python2$* setup.py install --force --root=$(CURDIR)/debian/python-llfuse \
+                                   --no-compile -O0 --install-layout=deb
+
+install-dbg-python2%: 
+	python2$*-dbg setup.py install --force --root=debian/python-llfuse-dbg \
+                                       --no-compile -O0 --install-layout=deb
+	find debian/python-llfuse-dbg ! -type d ! -name '*.so' | xargs rm -f
+	find debian/python-llfuse-dbg -depth -empty -exec rmdir {} \;
+
+clean:
+	python setup.py clean -a
+	dh_clean
+	rm -rf build-dbg-python* build-python* build-stamp
+
+binary: binary-arch binary-indep
+
+binary-arch: build install
+	dh_testroot -a
+	dh_testdir -a
+	dh_install -a
+	dh_installchangelogs -a Changes.txt
+	dh_installdocs -a
+	dh_fixperms -a
+	chmod +x debian/python-llfuse/usr/share/doc/python-llfuse/contrib/*.py 
+	chmod +x debian/python3-llfuse/usr/share/doc/python3-llfuse/contrib/*.py 
+	dh_python2 -a
+	dh_python3 -a
+	dh_lintian -a
+	for python in python python3; do \
+	   dh_strip -p$${python}-llfuse --dbg-package=$${python}-llfuse-dbg; \
+	   rm -rf debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
+	   ln -s $${python}-llfuse debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
+           ln -sf ../../../../javascript/jquery/jquery.js \
+              debian/$${python}-llfuse/usr/share/doc/$${python}-llfuse/html/_static/jquery.js; \
+	done
+	dh_compress -a -X.txt -X.js -X.py -X.json
+	dh_makeshlibs -a
+	dh_shlibdeps -a
+	dh_md5sums -a 
+	dh_installdeb -a
+	dh_gencontrol -a
+	dh_builddeb -a
+
+binary-indep: 
+
+
+.PHONY: build clean binary binary-arch binary-indep install 

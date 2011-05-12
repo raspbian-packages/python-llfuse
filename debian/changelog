@@ -1,0 +1,13 @@
+python-llfuse (0.32-1) unstable; urgency=low
+
+  * First official debian release. Closes: 626658
+  * Breaks and Replaces s3ql <= 0.28, this package isn't in the official
+    debian package but was provided by upstream over various channels (LLFUSE
+    was factored out of S3QL in version 0.29).
+  * Rebuilding of HTML documentation requires (yet unreleased) Sphinx version
+    1.1 or resolution of wishlist bug #63040, therefore we do not rebuild the
+    documentation in debian/rules but use the HTML files included in the
+    upstream tarball.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 12 May 2011 10:19:11 -0400
+
