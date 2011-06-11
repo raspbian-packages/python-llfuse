@@ -14,7 +14,7 @@ build-stamp: build_cython \
 
 build_cython:
 	dh_testdir
-	python setup.py build_ctypes
+	python setup.py build_cython
 
 build_sphinx:
 	dh_testdir
