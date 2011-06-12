@@ -3,7 +3,7 @@ Section: python
 X-Python-Version: >= 2.6
 X-Python3-Version: >= 3.0
 Priority: optional
-Uploaders: Debian Python Team <debian-python@lists.debian.org>
+Uploaders: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
 Maintainer: Nikolaus Rath <Nikolaus@rath.org>
 Build-Depends: debhelper (>= 8),
                libfuse-dev (>= 2.8.0),
