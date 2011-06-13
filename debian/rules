@@ -18,7 +18,8 @@ build_cython:
 
 build_sphinx:
 	dh_testdir
-	# Disabled until Sphinx 1.1 hits the archive
+	# Disabled until Sphinx 1.1 hits the archive or
+	# wishlish bug #63040 is fixed, backporting the required feature
 	#python setup.py build_sphinx
 
 build-python%: 
