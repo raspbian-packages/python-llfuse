@@ -9,18 +9,21 @@ build: build-stamp
 
 build-stamp: build_cython \
              build_sphinx \
-	     $(PYVERS:%=build-python%) $(PYVERS:%=build-dbg-python%)
+	     $(PYVERS:%=build-python%) \
+             $(PYVERS:%=build-dbg-python%)
 	touch $@
 
 build_cython:
 	dh_testdir
 	python setup.py build_cython
+	touch $@
 
 build_sphinx:
 	dh_testdir
 	# Disabled until Sphinx 1.1 hits the archive or
 	# wishlish bug #63040 is fixed, backporting the required feature
 	#python setup.py build_sphinx
+	touch $@
 
 build-python%: 
 	dh_testdir
