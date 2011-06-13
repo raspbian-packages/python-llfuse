@@ -79,7 +79,7 @@ binary-arch: build install
 	dh_python3 -a
 	dh_lintian -a
 	for python in python python3; do \
-	   dh_strip -a -p$${python}-llfuse --dbg-package=$${python}-llfuse-dbg; \
+	   dh_strip -p$${python}-llfuse --dbg-package=$${python}-llfuse-dbg; \
 	   rm -rf debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
 	   ln -s $${python}-llfuse debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
            ln -sf ../../../../javascript/jquery/jquery.js \
