@@ -19,8 +19,8 @@ Build-Depends: debhelper (>= 8),
                cython (>= 0.14)
 Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/python-llfuse/
-Vcs-Browser: http://code.google.com/p/python-llfuse/source/browse?repo=debian
-Vcs-Hg: https://debian.python-llfuse.googlecode.com/hg/
+Vcs-Svn: svn://svn.debian.org/python-modules/packages/python-llfuse/trunk 
+Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-llfuse/trunk/
 
 Package: python-llfuse
 Architecture: any
