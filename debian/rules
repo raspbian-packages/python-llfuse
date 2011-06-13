@@ -23,7 +23,7 @@ build_sphinx:
 
 build-python%: 
 	dh_testdir
-	python$* setup.py build 
+	python$* setup.py build
 	touch $@
 
 build-dbg-python%:
@@ -80,7 +80,6 @@ binary-arch: build install
 	dh_lintian -a
 	for python in python python3; do \
 	   dh_strip -a -p$${python}-llfuse --dbg-package=$${python}-llfuse-dbg; \
-	   (cd debian/$${python}-llfuse-dbg/usr/lib/debug/usr/lib && mv pyshared pymodules); \
 	   rm -rf debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
 	   ln -s $${python}-llfuse debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
            ln -sf ../../../../javascript/jquery/jquery.js \
