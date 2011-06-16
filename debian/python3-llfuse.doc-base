@@ -1,8 +1,0 @@
-Document: python3-llfuse
-Title: Python-LLFUSE API Documentation (Python 3)
-Author: Nikolaus Rath <Nikolaus@rath.org>
-Section: Programming/Python
-
-Format: HTML
-Index: /usr/share/doc/python3-llfuse/html/index.html
-Files: /usr/share/doc/python3-llfuse/html/*.html
