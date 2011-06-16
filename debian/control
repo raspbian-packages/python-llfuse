@@ -27,6 +27,7 @@ Architecture: any
 Depends: ${misc:Depends},
          ${python:Depends},
          ${shlibs:Depends}
+Suggests: python-llfuse-doc
 Replaces: s3ql (<= 0.28)
 Breaks: s3ql (<= 0.28)
 Provides: ${python:Provides}
@@ -58,7 +59,8 @@ Description: Python bindings for the low-level FUSE API (debugging symbols)
  also aims to provide a secure method for non privileged users to
  create and mount their own filesystem implementations.
  .
- This package contains the extension built for the Python debug interpreter.
+ This package contains the debugging symbols as well as the extension
+ built for the Python 2 debug interpreter.
 
 Package: python3-llfuse
 Architecture: any
@@ -66,9 +68,11 @@ Depends: ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
 Provides: ${python3:Provides}
+Suggests: python-llfuse-doc
 Description: Python 3 bindings for the low-level FUSE API
- Python3-llfuse is a set of Python 3 bindings for the low level
- FUSE API.
+ Python-llfuse is a set of Python bindings for the low level FUSE API.
+ This package provides the extension for the Python 3 interpreter. The
+ documentation is contained in the python-llfuse-doc package.
  .
  FUSE (Filesystem in USErspace) is a simple interface for userspace
  programs to export a virtual filesystem to the Linux kernel. FUSE
@@ -84,16 +88,15 @@ Depends: python3-llfuse (= ${binary:Version}),
          ${shlibs:Depends}, 
          ${misc:Depends}
 Description: Python 3 bindings for the low-level FUSE API (debugging symbols)
- Python-llfuse is a set of Python 3 bindings for the low level
- FUSE API.
+ Python-llfuse is a set of Python bindings for the low level FUSE API.
  .
  FUSE (Filesystem in USErspace) is a simple interface for userspace
  programs to export a virtual filesystem to the Linux kernel. FUSE
  also aims to provide a secure method for non privileged users to
  create and mount their own filesystem implementations.
  .
- This package contains the extension built for the Python 3 debug 
- interpreter.
+ This package contains the debugging symbols as well as the extension
+ built for the Python 3 debug interpreter.
 
 Package: python-llfuse-doc
 Architecture: all
@@ -102,14 +105,11 @@ Depends: libjs-jquery,
          ${shlibs:Depends},
          ${misc:Depends}
 Description: Python bindings for the low-level FUSE API (documentation)
- Python-llfuse is a set of Python bindings for the low level
- FUSE API. Bindings for the high level API are provided
- by the python-fuse package.
+ Python-llfuse is a set of Python bindings for the low level FUSE API.
+ This package provides the documentation for both the Python 2 and
+ Python 3 extension (packages python-llfuse and python3-llfuse).
  .
  FUSE (Filesystem in USErspace) is a simple interface for userspace
  programs to export a virtual filesystem to the Linux kernel. FUSE
  also aims to provide a secure method for non privileged users to
  create and mount their own filesystem implementations.
- .
- This package contains the documentation.
-
