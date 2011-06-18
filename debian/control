@@ -16,7 +16,8 @@ Build-Depends: debhelper (>= 8),
                pkg-config,
                python-distribute,
                python3-setuptools,
-               cython (>= 0.14)
+               cython (>= 0.14),
+               quilt
 Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/python-llfuse/
 Vcs-Svn: svn://svn.debian.org/python-modules/packages/python-llfuse/trunk 
@@ -100,6 +101,7 @@ Description: Python 3 bindings for the low-level FUSE API (debugging symbols)
 
 Package: python-llfuse-doc
 Architecture: all
+Section: doc
 Recommends: python-llfuse | python3-llfuse
 Depends: libjs-jquery,
          ${shlibs:Depends},
