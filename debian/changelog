@@ -1,3 +1,10 @@
+python-llfuse (0.32-2) unstable; urgency=low
+
+  * Created separate -doc package for documentation. Closes: 630632
+  * Regenerate documentation in debian/rules. Closes: 630605
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 25 Jun 2011 13:01:03 -0400
+
 python-llfuse (0.32-1) unstable; urgency=low
 
   * First official debian release. Closes: 626658

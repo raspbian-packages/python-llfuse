@@ -5,12 +5,15 @@
 
 PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
 
-build: build-stamp
+%:
+	dh $@ --with python2,python3,quilt
+
+override_dh_auto_build: build-stamp
 
 build-stamp: build_cython \
              build_sphinx \
 	     $(PYVERS:%=build-python%) \
-             $(PYVERS:%=build-dbg-python%)
+	     $(PYVERS:%=build-python%-dbg)
 	touch $@
 
 build_cython:
@@ -20,9 +23,7 @@ build_cython:
 
 build_sphinx:
 	dh_testdir
-	# Disabled until Sphinx 1.1 hits the archive or
-	# wishlish bug #63040 is fixed, backporting the required feature
-	#python setup.py build_sphinx
+	python setup.py build_sphinx
 	touch $@
 
 build-python%: 
@@ -30,12 +31,9 @@ build-python%:
 	python$* setup.py build -g
 	touch $@
 
-build-dbg-python%:
-	dh_testdir
-	python$*-dbg setup.py build -g
-	touch $@
-
-install: build install-prereq $(PYVERS:%=install-python%) $(PYVERS:%=install-dbg-python%) 
+override_dh_auto_install: build install-prereq\
+         $(PYVERS:%=install-python%) \
+	 $(PYVERS:%=install-python%-dbg)
 
 install-prereq:
 	dh_testdir
@@ -43,61 +41,35 @@ install-prereq:
 	dh_prep
 	dh_installdirs
 
-install-python3%: 
-	python3$* setup.py install --force --root=debian/python3-llfuse \
-                                   --no-compile -O0 --install-layout=deb
+install-python%: 
+	python$* setup.py install --force --root=debian/tmp \
+                                  --no-compile -O0 --install-layout=deb
 
-install-dbg-python3%: 
-	python3$*-dbg setup.py install --force --root=debian/python3-llfuse-dbg \
-                                       --no-compile -O0 --install-layout=deb
-	find debian/python3-llfuse-dbg ! -type d ! -name '*.so' | xargs rm -f
-	find debian/python3-llfuse-dbg -depth -empty -exec rmdir {} \;
+override_dh_link:
+	rm -rf debian/python-llfuse-dbg/usr/share/doc/python-llfuse-dbg
+	rm -rf debian/python3-llfuse-dbg/usr/share/doc/python3-llfuse-dbg
+	dh_link
 
-install-python2%: 
-	python2$* setup.py install --force --root=$(CURDIR)/debian/python-llfuse \
-                                   --no-compile -O0 --install-layout=deb
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf build-python* build_cython build_sphinx build-stamp
 
-install-dbg-python2%: 
-	python2$*-dbg setup.py install --force --root=debian/python-llfuse-dbg \
-                                       --no-compile -O0 --install-layout=deb
-	find debian/python-llfuse-dbg ! -type d ! -name '*.so' | xargs rm -f
-	find debian/python-llfuse-dbg -depth -empty -exec rmdir {} \;
+override_dh_strip:
+	dh_strip -ppython-llfuse --dbg-package=python-llfuse-dbg
+	dh_strip -ppython3-llfuse --dbg-package=python3-llfuse-dbg
 
-clean:
-	python setup.py clean -a
-	dh_clean
-	rm -rf build-dbg-python* build-python* build-stamp
+override_dh_installchangelog:
+	dh_installchangelog Changes.txt
 
-binary: binary-arch binary-indep
+override_dh_install:
+	dh_install
 
-binary-arch: build install
-	dh_testroot -a
-	dh_testdir -a
-	dh_install -a
-	dh_installchangelogs -a Changes.txt
-	dh_installdocs -a
-	dh_fixperms -a
-	chmod +x debian/python-llfuse/usr/share/doc/python-llfuse/contrib/*.py 
-	chmod +x debian/python3-llfuse/usr/share/doc/python3-llfuse/contrib/*.py 
-	dh_python2 -a
-	dh_python3 -a
-	dh_lintian -a
-	for python in python python3; do \
-	   dh_strip -p$${python}-llfuse --dbg-package=$${python}-llfuse-dbg; \
-	   rm -rf debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
-	   ln -s $${python}-llfuse debian/$${python}-llfuse-dbg/usr/share/doc/$${python}-llfuse-dbg; \
-           ln -sf ../../../../javascript/jquery/jquery.js \
-              debian/$${python}-llfuse/usr/share/doc/$${python}-llfuse/html/_static/jquery.js; \
-	done
-	dh_compress -a -X.txt -X.js -X.py -X.json
-	dh_makeshlibs -a
-	dh_shlibdeps -a
-	dh_md5sums -a 
-	dh_installdeb -a
-	dh_gencontrol -a
-	dh_builddeb -a
+        # Install debugging extension and remove from regular package
+	(cd debian/python-llfuse; \
+            find . -name "*_d.so" -printf "%P\0" -delete) \
+            | xargs -0 dh_install --autodest -ppython-llfuse-dbg
 
-binary-indep: 
-
-
-.PHONY: build clean binary binary-arch binary-indep install 
+	(cd debian/python3-llfuse; \
+            find . -regextype posix-egrep -regex ".+-[a-z0-9]*d[a-z]*.so" \
+                -printf "%P\0" -delete) \
+	    | xargs -0 dh_install --autodest -ppython3-llfuse-dbg
