@@ -6,7 +6,7 @@
 PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
 
 %:
-	dh $@ --with python2,python3,quilt
+	dh $@ --with python2,python3
 
 override_dh_auto_build: build-stamp
 
