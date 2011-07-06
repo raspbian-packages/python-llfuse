@@ -32,6 +32,9 @@ build-python%:
 	python$* setup.py build -g
 	touch $@
 
+update_intersphinx:
+	wget http://docs.python.org/objects.inv -O debian/python.inv
+
 override_dh_auto_install: build install-prereq\
          $(PYVERS:%=install-python%) \
 	 $(PYVERS:%=install-python%-dbg)
