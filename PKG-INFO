@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: llfuse
-Version: 0.32
+Version: 0.33
 Summary: Python bindings for the low-level FUSE API
 Home-page: http://python-llfuse.googlecode.com/
 Author: Nikolaus Rath

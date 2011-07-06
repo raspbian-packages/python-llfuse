@@ -6,14 +6,14 @@
 PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
 
 %:
-	dh $@ --with python2,python3,quilt
+	dh $@ --with python2,python3
 
 override_dh_auto_build: build-stamp
 
 build-stamp: build_cython \
-             build_sphinx \
 	     $(PYVERS:%=build-python%) \
-	     $(PYVERS:%=build-python%-dbg)
+	     $(PYVERS:%=build-python%-dbg) \
+             build_sphinx 
 	touch $@
 
 build_cython:
@@ -23,6 +23,7 @@ build_cython:
 
 build_sphinx:
 	dh_testdir
+	python setup.py build_ext --inplace
 	python setup.py build_sphinx
 	touch $@
 
@@ -30,6 +31,9 @@ build-python%:
 	dh_testdir
 	python$* setup.py build -g
 	touch $@
+
+update_intersphinx:
+	wget http://docs.python.org/objects.inv -O debian/python.inv
 
 override_dh_auto_install: build install-prereq\
          $(PYVERS:%=install-python%) \
