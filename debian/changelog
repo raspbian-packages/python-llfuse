@@ -1,3 +1,12 @@
+python-llfuse (0.33-2) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+  * Use underscore.js from libjs-underscore rather than shipping
+    our own version.
+  * Thanks to Jakub Wilk for his packaging review.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 09 Jul 2011 15:52:34 -0400
+
 python-llfuse (0.33-1) unstable; urgency=low
 
   * New upstream release.

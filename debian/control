@@ -103,6 +103,7 @@ Architecture: all
 Section: doc
 Recommends: python-llfuse | python3-llfuse
 Depends: libjs-jquery,
+         libjs-underscore,
          ${shlibs:Depends},
          ${misc:Depends}
 Description: Python bindings for the low-level FUSE API (documentation)
