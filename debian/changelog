@@ -1,13 +1,16 @@
-python-llfuse (0.33-2) UNRELEASED; urgency=low
+python-llfuse (0.34-1) UNRELEASED; urgency=low
 
   * NOT RELEASED YET
+  * New upstream release.
+  * Fixed argument parsing under Python 3.x
+  * Do correct typecasting of mode_t constants. Fix introduces
+    build dependency on Cython 0.15 (Closes: #635196).
   * Use underscore.js from libjs-underscore rather than shipping
     our own version.
-  * Added correct copyright information for files in doc/html/_static
-    (which come from the python-sphinx package).
+  * Added correct copyright information for files in doc/html/_static.
   * Thanks to Jakub Wilk for his packaging review.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 09 Jul 2011 16:11:57 -0400
+ -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 10 Aug 2011 15:56:47 -0400
 
 python-llfuse (0.33-1) unstable; urgency=low
 
