@@ -16,7 +16,7 @@ Build-Depends: debhelper (>= 8),
                pkg-config,
                python-distribute,
                python3-setuptools,
-               cython (>= 0.15)
+               cython (>= 0.15.1)
 Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/python-llfuse/
 Vcs-Svn: svn://svn.debian.org/python-modules/packages/python-llfuse/trunk 
@@ -29,7 +29,7 @@ Depends: ${misc:Depends},
          ${shlibs:Depends}
 Suggests: python-llfuse-doc
 Replaces: s3ql (<= 0.28)
-Breaks: s3ql (<= 0.28)
+Breaks: s3ql (<< 1.2)
 Provides: ${python:Provides}
 Description: Python bindings for the low-level FUSE API
  Python-llfuse is a set of Python bindings for the low level
