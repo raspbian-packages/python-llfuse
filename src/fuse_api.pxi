@@ -10,9 +10,6 @@ This file is part of LLFUSE (http://python-llfuse.googlecode.com).
 LLFUSE can be distributed under the terms of the GNU LGPL.
 '''
 
-ENOATTR = errno.ENOATTR
-ROOT_INODE = FUSE_ROOT_ID
-
 def listdir(path):
     '''Like os.listdir(), but releases the GIL'''
     
@@ -141,6 +138,9 @@ def init(operations_, char* mountpoint_, list args):
     mountpoint = mountpoint_
     operations = operations_
 
+    # Initialize Python thread support
+    PyEval_InitThreads()
+    
     make_fuse_args(args, &f_args)
     log.debug('Calling fuse_mount')
     channel = fuse_mount(mountpoint, &f_args)
@@ -167,16 +167,19 @@ def main(single=False):
     '''Run FUSE main loop'''
 
     cdef int ret
+    global exc_info
     
     if session == NULL:
         raise RuntimeError('Need to call init() before main()')
+
+    exc_info = None
 
     if single:
         log.debug('Calling fuse_session_loop')
         with nogil:
             ret = fuse_session_loop(session)
         if ret != 0:
-            raise RuntimeError("fuse_session_loop() failed")
+            raise RuntimeError("fuse_session_loop failed")
     else:
         log.debug('Calling fuse_session_loop_mt')
         with nogil:
@@ -184,12 +187,27 @@ def main(single=False):
         if ret != 0:
             raise RuntimeError("fuse_session_loop_mt() failed")
 
-def close():
-    '''Unmount file system and clean up'''
+    if exc_info:
+        # Re-raise expression from request handler
+        log.debug('Terminated main loop because request handler raised exception, re-raising..')
+        tmp = exc_info
+        exc_info = None
+        raise tmp[0], tmp[1], tmp[2]
+
+def close(unmount=True):
+    '''Unmount file system and clean up
+
+    If `unmount` is False, the only clean up operations are peformed,
+    but the file system is not unmounted. As long as the file system
+    process is still running, all requests will hang. Once the process
+    has terminated, these (and all future) requests fail with
+    ESHUTDOWN. 
+    '''
 
     global mountpoint
     global session
     global channel
+    global exc_info
 
     log.debug('Calling fuse_session_remove_chan')
     fuse_session_remove_chan(channel)
@@ -197,12 +215,20 @@ def close():
     fuse_remove_signal_handlers(session)
     log.debug('Calling fuse_session_destroy')
     fuse_session_destroy(session)
-    log.debug('Calling fuse_unmount')
-    fuse_unmount(mountpoint, channel)
+
+    if unmount:
+        log.debug('Calling fuse_unmount')
+        fuse_unmount(mountpoint, channel)
 
     mountpoint = NULL
     session = NULL
     channel = NULL
+
+    # destroy handler may have given us an exception
+    if exc_info:
+        tmp = exc_info
+        exc_info = None
+        raise tmp[0], tmp[1], tmp[2]
 
 def invalidate_inode(inode, attr_only=False):
     '''Invalidate cache for *inode*
@@ -228,12 +254,6 @@ def invalidate_entry(inode_p, name):
 
     PyBytes_AsStringAndSize(name, &cname, &len_)
     fuse_lowlevel_notify_inval_entry(channel, inode_p, cname, len_)
-
-    
-lock = Lock.__new__(Lock)
-lock_released = NoLockManager.__new__(NoLockManager)
-
-
 
 class RequestContext:
     '''

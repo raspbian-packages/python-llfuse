@@ -1,3 +1,29 @@
+python-llfuse (0.36-1) unstable; urgency=low
+
+  * New upstream release.
+  * Depend on Cython > 0.15.1, previous versions generated segfaulting
+    code.
+  * Breaks S3QL < 1.2, API changed in non-backwards compatible way.
+    (python-llfuse is not in any stable release, and S3QL is the
+    only reverse dependency, so a new package name does not seem
+    justified).
+  * Update format of copyright file.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 20 Sep 2011 22:16:17 -0400
+
+python-llfuse (0.34-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+  * Fixed argument parsing under Python 3.x
+  * Do correct typecasting of mode_t constants. Fix introduces
+    build dependency on Cython 0.15 (Closes: #635196).
+  * Use underscore.js from libjs-underscore rather than shipping
+    our own version.
+  * Added correct copyright information for files in doc/html/_static.
+  * Thanks to Jakub Wilk for his packaging review.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 10 Aug 2011 15:56:47 -0400
+
 python-llfuse (0.33-1) unstable; urgency=low
 
   * New upstream release.

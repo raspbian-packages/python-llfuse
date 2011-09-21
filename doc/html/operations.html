@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Request Handlers &mdash; LLFUSE v0.33 documentation</title>
+    <title>Request Handlers &mdash; LLFUSE v0.36 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.33',
+        VERSION:     '0.36',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.33 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
     <link rel="next" title="Example File System" href="example.html" />
     <link rel="prev" title="The global lock" href="lock.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="lock.html" title="The global lock"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.33 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -90,10 +90,14 @@ attributes of the newly created directory entry.</p>
 <dt id="llfuse.Operations.destroy">
 <tt class="descname">destroy</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#llfuse.Operations.destroy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clean up operations.</p>
-<p>This method will be called after the last request has been
-received and when the file system is about to be unmounted. It
-must not raise any exceptions (including <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a>, since
-this method is not handling a particular syscall).</p>
+<p>This method will be called when <a class="reference internal" href="fuse_api.html#llfuse.close" title="llfuse.close"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.close</span></tt></a> has been called
+and the file system is about to be unmounted.</p>
+<p>Since this handler is thus <em>not</em> run as part of the main loop,
+it is also <em>not</em> called with the global lock acquired (unless
+the caller of <a class="reference internal" href="fuse_api.html#llfuse.close" title="llfuse.close"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.close</span></tt></a> already holds the lock).</p>
+<p>This method must not raise any exceptions (including
+<a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a>, since this method is not handling a particular
+syscall).</p>
 </dd></dl>
 
 <dl class="method">
@@ -151,17 +155,6 @@ context.</p>
 <dd><p>Return extended attribute value</p>
 <p>If the attribute does not exist, the method must raise
 <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an error code of <a class="reference internal" href="data.html#llfuse.ENOATTR" title="llfuse.ENOATTR"><tt class="xref py py-obj docutils literal"><span class="pre">ENOATTR</span></tt></a>.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="llfuse.Operations.handle_exc">
-<tt class="descname">handle_exc</tt><big>(</big><em>self</em>, <em>fn</em>, <em>exc</em><big>)</big><a class="headerlink" href="#llfuse.Operations.handle_exc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Handle exceptions that occured during request processing.</p>
-<p>This method will be called when things went seriously wrong.
-This includes e.g. bugs in LLFUSE itself or request handlers
-raising exceptions other than <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a>, but <em>not</em> problems
-with sending the reply once the request has been processed.</p>
-<p>The type of the request that failed is passed in <em>fn</em>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -434,7 +427,7 @@ error occured, this should be exactly <tt class="samp docutils literal"><span cl
         <li class="right" >
           <a href="lock.html" title="The global lock"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.33 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

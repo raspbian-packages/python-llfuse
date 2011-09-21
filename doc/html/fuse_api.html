@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FUSE API Functions &mdash; LLFUSE v0.33 documentation</title>
+    <title>FUSE API Functions &mdash; LLFUSE v0.36 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.33',
+        VERSION:     '0.36',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.33 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
     <link rel="next" title="Data Structures" href="data.html" />
     <link rel="prev" title="Getting started" href="getting_started.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.33 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -71,8 +71,12 @@ and <tt class="docutils literal"><span class="pre">struct</span> <span class="pr
 
 <dl class="function">
 <dt id="llfuse.close">
-<tt class="descclassname">llfuse.</tt><tt class="descname">close</tt><big>(</big><big>)</big><a class="headerlink" href="#llfuse.close" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">llfuse.</tt><tt class="descname">close</tt><big>(</big><em>unmount=True</em><big>)</big><a class="headerlink" href="#llfuse.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unmount file system and clean up</p>
+<p>If <tt class="xref py py-obj docutils literal"><span class="pre">unmount</span></tt> is False, the mount point is not freed completely,
+but every attempt to access it results in ESHUTDOWN. This can
+be used if the file system encountered some error that makes
+further access impossible.</p>
 </dd></dl>
 
 <dl class="function">
@@ -100,8 +104,12 @@ the third finally gets the value).</p>
 
 <dl class="function">
 <dt>
-<tt class="descclassname">llfuse.</tt><tt class="descname">close</tt><big>(</big><big>)</big></dt>
+<tt class="descclassname">llfuse.</tt><tt class="descname">close</tt><big>(</big><em>unmount=True</em><big>)</big></dt>
 <dd><p>Unmount file system and clean up</p>
+<p>If <tt class="xref py py-obj docutils literal"><span class="pre">unmount</span></tt> is False, the mount point is not freed completely,
+but every attempt to access it results in ESHUTDOWN. This can
+be used if the file system encountered some error that makes
+further access impossible.</p>
 </dd></dl>
 
 </div>
@@ -157,7 +165,7 @@ the third finally gets the value).</p>
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.33 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

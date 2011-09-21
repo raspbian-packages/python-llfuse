@@ -10,8 +10,6 @@ This file is part of LLFUSE (http://python-llfuse.googlecode.com).
 LLFUSE can be distributed under the terms of the GNU LGPL.
 '''
 
-from libc.xattr cimport XATTR_REPLACE, XATTR_CREATE
-
 cdef void fuse_init (void *userdata, fuse_conn_info *conn) with gil:
     try:
         with lock:
@@ -20,12 +18,17 @@ cdef void fuse_init (void *userdata, fuse_conn_info *conn) with gil:
         handle_exc('init', e, NULL)
         
 cdef void fuse_destroy (void *userdata) with gil:
-    # Note: called by fuse_session_destroy()
+    # Note: called by fuse_session_destroy(), i.e. not as part of the
+    # main loop but only when llfuse.close() is called.
+    # (therefore we don't obtain the global lock)
+    global exc_info
     try:
-        with lock:
-            operations.destroy()
-    except BaseException as e:
-        handle_exc('destroy', e, NULL)
+        operations.destroy()
+    except:
+        if not exc_info:
+            exc_info = sys.exc_info()
+        else:
+            log.exception('Exception after kill:')
     
 cdef void fuse_lookup (fuse_req_t req, fuse_ino_t parent,
                        const_char *name) with gil:
@@ -161,8 +164,9 @@ cdef void fuse_mkdir (fuse_req_t req, fuse_ino_t parent, const_char *name,
     cdef fuse_entry_param entry
     
     try:
-        # Force the entry type to directory
-        mode = (mode & ~S_IFMT) | S_IFDIR
+        # Force the entry type to directory. We need to explicitly cast,
+        # because on BSD the S_* are not of type mode_t.
+        mode = <mode_t> ((mode & ~S_IFMT) | S_IFDIR)
         ctx = get_request_context(req)
         with lock:
             attr = operations.mkdir(parent, PyBytes_FromString(name), mode, ctx)
@@ -486,11 +490,11 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
             operations.stacktrace()
         else:
             # Make sure we know all the flags
-            if flags & ~(XATTR_CREATE | XATTR_REPLACE):
+            if flags & ~(xattr.XATTR_CREATE | xattr.XATTR_REPLACE):
                 raise ValueError('unknown flag(s): %o' % flags)
 
             with lock:
-                if flags & XATTR_CREATE: # Attribute must not exist
+                if flags & xattr.XATTR_CREATE: # Attribute must not exist
                     try:
                         operations.getxattr(ino, name)
                     except FUSEError as e:
@@ -500,7 +504,7 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                     else:
                         raise FUSEError(errno.EEXIST)
                 
-                elif flags & XATTR_REPLACE: # Attribute must exist
+                elif flags & xattr.XATTR_REPLACE: # Attribute must exist
                     operations.getxattr(ino, name)
                     
                 operations.setxattr(ino, name, value)
