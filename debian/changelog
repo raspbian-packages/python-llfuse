@@ -1,3 +1,9 @@
+python-llfuse (0.36-2) unstable; urgency=low
+
+  * Use dh_sphinxdoc. Closes: #637393.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 24 Oct 2011 19:36:59 -0400
+
 python-llfuse (0.36-1) unstable; urgency=low
 
   * New upstream release.

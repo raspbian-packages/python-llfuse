@@ -6,7 +6,7 @@
 PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
 
 %:
-	dh $@ --with python2,python3
+	dh $@ --with python2,python3,sphinxdoc
 
 override_dh_auto_build: build-stamp
 
@@ -26,6 +26,9 @@ build_sphinx:
 	python setup.py build_ext --inplace
 	python setup.py build_sphinx
 	touch $@
+
+override_dh_compress:
+	dh_compress -X.inv
 
 build-python%: 
 	dh_testdir
