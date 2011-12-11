@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Request Handlers &mdash; LLFUSE v0.36 documentation</title>
+    <title>Request Handlers &mdash; LLFUSE v0.37.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.36',
+        VERSION:     '0.37.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
     <link rel="next" title="Example File System" href="example.html" />
     <link rel="prev" title="The global lock" href="lock.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="lock.html" title="The global lock"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -84,6 +84,13 @@ called.</p>
 where <em>fh</em> is a file handle like the one returned by <a class="reference internal" href="#llfuse.Operations.open" title="llfuse.Operations.open"><tt class="xref py py-obj docutils literal"><span class="pre">open</span></tt></a>
 and <em>attr</em> is an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the
 attributes of the newly created directory entry.</p>
+<p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
+<a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
+file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
+inode. If <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.rmdir" title="llfuse.Operations.rmdir"><tt class="xref py py-obj docutils literal"><span class="pre">rmdir</span></tt></a> requests are received prior to
+the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call, they are expect to remove only the
+directory entry for the inode and defer removal of the inode
+itself until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call.</p>
 </dd></dl>
 
 <dl class="method">
@@ -113,14 +120,26 @@ all locks belonging to the file handle&#8217;s owner.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.forget">
-<tt class="descname">forget</tt><big>(</big><em>self</em>, <em>inode</em>, <em>nlookup</em><big>)</big><a class="headerlink" href="#llfuse.Operations.forget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Notify about inode being removed from the kernel cache</p>
-<p>This method is called when the kernel removes <em>inode</em> from
-its internal caches. <em>nlookup</em> is the number of times that
-<a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a> has been called for this inode.</p>
-<p>Once the file system has received a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call for an inode,
-no other request handlers will be called for this inode without
-a prior <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a> call.</p>
+<tt class="descname">forget</tt><big>(</big><em>self</em>, <em>inode_list</em><big>)</big><a class="headerlink" href="#llfuse.Operations.forget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Notify about inodes being removed from the kernel cache</p>
+<p><em>inode_list</em> is a list of <tt class="docutils literal"><span class="pre">(inode,</span> <span class="pre">nlookup)</span></tt> tuples. This
+method is called when the kernel removes the listed inodes
+from its internal caches. <em>nlookup</em> is the number of times
+that the inode has been looked up by calling either of the
+<a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>
+methods.</p>
+<p>The file system is expected to keep track of the number of
+times an inode has been looked up and forgotten. No request
+handlers other than <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a> will be called for an inode with
+a lookup count of zero.</p>
+<p>If the lookup count reaches zero after a call to <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>, the
+file system is expected to check if there are still directory
+entries referring to this inode and, if not, delete the inode
+itself.</p>
+<p>If the file system is unmounted, it will may not receive
+<a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> calls for inodes that are still cached. The <a class="reference internal" href="#llfuse.Operations.destroy" title="llfuse.Operations.destroy"><tt class="xref py py-obj docutils literal"><span class="pre">destroy</span></tt></a>
+method may be used to clean up any remaining inodes for which
+no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call has been received.</p>
 </dd></dl>
 
 <dl class="method">
@@ -173,6 +192,13 @@ particular syscall).</p>
 <dd><p>Create a hard link.</p>
 <p>The method must return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the
 attributes of the newly created directory entry.</p>
+<p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
+<a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
+file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
+inode. If <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.rmdir" title="llfuse.Operations.rmdir"><tt class="xref py py-obj docutils literal"><span class="pre">rmdir</span></tt></a> requests are received prior to
+the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call, they are expect to remove only the
+directory entry for the inode and defer removal of the inode
+itself until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call.</p>
 </dd></dl>
 
 <dl class="method">
@@ -188,6 +214,13 @@ attributes of the newly created directory entry.</p>
 <p>If the entry does not exist, this method must raise
 <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an errno of <a class="reference external" href="http://docs.python.org/library/errno.html#errno.ENOENT" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">errno.ENOENT</span></tt></a>. Otherwise it must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance.</p>
+<p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
+<a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
+file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
+inode. If <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.rmdir" title="llfuse.Operations.rmdir"><tt class="xref py py-obj docutils literal"><span class="pre">rmdir</span></tt></a> requests are received prior to
+the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call, they are expect to remove only the
+directory entry for the inode and defer removal of the inode
+itself until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call.</p>
 <p>The file system must be able to handle lookups for <tt class="file docutils literal"><span class="pre">.</span></tt>
 and <tt class="file docutils literal"><span class="pre">..</span></tt>, no matter if these entries are returned by
 <a class="reference internal" href="#llfuse.Operations.readdir" title="llfuse.Operations.readdir"><tt class="xref py py-obj docutils literal"><span class="pre">readdir</span></tt></a> or not.</p>
@@ -200,6 +233,13 @@ and <tt class="file docutils literal"><span class="pre">..</span></tt>, no matte
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the attributes of
 the newly created directory entry.</p>
+<p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
+<a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
+file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
+inode. If <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.rmdir" title="llfuse.Operations.rmdir"><tt class="xref py py-obj docutils literal"><span class="pre">rmdir</span></tt></a> requests are received prior to
+the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call, they are expect to remove only the
+directory entry for the inode and defer removal of the inode
+itself until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call.</p>
 </dd></dl>
 
 <dl class="method">
@@ -209,6 +249,13 @@ the newly created directory entry.</p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the attributes of
 the newly created directory entry.</p>
+<p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
+<a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
+file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
+inode. If <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.rmdir" title="llfuse.Operations.rmdir"><tt class="xref py py-obj docutils literal"><span class="pre">rmdir</span></tt></a> requests are received prior to
+the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call, they are expect to remove only the
+directory entry for the inode and defer removal of the inode
+itself until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call.</p>
 </dd></dl>
 
 <dl class="method">
@@ -295,12 +342,23 @@ for each <a class="reference internal" href="#llfuse.Operations.open" title="llf
 <dt id="llfuse.Operations.rename">
 <tt class="descname">rename</tt><big>(</big><em>self</em>, <em>inode_parent_old</em>, <em>name_old</em>, <em>inode_parent_new</em>, <em>name_new</em><big>)</big><a class="headerlink" href="#llfuse.Operations.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rename a directory entry</p>
+<p>If <em>name_new</em> already exists, it should be overwritten.</p>
+<p>If the file system has received a <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, but no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>
+call for the file that is about to be overwritten, <a class="reference internal" href="#llfuse.Operations.rename" title="llfuse.Operations.rename"><tt class="xref py py-obj docutils literal"><span class="pre">rename</span></tt></a> is
+expected to only overwrite the directory entry and defer
+removal of the old inode with the its contents and metadata
+until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call is received.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="llfuse.Operations.rmdir">
 <tt class="descname">rmdir</tt><big>(</big><em>self</em>, <em>inode_parent</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.rmdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a directory</p>
+<p>If the file system has received a <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, but no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>
+call for this file yet, <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> is expected to remove only
+the directory entry and defer removal of the inode with the
+actual file contents and metadata until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call is
+received.</p>
 </dd></dl>
 
 <dl class="method">
@@ -351,15 +409,24 @@ quite useful to debug file system deadlocks.</p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the attributes of
 the newly created directory entry.</p>
+<p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
+<a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
+file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
+inode. If <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.rmdir" title="llfuse.Operations.rmdir"><tt class="xref py py-obj docutils literal"><span class="pre">rmdir</span></tt></a> requests are received prior to
+the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call, they are expect to remove only the
+directory entry for the inode and defer removal of the inode
+itself until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="llfuse.Operations.unlink">
 <tt class="descname">unlink</tt><big>(</big><em>self</em>, <em>parent_inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.unlink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a (possibly special) file</p>
-<p>If the file is currently opened, the file system must defer
-removing the actual file contents and metadata until the file
-is no longer opened by any application.</p>
+<p>If the file system has received a <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, but no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>
+call for this file yet, <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> is expected to remove only
+the directory entry and defer removal of the inode with the
+actual file contents and metadata until the <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> call is
+received.</p>
 <p>Note that an unlinked file may also appear again if it gets a
 new directory entry by the <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a> method.</p>
 </dd></dl>
@@ -401,7 +468,7 @@ error occured, this should be exactly <tt class="samp docutils literal"><span cl
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -427,12 +494,12 @@ error occured, this should be exactly <tt class="samp docutils literal"><span cl
         <li class="right" >
           <a href="lock.html" title="The global lock"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

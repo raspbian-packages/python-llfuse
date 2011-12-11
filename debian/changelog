@@ -1,3 +1,15 @@
+python-llfuse (0.37.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 10 Dec 2011 20:57:38 -0500
+
+python-llfuse (0.36-2) unstable; urgency=low
+
+  * Use dh_sphinxdoc. Closes: #637393.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 24 Oct 2011 19:36:59 -0400
+
 python-llfuse (0.36-1) unstable; urgency=low
 
   * New upstream release.
@@ -8,12 +20,6 @@ python-llfuse (0.36-1) unstable; urgency=low
     only reverse dependency, so a new package name does not seem
     justified).
   * Update format of copyright file.
-
- -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 20 Sep 2011 22:16:17 -0400
-
-python-llfuse (0.34-1) UNRELEASED; urgency=low
-
-  * New upstream release.
   * Fixed argument parsing under Python 3.x
   * Do correct typecasting of mode_t constants. Fix introduces
     build dependency on Cython 0.15 (Closes: #635196).
@@ -22,7 +28,7 @@ python-llfuse (0.34-1) UNRELEASED; urgency=low
   * Added correct copyright information for files in doc/html/_static.
   * Thanks to Jakub Wilk for his packaging review.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 10 Aug 2011 15:56:47 -0400
+ -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 20 Sep 2011 22:16:17 -0400
 
 python-llfuse (0.33-1) unstable; urgency=low
 

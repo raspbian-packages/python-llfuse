@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FUSE API Functions &mdash; LLFUSE v0.36 documentation</title>
+    <title>FUSE API Functions &mdash; LLFUSE v0.37.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.36',
+        VERSION:     '0.37.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
     <link rel="next" title="Data Structures" href="data.html" />
     <link rel="prev" title="Getting started" href="getting_started.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -67,16 +67,21 @@ and <tt class="docutils literal"><span class="pre">struct</span> <span class="pr
 <dt id="llfuse.main">
 <tt class="descclassname">llfuse.</tt><tt class="descname">main</tt><big>(</big><em>single=False</em><big>)</big><a class="headerlink" href="#llfuse.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run FUSE main loop</p>
+<p>Note that <em>single</em> merely enforces that at most one request
+handler runs at a time. The main loop may still start background
+threads to e.g. asynchronously send notifications submitted with
+<a class="reference internal" href="#llfuse.invalidate_entry" title="llfuse.invalidate_entry"><tt class="xref py py-obj docutils literal"><span class="pre">invalidate_entry</span></tt></a> and <a class="reference internal" href="#llfuse.invalidate_inode" title="llfuse.invalidate_inode"><tt class="xref py py-obj docutils literal"><span class="pre">invalidate_inode</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="llfuse.close">
 <tt class="descclassname">llfuse.</tt><tt class="descname">close</tt><big>(</big><em>unmount=True</em><big>)</big><a class="headerlink" href="#llfuse.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unmount file system and clean up</p>
-<p>If <tt class="xref py py-obj docutils literal"><span class="pre">unmount</span></tt> is False, the mount point is not freed completely,
-but every attempt to access it results in ESHUTDOWN. This can
-be used if the file system encountered some error that makes
-further access impossible.</p>
+<p>If <em>unmount</em> is False, the only clean up operations are peformed,
+but the file system is not unmounted. As long as the file system
+process is still running, all requests will hang. Once the process
+has terminated, these (and all future) requests fail with
+ESHUTDOWN.</p>
 </dd></dl>
 
 <dl class="function">
@@ -106,10 +111,27 @@ the third finally gets the value).</p>
 <dt>
 <tt class="descclassname">llfuse.</tt><tt class="descname">close</tt><big>(</big><em>unmount=True</em><big>)</big></dt>
 <dd><p>Unmount file system and clean up</p>
-<p>If <tt class="xref py py-obj docutils literal"><span class="pre">unmount</span></tt> is False, the mount point is not freed completely,
-but every attempt to access it results in ESHUTDOWN. This can
-be used if the file system encountered some error that makes
-further access impossible.</p>
+<p>If <em>unmount</em> is False, the only clean up operations are peformed,
+but the file system is not unmounted. As long as the file system
+process is still running, all requests will hang. Once the process
+has terminated, these (and all future) requests fail with
+ESHUTDOWN.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="llfuse.invalidate_inode">
+<tt class="descclassname">llfuse.</tt><tt class="descname">invalidate_inode</tt><big>(</big><em>inode</em>, <em>attr_only=False</em><big>)</big><a class="headerlink" href="#llfuse.invalidate_inode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidate cache for <em>inode</em></p>
+<p>Instructs the FUSE kernel module to forgot cached attributes and
+data (unless <em>attr_only</em> is True) for <em>inode</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="llfuse.invalidate_entry">
+<tt class="descclassname">llfuse.</tt><tt class="descname">invalidate_entry</tt><big>(</big><em>inode_p</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.invalidate_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidate directory entry</p>
+<p>Instructs the FUSE kernel module to forget about the
+directory entry <em>name</em> in the directory with inode <em>inode_p</em></p>
 </dd></dl>
 
 </div>
@@ -139,7 +161,7 @@ further access impossible.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -165,12 +187,12 @@ further access impossible.</p>
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

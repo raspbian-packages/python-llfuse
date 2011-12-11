@@ -12,14 +12,14 @@ Build-Depends: debhelper (>= 8),
                python-all-dbg,
                python3-all-dev,
                python3-all-dbg,
-               python-sphinx (>= 1.0.7-5),
+               python-sphinx (>= 1.0.7+dfsg),
                pkg-config,
                python-distribute,
                python3-setuptools,
                cython (>= 0.15.1)
 Standards-Version: 3.9.2
 Homepage: http://code.google.com/p/python-llfuse/
-Vcs-Svn: svn://svn.debian.org/python-modules/packages/python-llfuse/trunk 
+Vcs-Svn: svn://svn.debian.org/python-modules/packages/python-llfuse/trunk
 Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-llfuse/trunk/
 
 Package: python-llfuse
@@ -102,8 +102,7 @@ Package: python-llfuse-doc
 Architecture: all
 Section: doc
 Recommends: python-llfuse | python3-llfuse
-Depends: libjs-jquery,
-         libjs-underscore,
+Depends: ${sphinxdoc:Depends},
          ${shlibs:Depends},
          ${misc:Depends}
 Description: Python bindings for the low-level FUSE API (documentation)
