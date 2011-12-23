@@ -77,3 +77,11 @@ override_dh_install:
             find . -regextype posix-egrep -regex ".+-[a-z0-9]*d[a-z]*.so" \
                 -printf "%P\0" -delete) \
 	    | xargs -0 dh_install --autodest -ppython3-llfuse-dbg
+
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=647233
+# (python-llfuse has same problem)
+override_dh_sphinxdoc:
+ifneq "$(shell dh_listpackages | grep -- -doc)" ""
+	dh_sphinxdoc
+endif
+
