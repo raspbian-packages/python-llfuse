@@ -1,0 +1,18 @@
+Author: Nikolaus Rath <Nikolaus@rath.org>
+Forwarded: not-needed
+Last-Update: 2011-07-06
+Description: Use local intersphinx inventory
+ Instead of downloading the Python intersphinx directory
+ at build time, use the cached copy shipped in debian/.
+--- a/rst/conf.py
++++ b/rst/conf.py
+@@ -27,7 +27,8 @@
+               'sphinx_cython' ]
+ 
+ # Link to Python standard library
+-intersphinx_mapping = {'python': ('http://docs.python.org/', None)}
++intersphinx_mapping = {'python': ('http://docs.python.org/', 
++                                  '../debian/python.inv')}
+ 
+ # Add any paths that contain templates here, relative to this directory.
+ templates_path = ['_templates']

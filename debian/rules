@@ -1,0 +1,87 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+#export DH_VERBOSE=1
+
+PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
+
+%:
+	dh $@ --with python2,python3,sphinxdoc
+
+override_dh_auto_build: build-stamp
+
+build-stamp: build_cython \
+	     $(PYVERS:%=build-python%) \
+	     $(PYVERS:%=build-python%-dbg) \
+             build_sphinx 
+	touch $@
+
+build_cython:
+	dh_testdir
+	python setup.py build_cython
+	touch $@
+
+build_sphinx:
+	dh_testdir
+	python setup.py build_ext --inplace
+	python setup.py build_sphinx
+	touch $@
+
+override_dh_compress:
+	dh_compress -X.inv
+
+build-python%: 
+	dh_testdir
+	python$* setup.py build -g
+	touch $@
+
+update_intersphinx:
+	wget http://docs.python.org/objects.inv -O debian/python.inv
+
+override_dh_auto_install: build install-prereq\
+         $(PYVERS:%=install-python%) \
+	 $(PYVERS:%=install-python%-dbg)
+
+install-prereq:
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+install-python%: 
+	python$* setup.py install --force --root=debian/tmp \
+                                  --no-compile -O0 --install-layout=deb
+
+override_dh_link:
+	rm -rf debian/python-llfuse-dbg/usr/share/doc/python-llfuse-dbg
+	rm -rf debian/python3-llfuse-dbg/usr/share/doc/python3-llfuse-dbg
+	dh_link
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf build-python* build_cython build_sphinx build-stamp
+
+override_dh_strip:
+	dh_strip -ppython-llfuse --dbg-package=python-llfuse-dbg
+	dh_strip -ppython3-llfuse --dbg-package=python3-llfuse-dbg
+
+override_dh_install:
+	dh_install
+
+        # Install debugging extension and remove from regular package
+	(cd debian/python-llfuse; \
+            find . -name "*_d.so" -printf "%P\0" -delete) \
+            | xargs -0 dh_install --autodest -ppython-llfuse-dbg
+
+	(cd debian/python3-llfuse; \
+            find . -regextype posix-egrep -regex ".+-[a-z0-9]*d[a-z]*.so" \
+                -printf "%P\0" -delete) \
+	    | xargs -0 dh_install --autodest -ppython3-llfuse-dbg
+
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=647233
+# (python-llfuse has same problem)
+override_dh_sphinxdoc:
+ifneq "$(shell dh_listpackages | grep -- -doc)" ""
+	dh_sphinxdoc
+endif
+

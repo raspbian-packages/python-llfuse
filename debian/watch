@@ -1,0 +1,6 @@
+# watch control file for uscan
+version=3
+opts=downloadurlmangle=s/^http:\/\/code.google.com\/\//http:\/\// \
+  http://code.google.com/p/python-llfuse/downloads/list \
+  (?:.+)/files/llfuse-(.+).tar.bz2 \
+  debian
