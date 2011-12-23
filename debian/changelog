@@ -1,3 +1,10 @@
+python-llfuse (0.37.1-2) unstable; urgency=low
+
+  * Fix build failure, only call dh_sphinxdoc when building
+    python-llfuse-doc package.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 22 Dec 2011 22:37:26 -0500
+
 python-llfuse (0.37.1-1) unstable; urgency=low
 
   * New upstream release.
