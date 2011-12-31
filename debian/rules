@@ -11,8 +11,8 @@ PYVERS=$(shell pyversions -vr) $(shell py3versions -vr)
 override_dh_auto_build: build-stamp
 
 build-stamp: build_cython \
-	     $(PYVERS:%=build-python%) \
 	     $(PYVERS:%=build-python%-dbg) \
+	     $(PYVERS:%=build-python%) \
              build_sphinx 
 	touch $@
 
@@ -39,8 +39,8 @@ update_intersphinx:
 	wget http://docs.python.org/objects.inv -O debian/python.inv
 
 override_dh_auto_install: build install-prereq\
-         $(PYVERS:%=install-python%) \
-	 $(PYVERS:%=install-python%-dbg)
+	 $(PYVERS:%=install-python%-dbg) \
+         $(PYVERS:%=install-python%)
 
 install-prereq:
 	dh_testdir
