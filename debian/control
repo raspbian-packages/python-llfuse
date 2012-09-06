@@ -5,7 +5,7 @@ X-Python3-Version: >= 3.0
 Priority: optional
 Uploaders: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
 Maintainer: Nikolaus Rath <Nikolaus@rath.org>
-Build-Depends: debhelper (>= 8),
+Build-Depends: debhelper (>= 9),
                libfuse-dev (>= 2.8.0),
                libattr1-dev,
                python-all-dev (>= 2.6.6-3~),
