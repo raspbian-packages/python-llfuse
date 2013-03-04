@@ -1,6 +1,6 @@
 python-llfuse (0.38-1) UNRELEASED; urgency=low
 
-  * Bumped standards version to 3.9.3, no other changes required.
+  * Bumped standards version to 3.9.4, no other changes required.
   * Bumped debhelper compatibility level to 9 to get support for
     dpkg-buildflags.
   * Added lintian override for hardening-no-fortify-functions,
