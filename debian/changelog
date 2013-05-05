@@ -1,5 +1,6 @@
 python-llfuse (0.38-1) UNRELEASED; urgency=low
 
+  [ Nikolaus Rath ]
   * Bumped standards version to 3.9.4, no other changes required.
   * Bumped debhelper compatibility level to 9 to get support for
     dpkg-buildflags.
@@ -8,7 +9,10 @@ python-llfuse (0.38-1) UNRELEASED; urgency=low
   * Build depend on newer Cython (> 0.16).
   * New upstream release.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 05 Jan 2013 19:36:41 -0800
+  [ Jakub Wilk ]
+  * Use canonical URIs for Vcs-* fields.
+
+ -- Jakub Wilk <jwilk@debian.org>  Sun, 05 May 2013 16:02:52 +0200
 
 python-llfuse (0.37.1-2) unstable; urgency=low
 
