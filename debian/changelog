@@ -1,3 +1,19 @@
+python-llfuse (0.39-1) unstable; urgency=low
+
+  [ Nikolaus Rath ]
+  * Bumped standards version to 3.9.4, no other changes required.
+  * Bumped debhelper compatibility level to 9 to get support for
+    dpkg-buildflags.
+  * Added lintian override for hardening-no-fortify-functions,
+    this is a false positive.
+  * Build depend on newer Cython (> 0.16).
+  * New upstream release.
+
+  [ Jakub Wilk ]
+  * Use canonical URIs for Vcs-* fields.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 11 May 2013 12:33:34 -0700
+
 python-llfuse (0.37.1-2) unstable; urgency=low
 
   * Fix build failure, only call dh_sphinxdoc when building

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''
-llfuse_example.py
+tmpfs.py - Example file system for python-llfuse.
 
-Example file system that uses python-llfuse.
+This file system stores all data in memory. 
 
 Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
 
@@ -19,7 +19,7 @@ import sys
 # that we use modules from this directory
 basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 if (os.path.exists(os.path.join(basedir, 'setup.py')) and
-    os.path.exists(os.path.join(basedir, 'src', 'llfuse.so'))):
+    os.path.exists(os.path.join(basedir, 'src', 'llfuse.pyx'))):
     sys.path = [os.path.join(basedir, 'src')] + sys.path
     
     
@@ -37,10 +37,10 @@ log = logging.getLogger()
 class Operations(llfuse.Operations):
     '''An example filesystem that stores all data in memory
     
-    This is a very simple implementation with terrible
-    performance. Don't try to store significant amounts of
-    data. Also, there are some other flaws that have not been
-    fixed to keep the code easier to understand:
+    This is a very simple implementation with terrible performance.
+    Don't try to store significant amounts of data. Also, there are
+    some other flaws that have not been fixed to keep the code easier
+    to understand:
     
     * atime, mtime and ctime are not updated
     * generation numbers are not supported
@@ -306,7 +306,7 @@ class Operations(llfuse.Operations):
         size = self.get_row('SELECT SUM(size) FROM inodes')[0]
         stat_.f_blocks = size // stat_.f_frsize
         stat_.f_bfree = max(size // stat_.f_frsize, 1024)
-        stat_.f_bavail = stat_["f_bfree"]
+        stat_.f_bavail = stat_.f_bfree
 
         inodes = self.get_row('SELECT COUNT(id) FROM inodes')[0]
         stat_.f_files = inodes
@@ -328,7 +328,8 @@ class Operations(llfuse.Operations):
         #pylint: disable=R0201,W0613
         return True
 
-    def create(self, inode_parent, name, mode, ctx):
+    def create(self, inode_parent, name, mode, flags, ctx):
+        #pylint: disable=W0612 
         entry = self._create(inode_parent, name, mode, ctx)
         self.inode_open_count[entry.st_ino] += 1
         return (entry.st_ino, entry)
@@ -401,7 +402,7 @@ if __name__ == '__main__':
     operations = Operations()
     
     llfuse.init(operations, mountpoint, 
-                [  b'fsname=llfuse_xmp', b"nonempty" ])
+                [  b'fsname=tmpfs', b"nonempty" ])
     
     # sqlite3 does not support multithreading
     try:
