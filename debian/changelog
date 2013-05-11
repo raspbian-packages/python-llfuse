@@ -1,4 +1,4 @@
-python-llfuse (0.38-1) UNRELEASED; urgency=low
+python-llfuse (0.39-1) UNRELEASED; urgency=low
 
   [ Nikolaus Rath ]
   * Bumped standards version to 3.9.4, no other changes required.
