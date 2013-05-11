@@ -1,4 +1,4 @@
-python-llfuse (0.39-1) UNRELEASED; urgency=low
+python-llfuse (0.39-1) unstable; urgency=low
 
   [ Nikolaus Rath ]
   * Bumped standards version to 3.9.4, no other changes required.
@@ -12,7 +12,7 @@ python-llfuse (0.39-1) UNRELEASED; urgency=low
   [ Jakub Wilk ]
   * Use canonical URIs for Vcs-* fields.
 
- -- Jakub Wilk <jwilk@debian.org>  Sun, 05 May 2013 16:02:52 +0200
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 11 May 2013 12:33:34 -0700
 
 python-llfuse (0.37.1-2) unstable; urgency=low
 
