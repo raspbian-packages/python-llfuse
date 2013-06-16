@@ -5,6 +5,10 @@
 
 PYVERS=$(shell pyversions -vr) $(shell py3versions -vr) 
 
+
+# NOTE:
+# Anyone willing to convert the package to pure debhelper
+# (i.e., without dh sequencer) is very welcome to do so.
 %:
 	dh $@ --with python2,python3,sphinxdoc
 
@@ -57,9 +61,16 @@ override_dh_link:
 	rm -rf debian/python3-llfuse-dbg/usr/share/doc/python3-llfuse-dbg
 	dh_link
 
+# We don't want to call setup.py clean, because this
+# requires a number of (potentially uninstalled) build-dependencies.
 override_dh_auto_clean:
-	dh_auto_clean
-	rm -rf build-python* build_cython build_sphinx build-stamp
+	rm -rf build-python* build_cython build_sphinx build-stamp \
+	       src/llfuse.c
+	find \( \( -name '*.egg-info' -type d \) \
+	     -o \( -name __pycache__  -type d \) \
+	     -o \( -name '*.so' -type f \) \
+	     -o \( -name '*.pyc' -type f \) \
+	     \) -prune -exec rm -rf '{}' +
 
 override_dh_strip:
 	dh_strip -ppython-llfuse --dbg-package=python-llfuse-dbg
