@@ -92,9 +92,11 @@ cdef void fuse_setattr (fuse_req_t req, fuse_ino_t ino, c_stat *stat,
         # is smaller than long int.
         if to_set & FUSE_SET_ATTR_ATIME:
             attr.st_atime = <double> stat.st_atime + <double> GET_ATIME_NS(stat) * 1e-9
+            attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)
 
         if to_set & FUSE_SET_ATTR_MTIME:
             attr.st_mtime = <double> stat.st_mtime + <double> GET_MTIME_NS(stat) * 1e-9
+            attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)
 
         if to_set & FUSE_SET_ATTR_MODE:
             attr.st_mode = stat.st_mode
@@ -477,7 +479,7 @@ cdef void fuse_statfs (fuse_req_t req, fuse_ino_t ino) with gil:
     if ret != 0:
         log.error('fuse_statfs(): fuse_reply_* failed with %s', strerror(-ret))
 
-IF UNAME_SYSNAME == "Darwin":
+IF TARGET_PLATFORM == 'darwin':        
     cdef void fuse_setxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                                     const_char *cvalue, size_t size, int flags,
                                     uint32_t position) with gil:
@@ -491,6 +493,7 @@ IF UNAME_SYSNAME == "Darwin":
         else:
             fuse_setxattr(req, ino, cname, cvalue, size, flags)
 
+
 cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                          const_char *cvalue, size_t size, int flags) with gil:
     cdef int ret
@@ -503,26 +506,30 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
         if ino == FUSE_ROOT_ID and string.strcmp(cname, 'fuse_stacktrace') == 0:
             operations.stacktrace()
         else:
-            # Make sure we know all the flags
-            if flags & ~(xattr.XATTR_CREATE | xattr.XATTR_REPLACE):
-                raise ValueError('unknown flag(s): %o' % flags)
+            IF TARGET_PLATFORM == 'freebsd':
+	        # No known flags
+                with lock:
+                    operations.setxattr(ino, name, value)
+            ELSE:
+                # Make sure we know all the flags
+                if flags & ~(xattr.XATTR_CREATE | xattr.XATTR_REPLACE):
+                    raise ValueError('unknown flag(s): %o' % flags)
 
-            with lock:
-                if flags & xattr.XATTR_CREATE: # Attribute must not exist
-                    try:
+                with lock:
+                    if flags & xattr.XATTR_CREATE: # Attribute must not exist
+                        try:
+                            operations.getxattr(ino, name)
+                        except FUSEError as e:
+                            if e.errno != errno.ENOATTR:
+                                raise
+                        else:
+                            raise FUSEError(errno.EEXIST)
+
+                    elif flags & xattr.XATTR_REPLACE: # Attribute must exist
                         operations.getxattr(ino, name)
-                    except FUSEError as e:
-                        if e.errno == errno.ENOATTR:
-                            pass
-                        raise
-                    else:
-                        raise FUSEError(errno.EEXIST)
-                
-                elif flags & xattr.XATTR_REPLACE: # Attribute must exist
-                    operations.getxattr(ino, name)
-                    
-                operations.setxattr(ino, name, value)
-                
+			
+                    operations.setxattr(ino, name, value)
+
         ret = fuse_reply_err(req, 0)
     except FUSEError as e:
         ret = fuse_reply_err(req, e.errno)
@@ -532,7 +539,7 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
     if ret != 0:
         log.error('fuse_setxattr(): fuse_reply_* failed with %s', strerror(-ret))
 
-IF UNAME_SYSNAME == "Darwin":
+IF TARGET_PLATFORM == 'darwin':        
     cdef void fuse_getxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                                     size_t size, uint32_t position) with gil:
         cdef int ret

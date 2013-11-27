@@ -36,13 +36,27 @@ cdef object fill_c_stat(object attr, c_stat* stat):
     stat.st_blksize = attr.st_blksize
     stat.st_blocks = attr.st_blocks
 
-    stat.st_atime = attr.st_atime
-    stat.st_ctime = attr.st_ctime
-    stat.st_mtime = attr.st_mtime
-    
-    SET_ATIME_NS(stat, (attr.st_atime - stat.st_atime) * 1e9)
-    SET_CTIME_NS(stat, (attr.st_ctime - stat.st_ctime) * 1e9)
-    SET_MTIME_NS(stat, (attr.st_mtime - stat.st_mtime) * 1e9)
+    if attr.st_atime_ns is not None:
+        stat.st_atime = attr.st_atime_ns / 10**9
+        SET_ATIME_NS(stat, attr.st_atime_ns % 10**9)
+    else:
+        stat.st_atime = attr.st_atime
+        SET_ATIME_NS(stat, (attr.st_atime - stat.st_atime) * 1e9)
+
+    if attr.st_ctime_ns is not None:
+        stat.st_ctime = attr.st_ctime_ns / 10**9
+        SET_CTIME_NS(stat, attr.st_ctime_ns % 10**9)
+    else:
+        stat.st_ctime = attr.st_ctime
+        SET_CTIME_NS(stat, (attr.st_ctime - stat.st_ctime) * 1e9)
+
+    if attr.st_mtime_ns is not None:
+        stat.st_mtime = attr.st_mtime_ns / 10**9
+        SET_MTIME_NS(stat, attr.st_mtime_ns % 10**9)
+    else:
+        stat.st_mtime = attr.st_mtime
+        SET_MTIME_NS(stat, (attr.st_mtime - stat.st_mtime) * 1e9)
+
 
 cdef object fill_statvfs(object attr, statvfs* stat):
     stat.f_bsize = attr.f_bsize
@@ -54,11 +68,6 @@ cdef object fill_statvfs(object attr, statvfs* stat):
     stat.f_ffree = attr.f_ffree
     stat.f_favail = attr.f_favail
     
-cdef object strerror(errno):
-    try:
-        return os.strerror(errno)
-    except ValueError:
-        return 'errno: %d' % errno
 
 cdef int handle_exc(char* fn, object e, fuse_req_t req):
     '''Try to call fuse_reply_err and terminate main loop'''
@@ -67,6 +76,7 @@ cdef int handle_exc(char* fn, object e, fuse_req_t req):
     
     if not exc_info:
         exc_info = sys.exc_info()
+        log.debug('handler raised exception, sending SIGTERM to self.')
         kill(getpid(), SIGTERM)
     else:
         log.exception('Exception after kill:')
@@ -120,7 +130,7 @@ cdef void init_fuse_ops():
     fuse_ops.releasedir = fuse_releasedir
     fuse_ops.fsyncdir = fuse_fsyncdir
     fuse_ops.statfs = fuse_statfs
-    IF UNAME_SYSNAME == "Darwin":
+    IF TARGET_PLATFORM == 'darwin':        
         fuse_ops.setxattr = fuse_setxattr_darwin
         fuse_ops.getxattr = fuse_getxattr_darwin
     ELSE:

@@ -16,6 +16,13 @@ import sys
 import os
 import subprocess
 
+try:
+    import setuptools
+except ImportError:
+    raise SystemExit('Setuptools package not found. Please install from '
+                     'https://pypi.python.org/pypi/setuptools')
+from setuptools import Extension
+
 # Add util to load path
 basedir = os.path.abspath(os.path.dirname(sys.argv[0]))
 sys.path.insert(0, os.path.join(basedir, 'util'))
@@ -24,13 +31,7 @@ sys.path.insert(0, os.path.join(basedir, 'util'))
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-# Import distribute
-from distribute_setup import use_setuptools
-use_setuptools(version='0.6.12', download_delay=5)
-import setuptools
-from setuptools import Extension
-
-LLFUSE_VERSION = '0.39'
+LLFUSE_VERSION = '0.40'
 
 def main():
 
@@ -57,21 +58,21 @@ def main():
         print('MANIFEST.in exists, compiling with developer options')
         compile_args += [ '-Werror', '-Wextra', '-Wconversion',
                           '-Wno-sign-conversion' ]
-        
+
+        # http://bugs.python.org/issue7576
+        if sys.version_info[0] == 3 and sys.version_info[1] < 2:
+            compile_args.append('-Wno-missing-field-initializers')
+
+        # http://trac.cython.org/cython_trac/ticket/811
+        compile_args.append('-Wno-unused-but-set-variable')
+
+        # http://trac.cython.org/cython_trac/ticket/813
+        compile_args.append('-Wno-maybe-uninitialized')
+
     # http://bugs.python.org/issue969718
     if sys.version_info[0] == 2:
         compile_args.append('-fno-strict-aliasing')
 
-    # http://bugs.python.org/issue7576
-    if sys.version_info[0] == 3 and sys.version_info[1] < 2:
-        compile_args.append('-Wno-missing-field-initializers')
-            
-    # http://trac.cython.org/cython_trac/ticket/811
-    compile_args.append('-Wno-unused-but-set-variable')
-    
-    # http://trac.cython.org/cython_trac/ticket/813
-    compile_args.append('-Wno-maybe-uninitialized')
-            
     link_args = pkg_config('fuse', cflags=False, ldflags=True, min_ver='2.8.0')
     link_args.append('-lpthread')
 
@@ -110,7 +111,7 @@ def main():
           package_dir={'': 'src'},
           packages=setuptools.find_packages('src'),
           provides=['llfuse'],
-          ext_modules=[Extension('llfuse', ['src/llfuse.c'], 
+          ext_modules=[Extension('llfuse.capi', ['src/llfuse/capi.c'], 
                                   extra_compile_args=compile_args,
                                   extra_link_args=link_args)],
           cmdclass={'build_cython': build_cython,
@@ -165,10 +166,8 @@ class build_cython(setuptools.Command):
         pass
 
     def finalize_options(self):
-        # Attribute defined outside init
-        #pylint: disable=W0201
-        self.extensions = self.distribution.ext_modules
-
+        pass
+    
     def run(self):
         try:
             from Cython.Compiler.Main import compile as cython_compile
@@ -185,25 +184,20 @@ class build_cython(setuptools.Command):
         
         options = {'include_path': [ os.path.join(basedir, 'Include') ],
                    'recursive': False, 'verbose': True, 'timestamps': False,
-                   'compiler_directives': directives, 'warning_errors': True }
-        
-        for extension in self.extensions:
-            for file_ in extension.sources:
-                (file_, ext) = os.path.splitext(file_)
-                path = os.path.join(basedir, file_)
-                if ext != '.c':
-                    continue 
-                if os.path.exists(path + '.pyx'):
-                    print('compiling %s to %s' % (file_ + '.pyx', file_ + ext))
-                    res = cython_compile(path + '.pyx', full_module_name=extension.name,
-                                         **options)
-                    if res.num_errors != 0:
-                        raise SystemExit('Cython encountered errors.')
-                else:
-                    print('%s is up to date' % (file_ + ext,))
+                   'compiler_directives': directives, 'warning_errors': True,
+                   'compile_time_env': {} }
+
+        for sysname in ('linux', 'freebsd', 'darwin'):
+            print('compiling capi.pyx to capi_%s.c...' % (sysname,))
+            options['compile_time_env']['TARGET_PLATFORM'] = sysname
+            options['output_file'] = os.path.join(basedir, 'src', 'llfuse',
+                                                  'capi_%s.c' % (sysname,))
+            res = cython_compile(os.path.join(basedir, 'src', 'llfuse', 'capi.pyx'),
+                                 full_module_name='llfuse.capi', **options)
+            if res.num_errors != 0:
+                raise SystemExit('Cython encountered errors.')
 
 
-        
 class upload_docs(setuptools.Command):
     user_options = []
     boolean_options = []
@@ -217,7 +211,7 @@ class upload_docs(setuptools.Command):
 
     def run(self):
         subprocess.check_call(['rsync', '-aHv', '--del', os.path.join(basedir, 'doc', 'html') + '/',
-                               'ebox.rath.org:/var/www/llfuse-docs/'])
+                               'ebox.rath.org:/srv/www.rath.org/public_html/llfuse-docs/'])
 
 def fix_docutils():
     '''Work around https://bitbucket.org/birkenfeld/sphinx/issue/1154/'''

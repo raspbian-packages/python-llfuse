@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; LLFUSE 0.39 documentation</title>
+    <title>Getting started &mdash; LLFUSE 0.40 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.39',
+        VERSION:     '0.40',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE 0.39 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE 0.40 documentation" href="index.html" />
     <link rel="next" title="FUSE API Functions" href="fuse_api.html" />
     <link rel="prev" title="Installing LLFUSE" href="install.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="install.html" title="Installing LLFUSE"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.40 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,12 +53,14 @@
             
   <div class="section" id="getting-started">
 <span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>A file system is implemented by subclassing the <a class="reference internal" href="operations.html#llfuse.Operations" title="llfuse.Operations"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.Operations</span></tt></a>
+<p>A file system is implemented by subclassing the <tt class="xref py py-obj docutils literal"><span class="pre">llfuse.Operations</span></tt>
 class and implementing the various request handlers. An instance of
-the this class must then be passed to <a class="reference internal" href="fuse_api.html#llfuse.init" title="llfuse.init"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.init</span></tt></a> to mount the file
-system. To enter the request handling loop, run <a class="reference internal" href="fuse_api.html#llfuse.main" title="llfuse.main"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.main</span></tt></a>. This
+the this class must then be passed to <tt class="xref py py-obj docutils literal"><span class="pre">llfuse.init</span></tt> to mount the file
+system. To enter the request handling loop, run <tt class="xref py py-obj docutils literal"><span class="pre">llfuse.main</span></tt>. This
 function will return when the file system should be unmounted again,
-which is done by calling <a class="reference internal" href="fuse_api.html#llfuse.close" title="llfuse.close"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.close</span></tt></a>.</p>
+which is done by calling <tt class="xref py py-obj docutils literal"><span class="pre">llfuse.close</span></tt>.</p>
+<p>For easier debugging, it is strongly recommended that applications
+using llfuse also make use of the <a class="reference external" href="http://docs.python.org/3/library/faulthandler.html">faulthandler</a> module.</p>
 <p>It is probably a good idea to look at the <a class="reference internal" href="example.html#example-file-system"><em>Example File System</em></a>
 as well.</p>
 </div>
@@ -114,7 +116,7 @@ as well.</p>
         <li class="right" >
           <a href="install.html" title="Installing LLFUSE"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.40 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
