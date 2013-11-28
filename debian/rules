@@ -95,4 +95,3 @@ override_dh_sphinxdoc:
 ifneq "$(shell dh_listpackages | grep -- -doc)" ""
 	dh_sphinxdoc
 endif
-
