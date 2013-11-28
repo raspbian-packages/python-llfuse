@@ -2,6 +2,7 @@ python-llfuse (0.40-2) UNRELEASED; urgency=low
 
   * Some cosmetic fixes to debian/
   * Bumped standards version to 3.9.5, no other changes required.
+  * Added force_xattr_api.diff to support compilation under GNU/kFreeBSD.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 27 Nov 2013 20:19:13 -0800
 
