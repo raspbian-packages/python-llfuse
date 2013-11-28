@@ -1,4 +1,4 @@
-python-llfuse (0.40-2) UNRELEASED; urgency=low
+python-llfuse (0.40-2) unstable; urgency=low
 
   * Some cosmetic fixes to debian/
   * Bumped standards version to 3.9.5, no other changes required.
