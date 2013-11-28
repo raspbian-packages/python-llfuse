@@ -1,3 +1,2 @@
 # This is a false positive (cf https://wiki.debian.org/Hardening#Validation)
 python-llfuse: hardening-no-fortify-functions
-

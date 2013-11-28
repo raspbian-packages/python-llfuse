@@ -21,8 +21,8 @@ License: LGPL-2+
  file.
 
 Files: doc/html/_static/*
-Copyright: Copyright (c) 2007-2011 by the Sphinx team (see Sphinx's AUTHORS file).
- All rights reserved.
+Copyright: Copyright (c) 2007-2011 by the Sphinx team
+ (see Sphinx's AUTHORS file). All rights reserved.
 License: BSD-2-clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
