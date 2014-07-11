@@ -1,3 +1,12 @@
+python-llfuse (0.40+dfsg-1) unstable; urgency=medium
+
+  * Updated watch file to use pypi, and validate pgp signature.
+  * Remove minified javascript files from upstream source.
+  * Switched package build system to pybuild.
+  * Updated project URL.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 10 Jul 2014 21:34:34 -0700
+
 python-llfuse (0.40-2) unstable; urgency=low
 
   * Some cosmetic fixes to debian/
