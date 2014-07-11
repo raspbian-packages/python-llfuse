@@ -1,8 +1,9 @@
-python-llfuse (0.40-3) UNRELEASED; urgency=medium
+python-llfuse (0.40+dfsg-1) UNRELEASED; urgency=medium
 
   * Updated watch file to use pypi, and validate pgp signature.
+  * Remove minified javascript files from upstream source.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 14 Mar 2014 19:01:42 -0700
+ -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 10 Jul 2014 21:34:34 -0700
 
 python-llfuse (0.40-2) unstable; urgency=low
 
