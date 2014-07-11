@@ -2,6 +2,7 @@ python-llfuse (0.40+dfsg-1) UNRELEASED; urgency=medium
 
   * Updated watch file to use pypi, and validate pgp signature.
   * Remove minified javascript files from upstream source.
+  * Switched package build system to pybuild.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 10 Jul 2014 21:34:34 -0700
 

@@ -6,6 +6,7 @@ Priority: optional
 Uploaders: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
 Maintainer: Nikolaus Rath <Nikolaus@rath.org>
 Build-Depends: debhelper (>= 9),
+               dh-python,
                libfuse-dev (>= 2.8.0),
                libattr1-dev,
                python-all-dev (>= 2.6.6-3~),
@@ -16,7 +17,7 @@ Build-Depends: debhelper (>= 9),
                pkg-config,
                python-distribute,
                python3-setuptools,
-               cython (>= 0.16)
+               cython (>= 0.16),
 Standards-Version: 3.9.5
 Homepage: http://code.google.com/p/python-llfuse/
 Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-llfuse/trunk/
