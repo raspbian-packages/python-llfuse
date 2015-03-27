@@ -19,7 +19,7 @@ Build-Depends: debhelper (>= 9),
                python3-setuptools,
                cython (>= 0.16),
 Standards-Version: 3.9.5
-Homepage: http://code.google.com/p/python-llfuse/
+Homepage: https://bitbucket.org/nikratio/python-llfuse/
 Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-llfuse/trunk/
 Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-llfuse/trunk/
 
