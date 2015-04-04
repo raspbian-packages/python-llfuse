@@ -47,6 +47,8 @@ Section: debug
 Priority: extra
 Architecture: any
 Recommends: python-dbg
+Breaks: python-llfuse (<< 0.40+dfsg-1)
+Replaces: python-llfuse (<< 0.40+dfsg-1)
 Depends: python-llfuse (= ${binary:Version}), 
          ${shlibs:Depends}, 
          ${misc:Depends}
@@ -85,6 +87,8 @@ Section: debug
 Priority: extra
 Architecture: any
 Recommends: python-dbg
+Breaks: python3-llfuse (<< 0.40+dfsg-1)
+Replaces: python3-llfuse (<< 0.40+dfsg-1)
 Depends: python3-llfuse (= ${binary:Version}), 
          ${shlibs:Depends}, 
          ${misc:Depends}
