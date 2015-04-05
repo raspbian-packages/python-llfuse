@@ -2,6 +2,8 @@ python-llfuse (0.40+dfsg-2) UNRELEASED; urgency=medium
 
   * Add versioned Breaks and Conflicts to -dbg packages to avoid
     upgrade problems due to moved file. Closes: #781652.
+  * Put debugging symbols for regular interpreter into -dbg
+    package again. Closes: #781719.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 03 Apr 2015 20:05:42 -0700
 

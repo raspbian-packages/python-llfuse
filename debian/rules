@@ -23,6 +23,10 @@ build_sphinx:
 	python setup.py build_sphinx
 	touch $@
 
+override_dh_strip:
+	dh_strip -ppython-llfuse --dbg-package=python-llfuse-dbg
+	dh_strip -ppython3-llfuse --dbg-package=python3-llfuse-dbg
+
 override_dh_auto_clean:
 	# Remove documentation and cython output
 	rm -rf build_cython build_sphinx src/llfuse/capi_*.c doc/
