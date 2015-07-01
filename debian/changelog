@@ -1,4 +1,4 @@
-python-llfuse (0.40+dfsg-2) UNRELEASED; urgency=medium
+python-llfuse (0.40+dfsg-2) unstable; urgency=medium
 
   * Add versioned Breaks and Conflicts to -dbg packages to avoid
     upgrade problems due to moved file. Closes: #781652.
