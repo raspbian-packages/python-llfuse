@@ -17,8 +17,10 @@ Build-Depends: debhelper (>= 9),
                pkg-config,
                python-distribute,
                python3-setuptools,
-               cython (>= 0.16),
-Standards-Version: 3.9.5
+               cython3 (>= 0.16),
+               cython-dbg (>= 0.16),
+               cython3-dbg (>= 0.16)
+Standards-Version: 3.9.6
 Homepage: https://bitbucket.org/nikratio/python-llfuse/
 Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-llfuse/trunk/
 Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-llfuse/trunk/

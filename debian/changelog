@@ -4,6 +4,8 @@ python-llfuse (0.40+dfsg-2) unstable; urgency=medium
     upgrade problems due to moved file. Closes: #781652.
   * Put debugging symbols for regular interpreter into -dbg
     package again. Closes: #781719.
+  * Bumped Standards-Version to 3.9.6 (no changes needed).
+  * Added missing build-depends on cython3 and cython-dbg.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 03 Apr 2015 20:05:42 -0700
 
