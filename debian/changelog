@@ -1,8 +1,8 @@
 python-llfuse (0.40+dfsg-3) UNRELEASED; urgency=medium
 
-  * Correctly handle symlink-to-directry transition of 
+  * Correctly handle symlink-to-directory transition of 
     /usr/share/doc/{python,python3}-llfuse-dbg when upgrading from jessie.
-    Closes: #775056.
+    Closes: #788161.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 29 Jul 2015 20:49:49 -0700
 
