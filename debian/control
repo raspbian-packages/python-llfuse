@@ -17,8 +17,10 @@ Build-Depends: debhelper (>= 9),
                pkg-config,
                python-distribute,
                python3-setuptools,
-               cython (>= 0.16),
-Standards-Version: 3.9.5
+               cython3 (>= 0.16),
+               cython-dbg (>= 0.16),
+               cython3-dbg (>= 0.16)
+Standards-Version: 3.9.6
 Homepage: https://bitbucket.org/nikratio/python-llfuse/
 Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-llfuse/trunk/
 Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-llfuse/trunk/
@@ -47,6 +49,8 @@ Section: debug
 Priority: extra
 Architecture: any
 Recommends: python-dbg
+Breaks: python-llfuse (<< 0.40+dfsg-1)
+Replaces: python-llfuse (<< 0.40+dfsg-1)
 Depends: python-llfuse (= ${binary:Version}), 
          ${shlibs:Depends}, 
          ${misc:Depends}
@@ -85,6 +89,8 @@ Section: debug
 Priority: extra
 Architecture: any
 Recommends: python-dbg
+Breaks: python3-llfuse (<< 0.40+dfsg-1)
+Replaces: python3-llfuse (<< 0.40+dfsg-1)
 Depends: python3-llfuse (= ${binary:Version}), 
          ${shlibs:Depends}, 
          ${misc:Depends}
