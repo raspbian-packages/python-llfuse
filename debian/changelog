@@ -1,21 +1,17 @@
-python-llfuse (0.40+dfsg-3) UNRELEASED; urgency=medium
+python-llfuse (0.40+dfsg-2) unstable; urgency=medium
 
   * Correctly handle symlink-to-directory transition of 
     /usr/share/doc/{python,python3}-llfuse-dbg when upgrading from jessie.
     Closes: #788161.
-
- -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 29 Jul 2015 20:49:49 -0700
-
-python-llfuse (0.40+dfsg-2) unstable; urgency=medium
-
   * Add versioned Breaks and Conflicts to -dbg packages to avoid
     upgrade problems due to moved file. Closes: #781652.
   * Put debugging symbols for regular interpreter into -dbg
     package again. Closes: #781719.
   * Bumped Standards-Version to 3.9.6 (no changes needed).
-  * Added missing build-depends on cython3 and cython-dbg.
+  * Added missing build-depends on cython3 and cython-dbg. 
+    Closes: #794056.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 03 Apr 2015 20:05:42 -0700
+ -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 29 Jul 2015 20:49:49 -0700
 
 python-llfuse (0.40+dfsg-1) unstable; urgency=medium
 
