@@ -24,8 +24,10 @@ build_sphinx:
 	touch $@
 
 override_dh_strip:
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip -ppython-llfuse --dbg-package=python-llfuse-dbg
 	dh_strip -ppython3-llfuse --dbg-package=python3-llfuse-dbg
+endif
 
 override_dh_auto_clean:
 	# Remove documentation and cython output
