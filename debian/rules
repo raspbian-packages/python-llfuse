@@ -14,13 +14,13 @@ override_dh_auto_build: build_cython build_sphinx
 
 build_cython:
 	dh_testdir
-	python setup.py build_cython
+	python3 setup.py build_cython
 	touch $@
 
 build_sphinx:
 	dh_testdir
-	python setup.py build_ext --inplace
-	python setup.py build_sphinx
+	python3 setup.py build_ext --inplace
+	python3 setup.py build_sphinx
 	touch $@
 
 override_dh_strip:

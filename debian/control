@@ -13,13 +13,11 @@ Build-Depends: debhelper (>= 9),
                python-all-dbg,
                python3-all-dev,
                python3-all-dbg,
-               python-sphinx (>= 1.0.7+dfsg),
+               python3-sphinx (>= 1.0.7+dfsg),
                pkg-config,
                python-distribute,
                python3-setuptools,
-               cython3 (>= 0.16),
-               cython-dbg (>= 0.16),
-               cython3-dbg (>= 0.16)
+               cython3 (>= 0.16)
 Standards-Version: 3.9.6
 Homepage: https://bitbucket.org/nikratio/python-llfuse/
 Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-llfuse/trunk/
