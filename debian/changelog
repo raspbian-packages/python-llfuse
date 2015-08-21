@@ -1,3 +1,11 @@
+python-llfuse (0.41+dfsg-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Use Python 3 versions of Cython and Sphinx.
+  * Dropped build dependency on cython3-dbg (fixed upstream).
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 21 Aug 2015 08:52:21 -0700
+
 python-llfuse (0.40+dfsg-2) unstable; urgency=medium
 
   * Correctly handle symlink-to-directory transition of 

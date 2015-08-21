@@ -4,10 +4,11 @@ fuse_api.pxi
 This file defines the Python bindings to common FUSE API functions.
 It is included by llfuse.pyx.
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2013 Nikolaus Rath <Nikolaus.org>
 
-This file is part of LLFUSE (http://python-llfuse.googlecode.com).
-LLFUSE can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
+
 '''
 
 def listdir(path):
@@ -25,16 +26,16 @@ def listdir(path):
 
     if not isinstance(path, str_t):
         raise TypeError('*path* argument must be of type str')
-    
+
     cdef dirent.DIR* dirp
     cdef dirent.dirent ent
     cdef dirent.dirent* res
     cdef int ret
     cdef char* buf
-    
+
     path_b = str2bytes(path)
     buf = <char*> path_b
-    
+
     with nogil:
         dirp = dirent.opendir(buf)
 
@@ -46,7 +47,7 @@ def listdir(path):
         errno.errno = 0
         with nogil:
             ret = dirent.readdir_r(dirp, &ent, &res)
-            
+
         if ret != 0:
             raise OSError(errno.errno, strerror(errno.errno), path)
         if res is NULL:
@@ -55,10 +56,10 @@ def listdir(path):
             continue
 
         names.append(bytes2str(PyBytes_FromString(ent.d_name)))
-        
+
     with nogil:
         dirent.closedir(dirp)
-    
+
     return names
 
 
@@ -71,9 +72,9 @@ def setxattr(path, name, bytes value, namespace='user'):
     Under FreeBSD, the *namespace* parameter may be set to *system* or *user* to
     select the namespace for the extended attribute. For other platforms, this
     parameter is ignored.
-    
+
     In contrast the `os.setxattr` function from the standard library,
-    the method provided by llfuse is also available for non-Linux
+    the method provided by Python-LLFUSE is also available for non-Linux
     systems.
     '''
 
@@ -86,11 +87,13 @@ def setxattr(path, name, bytes value, namespace='user'):
     if namespace not in ('system', 'user'):
         raise ValueError('*namespace* parameter must be "system" or "user", not %s'
                          % namespace)
-    
+
     cdef int ret
     cdef Py_ssize_t len_
-    cdef char *cvalue, *cpath, *cname
-    
+    cdef char *cvalue
+    cdef char *cpath
+    cdef char *cname
+
     IF TARGET_PLATFORM == 'freebsd':
         cdef int cnamespace
         if namespace == 'system':
@@ -104,7 +107,7 @@ def setxattr(path, name, bytes value, namespace='user'):
     cpath = <char*> path_b
     cname = <char*> name_b
 
-    
+
     with nogil:
         IF TARGET_PLATFORM == 'freebsd':
             ret = xattr.extattr_set_file(cpath, cnamespace, cname,
@@ -121,7 +124,7 @@ def getxattr(path, name, int size_guess=128, namespace='user'):
 
     *path* and *name* have to be of type `str`. In Python 3.x, they may
     contain surrogates. Returns a value of type `bytes`.
-    
+
     If the caller knows the approximate size of the attribute value,
     it should be supplied in *size_guess*. If the guess turns out
     to be wrong, the system call has to be carried out three times
@@ -133,7 +136,7 @@ def getxattr(path, name, int size_guess=128, namespace='user'):
     parameter is ignored.
 
     In contrast the `os.setxattr` function from the standard library,
-    the method provided by llfuse is also available for non-Linux
+    the method provided by Python-LLFUSE is also available for non-Linux
     systems.
     '''
 
@@ -146,9 +149,11 @@ def getxattr(path, name, int size_guess=128, namespace='user'):
     if namespace not in ('system', 'user'):
         raise ValueError('*namespace* parameter must be "system" or "user", not %s'
                          % namespace)
-    
+
     cdef ssize_t ret
-    cdef char *buf, *cpath, *cname
+    cdef char *buf
+    cdef char *cpath
+    cdef char *cname
     cdef size_t bufsize
 
     IF TARGET_PLATFORM == 'freebsd':
@@ -157,7 +162,7 @@ def getxattr(path, name, int size_guess=128, namespace='user'):
             cnamespace = xattr.EXTATTR_NAMESPACE_SYSTEM
         else:
             cnamespace = xattr.EXTATTR_NAMESPACE_USER
-    
+
     path_b = str2bytes(path)
     name_b = str2bytes(name)
     cpath = <char*> path_b
@@ -206,16 +211,16 @@ def getxattr(path, name, int size_guess=128, namespace='user'):
             raise OSError(errno.errno, strerror(errno.errno), path)
 
         return PyBytes_FromStringAndSize(buf, ret)
-    
+
     finally:
         stdlib.free(buf)
-        
+
 def init(ops, mountpoint, list args):
     '''Initialize and mount FUSE file system
-            
+
     *ops* has to be an instance of the `Operations` class (or another
     class defining the same methods).
-    
+
     *args* has to be a list of strings. Valid options are listed under ``struct
     fuse_opt fuse_mount_opts[]``
     (`mount.c:82 <http://fuse.git.sourceforge.net/git/gitweb.cgi?p=fuse/fuse;f=lib/mount.c;hb=HEAD#l82>`_)
@@ -240,7 +245,7 @@ def init(ops, mountpoint, list args):
 
     # Initialize Python thread support
     PyEval_InitThreads()
-    
+
     make_fuse_args(args, &f_args)
     log.debug('Calling fuse_mount')
     channel = fuse_mount(<char*>mountpoint_b, &f_args)
@@ -265,7 +270,7 @@ def init(ops, mountpoint, list args):
 
 def main(single=False):
     '''Run FUSE main loop
-    
+
     If *single* is True, all requests will be handled sequentially by
     the thread that has called `main`. If *single* is False, multiple
     worker threads will be started and work on requests concurrently.
@@ -273,7 +278,7 @@ def main(single=False):
 
     cdef int ret
     global exc_info
-    
+
     if session == NULL:
         raise RuntimeError('Need to call init() before main()')
 
@@ -348,7 +353,7 @@ def close(unmount=True):
     if exc_info:
         tmp = exc_info
         exc_info = None
-        
+
         # The explicit version check works around a Cython bug with
         # the 3-parameter version of the raise statement, c.f.
         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
@@ -359,7 +364,7 @@ def close(unmount=True):
 
 def invalidate_inode(int inode, attr_only=False):
     '''Invalidate cache for *inode*
-    
+
     Instructs the FUSE kernel module to forgot cached attributes and
     data (unless *attr_only* is True) for *inode*. This operation is
     carried out asynchronously, i.e. the method may return before the
@@ -367,7 +372,7 @@ def invalidate_inode(int inode, attr_only=False):
     '''
 
     _notify_queue.put(inval_inode_req(inode, attr_only))
-    
+
 def invalidate_entry(int inode_p, bytes name):
     '''Invalidate directory entry
 
@@ -394,4 +399,3 @@ def get_off_t_bits():
     result in `OverflowError`.
     '''
     return sizeof(off_t) * 8
-

@@ -1,13 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 '''
-tmpfs.py - Example file system for python-llfuse.
+tmpfs.py - Example file system for Python-LLFUSE.
 
-This file system stores all data in memory. 
+This file system stores all data in memory. It is compatible with both Python
+2.x and 3.x.
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2013 Nikolaus Rath <Nikolaus.org>
 
-This file is part of python-llfuse (http://python-llfuse.googlecode.com).
-python-llfuse can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
 '''
 
 from __future__ import division, print_function, absolute_import
@@ -15,14 +17,13 @@ from __future__ import division, print_function, absolute_import
 import os
 import sys
 
-# We are running from the llfuse source directory, make sure
+# We are running from the Python-LLFUSE source directory, make sure
 # that we use modules from this directory
 basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 if (os.path.exists(os.path.join(basedir, 'setup.py')) and
-    os.path.exists(os.path.join(basedir, 'src', 'llfuse.pyx'))):
+    os.path.exists(os.path.join(basedir, 'src', 'llfuse'))):
     sys.path = [os.path.join(basedir, 'src')] + sys.path
-    
-    
+
 import llfuse
 import errno
 import stat
@@ -31,6 +32,7 @@ import sqlite3
 import logging
 from collections import defaultdict
 from llfuse import FUSEError
+from argparse import ArgumentParser
 
 log = logging.getLogger()
 
@@ -40,71 +42,71 @@ if sys.version_info[0] == 2:
         return it.next()
 else:
     buffer = memoryview
-    
+
 class Operations(llfuse.Operations):
     '''An example filesystem that stores all data in memory
-    
+
     This is a very simple implementation with terrible performance.
     Don't try to store significant amounts of data. Also, there are
     some other flaws that have not been fixed to keep the code easier
     to understand:
-    
+
     * atime, mtime and ctime are not updated
     * generation numbers are not supported
     '''
-    
-    
-    def __init__(self):      
+
+
+    def __init__(self):
         super(Operations, self).__init__()
         self.db = sqlite3.connect(':memory:')
         self.db.text_factory = str
         self.db.row_factory = sqlite3.Row
-        self.cursor = self.db.cursor()        
+        self.cursor = self.db.cursor()
         self.inode_open_count = defaultdict(int)
         self.init_tables()
-             
+
     def init_tables(self):
         '''Initialize file system tables'''
-        
+
         self.cursor.execute("""
         CREATE TABLE inodes (
             id        INTEGER PRIMARY KEY,
             uid       INT NOT NULL,
             gid       INT NOT NULL,
             mode      INT NOT NULL,
-            mtime     REAL NOT NULL,
-            atime     REAL NOT NULL,
-            ctime     REAL NOT NULL,
+            mtime_ns  INT NOT NULL,
+            atime_ns  INT NOT NULL,
+            ctime_ns  INT NOT NULL,
             target    BLOB(256) ,
             size      INT NOT NULL DEFAULT 0,
             rdev      INT NOT NULL DEFAULT 0,
             data      BLOB
         )
         """)
-    
+
         self.cursor.execute("""
         CREATE TABLE contents (
             rowid     INTEGER PRIMARY KEY AUTOINCREMENT,
             name      BLOB(256) NOT NULL,
             inode     INT NOT NULL REFERENCES inodes(id),
             parent_inode INT NOT NULL REFERENCES inodes(id),
-            
+
             UNIQUE (name, parent_inode)
         )""")
-        
+
         # Insert root directory
-        self.cursor.execute("INSERT INTO inodes (id,mode,uid,gid,mtime,atime,ctime) "
+        now_ns = int(time() * 1e9)
+        self.cursor.execute("INSERT INTO inodes (id,mode,uid,gid,mtime_ns,atime_ns,ctime_ns) "
                             "VALUES (?,?,?,?,?,?,?)",
                             (llfuse.ROOT_INODE, stat.S_IFDIR | stat.S_IRUSR | stat.S_IWUSR
-                              | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH 
-                              | stat.S_IXOTH, os.getuid(), os.getgid(), time(), 
-                              time(), time()))
+                              | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH
+                              | stat.S_IXOTH, os.getuid(), os.getgid(), now_ns, now_ns, now_ns))
         self.cursor.execute("INSERT INTO contents (name, parent_inode, inode) VALUES (?,?,?)",
                             (b'..', llfuse.ROOT_INODE, llfuse.ROOT_INODE))
-        
-                
+
+
     def get_row(self, *a, **kw):
-        self.cursor.execute(*a, **kw) 
+        self.cursor.execute(*a, **kw)
         try:
             row = next(self.cursor)
         except StopIteration:
@@ -117,7 +119,7 @@ class Operations(llfuse.Operations):
             raise NoUniqueValueError()
 
         return row
-                    
+
     def lookup(self, inode_p, name):
         if name == '.':
             inode = inode_p
@@ -130,13 +132,13 @@ class Operations(llfuse.Operations):
                                      (name, inode_p))['inode']
             except NoSuchRowError:
                 raise(llfuse.FUSEError(errno.ENOENT))
-        
+
         return self.getattr(inode)
-        
+
 
     def getattr(self, inode):
         row = self.get_row('SELECT * FROM inodes WHERE id=?', (inode,))
-        
+
         entry = llfuse.EntryAttributes()
         entry.st_ino = inode
         entry.generation = 0
@@ -149,29 +151,29 @@ class Operations(llfuse.Operations):
         entry.st_gid = row['gid']
         entry.st_rdev = row['rdev']
         entry.st_size = row['size']
-        
+
         entry.st_blksize = 512
         entry.st_blocks = 1
-        entry.st_atime = row['atime']                          
-        entry.st_mtime = row['mtime']
-        entry.st_ctime = row['ctime']
-        
+        entry.st_atime_ns = row['atime_ns']
+        entry.st_mtime_ns = row['mtime_ns']
+        entry.st_ctime_ns = row['ctime_ns']
+
         return entry
 
     def readlink(self, inode):
         return self.get_row('SELECT * FROM inodes WHERE id=?', (inode,))['target']
-    
+
     def opendir(self, inode):
         return inode
 
     def readdir(self, inode, off):
         if off == 0:
             off = -1
-            
+
         cursor2 = self.db.cursor()
         cursor2.execute("SELECT * FROM contents WHERE parent_inode=? "
                         'AND rowid > ? ORDER BY rowid', (inode, off))
-        
+
         for row in cursor2:
             yield (row['name'], self.getattr(row['inode']), row['rowid'])
 
@@ -192,23 +194,23 @@ class Operations(llfuse.Operations):
         self._remove(inode_p, name, entry)
 
     def _remove(self, inode_p, name, entry):
-        if self.get_row("SELECT COUNT(inode) FROM contents WHERE parent_inode=?", 
+        if self.get_row("SELECT COUNT(inode) FROM contents WHERE parent_inode=?",
                         (entry.st_ino,))[0] > 0:
             raise llfuse.FUSEError(errno.ENOTEMPTY)
 
         self.cursor.execute("DELETE FROM contents WHERE name=? AND parent_inode=?",
                         (name, inode_p))
-        
+
         if entry.st_nlink == 1 and entry.st_ino not in self.inode_open_count:
             self.cursor.execute("DELETE FROM inodes WHERE id=?", (entry.st_ino,))
 
     def symlink(self, inode_p, name, target, ctx):
-        mode = (stat.S_IFLNK | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | 
-                stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | 
+        mode = (stat.S_IFLNK | stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
+                stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |
                 stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
         return self._create(inode_p, name, mode, ctx, target=target)
 
-    def rename(self, inode_p_old, name_old, inode_p_new, name_new):     
+    def rename(self, inode_p_old, name_old, inode_p_new, name_new):
         entry_old = self.lookup(inode_p_old, name_old)
 
         try:
@@ -231,10 +233,10 @@ class Operations(llfuse.Operations):
     def _replace(self, inode_p_old, name_old, inode_p_new, name_new,
                  entry_old, entry_new):
 
-        if self.get_row("SELECT COUNT(inode) FROM contents WHERE parent_inode=?", 
-                        (entry_new.st_ino))[0] > 0:
+        if self.get_row("SELECT COUNT(inode) FROM contents WHERE parent_inode=?",
+                        (entry_new.st_ino,))[0] > 0:
             raise llfuse.FUSEError(errno.ENOTEMPTY)
-   
+
         self.cursor.execute("UPDATE contents SET inode=? WHERE name=? AND parent_inode=?",
                             (entry_old.st_ino, name_new, inode_p_new))
         self.db.execute('DELETE FROM contents WHERE name=? AND parent_inode=?',
@@ -261,7 +263,7 @@ class Operations(llfuse.Operations):
         if attr.st_size is not None:
             data = self.get_row('SELECT data FROM inodes WHERE id=?', (inode,))[0]
             if data is None:
-                data = ''
+                data = b''
             if len(data) < attr.st_size:
                 data = data + b'\0' * (attr.st_size - len(data))
             else:
@@ -284,17 +286,17 @@ class Operations(llfuse.Operations):
             self.cursor.execute('UPDATE inodes SET rdev=? WHERE id=?',
                                 (attr.st_rdev, inode))
 
-        if attr.st_atime is not None:
-            self.cursor.execute('UPDATE inodes SET atime=? WHERE id=?',
-                                (attr.st_atime, inode))
+        if attr.st_atime_ns is not None:
+            self.cursor.execute('UPDATE inodes SET atime_ns=? WHERE id=?',
+                                (attr.st_atime_ns, inode))
 
-        if attr.st_mtime is not None:
-            self.cursor.execute('UPDATE inodes SET mtime=? WHERE id=?',
-                                (attr.st_mtime, inode))
+        if attr.st_mtime_ns is not None:
+            self.cursor.execute('UPDATE inodes SET mtime_ns=? WHERE id=?',
+                                (attr.st_mtime_ns, inode))
 
-        if attr.st_ctime is not None:
-            self.cursor.execute('UPDATE inodes SET ctime=? WHERE id=?',
-                                (attr.st_ctime, inode))
+        if attr.st_ctime_ns is not None:
+            self.cursor.execute('UPDATE inodes SET ctime_ns=? WHERE id=?',
+                                (attr.st_ctime_ns, inode))
 
         return self.getattr(inode)
 
@@ -326,7 +328,7 @@ class Operations(llfuse.Operations):
         # Yeah, unused arguments
         #pylint: disable=W0613
         self.inode_open_count[inode] += 1
-        
+
         # Use inodes as a file handles
         return inode
 
@@ -336,26 +338,26 @@ class Operations(llfuse.Operations):
         return True
 
     def create(self, inode_parent, name, mode, flags, ctx):
-        #pylint: disable=W0612 
+        #pylint: disable=W0612
         entry = self._create(inode_parent, name, mode, ctx)
         self.inode_open_count[entry.st_ino] += 1
         return (entry.st_ino, entry)
 
-    def _create(self, inode_p, name, mode, ctx, rdev=0, target=None):             
+    def _create(self, inode_p, name, mode, ctx, rdev=0, target=None):
         if self.getattr(inode_p).st_nlink == 0:
             log.warn('Attempted to create entry %s with unlinked parent %d',
                      name, inode_p)
             raise FUSEError(errno.EINVAL)
 
-        self.cursor.execute('INSERT INTO inodes (uid, gid, mode, mtime, atime, '
-                            'ctime, target, rdev) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
-                            (ctx.uid, ctx.gid, mode, time(), time(), time(), target, rdev))
+        now_ns = int(time() * 1e9)
+        self.cursor.execute('INSERT INTO inodes (uid, gid, mode, mtime_ns, atime_ns, '
+                            'ctime_ns, target, rdev) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
+                            (ctx.uid, ctx.gid, mode, now_ns, now_ns, now_ns, target, rdev))
 
         inode = self.cursor.lastrowid
         self.db.execute("INSERT INTO contents(name, inode, parent_inode) VALUES(?,?,?)",
                         (name, inode, inode_p))
         return self.getattr(inode)
-
 
     def read(self, fh, offset, length):
         data = self.get_row('SELECT data FROM inodes WHERE id=?', (fh,))[0]
@@ -363,17 +365,16 @@ class Operations(llfuse.Operations):
             data = b''
         return data[offset:offset+length]
 
-                
     def write(self, fh, offset, buf):
         data = self.get_row('SELECT data FROM inodes WHERE id=?', (fh,))[0]
         if data is None:
             data = b''
         data = data[:offset] + buf + data[offset+len(buf):]
-        
+
         self.cursor.execute('UPDATE inodes SET data=?, size=? WHERE id=?',
                             (buffer(data), len(data), fh))
         return len(buf)
-   
+
     def release(self, fh):
         self.inode_open_count[fh] -= 1
 
@@ -385,32 +386,48 @@ class Operations(llfuse.Operations):
 class NoUniqueValueError(Exception):
     def __str__(self):
         return 'Query generated more than 1 result row'
-    
-    
+
+
 class NoSuchRowError(Exception):
     def __str__(self):
         return 'Query produced 0 result rows'
-    
-def init_logging():
-    formatter = logging.Formatter('%(message)s') 
+
+def init_logging(debug=False):
+    formatter = logging.Formatter('%(asctime)s.%(msecs)03d %(threadName)s: '
+                                  '[%(name)s] %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-    handler.setLevel(logging.INFO)
-    log.setLevel(logging.INFO)    
-    log.addHandler(handler)    
-        
+    root_logger = logging.getLogger()
+    if debug:
+        handler.setLevel(logging.DEBUG)
+        root_logger.setLevel(logging.DEBUG)
+    else:
+        handler.setLevel(logging.INFO)
+        root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(handler)
+
+def parse_args():
+    '''Parse command line'''
+
+    parser = ArgumentParser()
+
+    parser.add_argument('mountpoint', type=str,
+                        help='Where to mount the file system')
+    parser.add_argument('--debug', action='store_true', default=False,
+                        help='Enable debugging output')
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
-    
-    if len(sys.argv) != 2:
-        raise SystemExit('Usage: %s <mountpoint>' % sys.argv[0])
-    
-    init_logging()
-    mountpoint = sys.argv[1]
+
+    options = parse_args()
+    init_logging(options.debug)
     operations = Operations()
-    
-    llfuse.init(operations, mountpoint, 
+
+    llfuse.init(operations, options.mountpoint,
                 [  'fsname=tmpfs', "nonempty" ])
-    
+
     # sqlite3 does not support multithreading
     try:
         llfuse.main(single=True)
@@ -419,4 +436,3 @@ if __name__ == '__main__':
         raise
 
     llfuse.close()
-    

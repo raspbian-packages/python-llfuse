@@ -1,5 +1,6 @@
 Changes.txt
 LICENSE
+README.rst
 setup.cfg
 setup.py
 Include/fuse_common.pxd
@@ -54,6 +55,7 @@ doc/html/_static/underscore.js
 doc/html/_static/up-pressed.png
 doc/html/_static/up.png
 doc/html/_static/websupport.js
+examples/lltest.py
 examples/passthroughfs.py
 examples/tmpfs.py
 rst/about.rst
@@ -68,7 +70,6 @@ rst/lock.rst
 rst/operations.rst
 rst/_static/.placeholder
 rst/_templates/localtoc.html
-src/llfuse.c
 src/llfuse/__init__.py
 src/llfuse/capi.c
 src/llfuse/capi.pyx
@@ -87,4 +88,5 @@ src/llfuse.egg-info/SOURCES.txt
 src/llfuse.egg-info/dependency_links.txt
 src/llfuse.egg-info/top_level.txt
 src/llfuse.egg-info/zip-safe
+test/test_examples.py
 util/sphinx_cython.py

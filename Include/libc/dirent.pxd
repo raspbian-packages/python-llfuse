@@ -3,10 +3,10 @@ dirent.pxd
 
 This file contains Cython definitions for dirent.h and sys/types.h
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2010 Nikolaus Rath <Nikolaus.org>
 
-This file is part of python-llfuse (http://python-llfuse.googlecode.com).
-python-llfuse can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
 '''
 
 cdef extern from "dirent.h" nogil:
@@ -14,7 +14,7 @@ cdef extern from "dirent.h" nogil:
         pass
     cdef struct dirent:
         char* d_name
-        
+
     dirent* readdir(DIR* dirp)
     int readdir_r(DIR *dirp, dirent *entry, dirent **result)
 

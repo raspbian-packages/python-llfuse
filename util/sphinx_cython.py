@@ -1,13 +1,14 @@
+# -*- coding: utf-8 -*-
 '''
 sphinx_cython.py
 
 This module removes C style type declarations from function and
 method docstrings. It also works around http://trac.cython.org/cython_trac/ticket/812
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2010 Nikolaus Rath <Nikolaus.org>
 
-This file is part of LLFUSE (http://python-llfuse.googlecode.com).
-LLFUSE can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
 '''
 
 from __future__ import division, print_function, absolute_import
@@ -25,7 +26,7 @@ def process_signature(app, what, name, obj, options, signature, return_annotatio
 
     if signature is None:
         return (signature, return_annotation)
-    
+
     new_params = list()
     for param in (x.strip() for x in signature[1:-1].split(',')):
         hit = TYPE_RE.match(param)
@@ -33,5 +34,5 @@ def process_signature(app, what, name, obj, options, signature, return_annotatio
             new_params.append(hit.group(2))
         else:
             new_params.append(param)
-            
+
     return ('(%s)' % ', '.join(new_params), return_annotation)

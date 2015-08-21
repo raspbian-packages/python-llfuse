@@ -4,10 +4,11 @@ handlers.pxi
 This file defines the FUSE request handlers. It is included
 by llfuse.pyx.
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2013 Nikolaus Rath <Nikolaus.org>
 
-This file is part of LLFUSE (http://python-llfuse.googlecode.com).
-LLFUSE can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
+
 '''
 
 cdef void fuse_init (void *userdata, fuse_conn_info *conn) with gil:
@@ -16,7 +17,7 @@ cdef void fuse_init (void *userdata, fuse_conn_info *conn) with gil:
             operations.init()
     except BaseException as e:
         handle_exc('init', e, NULL)
-        
+
 cdef void fuse_destroy (void *userdata) with gil:
     # Note: called by fuse_session_destroy(), i.e. not as part of the
     # main loop but only when llfuse.close() is called.
@@ -29,7 +30,7 @@ cdef void fuse_destroy (void *userdata) with gil:
             exc_info = sys.exc_info()
         else:
             log.exception('Exception after kill:')
-    
+
 cdef void fuse_lookup (fuse_req_t req, fuse_ino_t parent,
                        const_char *name) with gil:
     cdef fuse_entry_param entry
@@ -47,7 +48,7 @@ cdef void fuse_lookup (fuse_req_t req, fuse_ino_t parent,
 
     if ret != 0:
         log.error('fuse_lookup(): fuse_reply_* failed with %s', strerror(-ret))
-    
+
 
 cdef void fuse_forget (fuse_req_t req, fuse_ino_t ino,
                        ulong_t nlookup) with gil:
@@ -87,29 +88,41 @@ cdef void fuse_setattr (fuse_req_t req, fuse_ino_t ino, c_stat *stat,
 
     try:
         attr = EntryAttributes()
-        
+
         # Type casting required on 64bit, where double
         # is smaller than long int.
         if to_set & FUSE_SET_ATTR_ATIME:
             attr.st_atime = <double> stat.st_atime + <double> GET_ATIME_NS(stat) * 1e-9
             attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)
+        else:
+            attr.st_atime = attr.st_atime_ns = None
 
         if to_set & FUSE_SET_ATTR_MTIME:
             attr.st_mtime = <double> stat.st_mtime + <double> GET_MTIME_NS(stat) * 1e-9
             attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)
+        else:
+            attr.st_mtime = attr.st_mtime_ns = None
 
         if to_set & FUSE_SET_ATTR_MODE:
             attr.st_mode = stat.st_mode
-            
+        else:
+            attr.st_mode = None
+
         if to_set & FUSE_SET_ATTR_UID:
             attr.st_uid = stat.st_uid
+        else:
+            attr.st_uid = None
 
         if to_set & FUSE_SET_ATTR_GID:
             attr.st_gid = stat.st_gid
-            
+        else:
+            attr.st_gid = None
+
         if to_set & FUSE_SET_ATTR_SIZE:
             attr.st_size = stat.st_size
-            
+        else:
+            attr.st_size = None
+
         with lock:
             attr = operations.setattr(ino, attr)
 
@@ -144,7 +157,7 @@ cdef void fuse_mknod (fuse_req_t req, fuse_ino_t parent, const_char *name,
                       mode_t mode, dev_t rdev) with gil:
     cdef int ret
     cdef fuse_entry_param entry
-    
+
     try:
         ctx = get_request_context(req)
         with lock:
@@ -164,7 +177,7 @@ cdef void fuse_mkdir (fuse_req_t req, fuse_ino_t parent, const_char *name,
                       mode_t mode) with gil:
     cdef int ret
     cdef fuse_entry_param entry
-    
+
     try:
         # Force the entry type to directory. We need to explicitly cast,
         # because on BSD the S_* are not of type mode_t.
@@ -184,7 +197,7 @@ cdef void fuse_mkdir (fuse_req_t req, fuse_ino_t parent, const_char *name,
 
 cdef void fuse_unlink (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.unlink(parent, PyBytes_FromString(name))
@@ -199,7 +212,7 @@ cdef void fuse_unlink (fuse_req_t req, fuse_ino_t parent, const_char *name) with
 
 cdef void fuse_rmdir (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.rmdir(parent, PyBytes_FromString(name))
@@ -216,7 +229,7 @@ cdef void fuse_symlink (fuse_req_t req, const_char *link, fuse_ino_t parent,
                         const_char *name) with gil:
     cdef int ret
     cdef fuse_entry_param entry
-    
+
     try:
         ctx = get_request_context(req)
         with lock:
@@ -235,7 +248,7 @@ cdef void fuse_symlink (fuse_req_t req, const_char *link, fuse_ino_t parent,
 cdef void fuse_rename (fuse_req_t req, fuse_ino_t parent, const_char *name,
                        fuse_ino_t newparent, const_char *newname) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.rename(parent, PyBytes_FromString(name),
@@ -253,7 +266,7 @@ cdef void fuse_link (fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,
                      const_char *newname) with gil:
     cdef int ret
     cdef fuse_entry_param entry
-    
+
     try:
         with lock:
             attr = operations.link(ino, newparent, PyBytes_FromString(newname))
@@ -270,15 +283,15 @@ cdef void fuse_link (fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,
 
 cdef void fuse_open (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
-            fi.fh = operations.open(ino, fi.flags) 
+            fi.fh = operations.open(ino, fi.flags)
 
         # Cached file data does not need to be invalidated.
         # http://article.gmane.org/gmane.comp.file-systems.fuse.devel/5325/
         fi.keep_cache = 1
-        
+
         ret = fuse_reply_open(req, fi)
     except FUSEError as e:
         ret = fuse_reply_err(req, e.errno)
@@ -293,10 +306,10 @@ cdef void fuse_read (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
     cdef int ret
     cdef ssize_t len_
     cdef char* cbuf
-    
+
     try:
         with lock:
-            buf = operations.read(fi.fh, off, size) 
+            buf = operations.read(fi.fh, off, size)
         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
         ret = fuse_reply_buf(req, cbuf, len_)
     except FUSEError as e:
@@ -314,23 +327,27 @@ cdef void fuse_write (fuse_req_t req, fuse_ino_t ino, const_char *buf,
 
     # GCC thinks this may end up uninitialized
     len_ = 0
-    
+
     try:
         pbuf = PyBytes_FromStringAndSize(buf, size)
         with lock:
             len_ = operations.write(fi.fh, off, pbuf)
         ret = fuse_reply_write(req, len_)
+        if ret != 0:
+            log.error('fuse_write(): fuse_reply_write failed with %s', strerror(-ret))
     except FUSEError as e:
         ret = fuse_reply_err(req, e.errno)
+        if ret != 0:
+            log.error('fuse_write(): fuse_reply_err(%d) failed with %s', strerror(-ret), e.errno)
     except BaseException as e:
         ret = handle_exc('write', e, req)
 
-    if ret != 0:
-        log.error('fuse_write(): fuse_reply_* failed with %s', strerror(-ret))
+        if ret != 0:
+            log.error('fuse_write(): fuse_reply_err failed with %s after exception', strerror(-ret))
 
 cdef void fuse_flush (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.flush(fi.fh)
@@ -345,7 +362,7 @@ cdef void fuse_flush (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with g
 
 cdef void fuse_release (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.release(fi.fh)
@@ -361,7 +378,7 @@ cdef void fuse_release (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with
 cdef void fuse_fsync (fuse_req_t req, fuse_ino_t ino, int datasync,
                       fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.fsync(fi.fh, datasync != 0)
@@ -376,10 +393,10 @@ cdef void fuse_fsync (fuse_req_t req, fuse_ino_t ino, int datasync,
 
 cdef void fuse_opendir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
-            fi.fh = operations.opendir(ino) 
+            fi.fh = operations.opendir(ino)
 
         ret = fuse_reply_open(req, fi)
     except FUSEError as e:
@@ -393,13 +410,14 @@ cdef void fuse_opendir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with
 cdef void fuse_readdir (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
                         fuse_file_info *fi) with gil:
     cdef int ret
-    cdef char *cname, *buf
+    cdef char *cname
+    cdef char *buf
     cdef size_t len_, acc_size
     cdef c_stat stat
 
     # GCC thinks this may end up uninitialized
     ret = 0
-    
+
     try:
         acc_size = 0
         buf = NULL
@@ -422,13 +440,13 @@ cdef void fuse_readdir (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
     finally:
         if buf != NULL:
             stdlib.free(buf)
-    
+
     if ret != 0:
         log.error('fuse_readdir(): fuse_reply_* failed with %s', strerror(-ret))
 
 cdef void fuse_releasedir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.releasedir(fi.fh)
@@ -445,7 +463,7 @@ cdef void fuse_releasedir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) w
 cdef void fuse_fsyncdir (fuse_req_t req, fuse_ino_t ino, int datasync,
                          fuse_file_info *fi) with gil:
     cdef int ret
-    
+
     try:
         with lock:
             operations.fsyncdir(fi.fh, datasync != 0)
@@ -479,7 +497,7 @@ cdef void fuse_statfs (fuse_req_t req, fuse_ino_t ino) with gil:
     if ret != 0:
         log.error('fuse_statfs(): fuse_reply_* failed with %s', strerror(-ret))
 
-IF TARGET_PLATFORM == 'darwin':        
+IF TARGET_PLATFORM == 'darwin':
     cdef void fuse_setxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                                     const_char *cvalue, size_t size, int flags,
                                     uint32_t position) with gil:
@@ -490,14 +508,21 @@ IF TARGET_PLATFORM == 'darwin':
             ret = fuse_reply_err(req, errno.EIO)
             if ret != 0:
                 log.error('fuse_setxattr(): fuse_reply_err failed with %s', strerror(-ret))
-        else:
-            fuse_setxattr(req, ino, cname, cvalue, size, flags)
+            return
+
+        # Filter out flags that don't make any sense for a FUSE
+        # file system, but that FUSE4x nevertheless stupidly
+        # passes through.
+        # (cf. https://groups.google.com/d/msg/fuse4x/bRnh7J_nsts/Z7raJ06DB4sJ)
+        flags &= ~(xattr.XATTR_NOFOLLOW | xattr.XATTR_NODEFAULT |
+                   xattr.XATTR_NOSECURITY)
+        fuse_setxattr(req, ino, cname, cvalue, size, flags)
 
 
 cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                          const_char *cvalue, size_t size, int flags) with gil:
     cdef int ret
-    
+
     try:
         name = PyBytes_FromString(cname)
         value = PyBytes_FromStringAndSize(cvalue, size)
@@ -507,7 +532,7 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
             operations.stacktrace()
         else:
             IF TARGET_PLATFORM == 'freebsd':
-	        # No known flags
+                # No known flags
                 with lock:
                     operations.setxattr(ino, name, value)
             ELSE:
@@ -527,7 +552,7 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
 
                     elif flags & xattr.XATTR_REPLACE: # Attribute must exist
                         operations.getxattr(ino, name)
-			
+
                     operations.setxattr(ino, name, value)
 
         ret = fuse_reply_err(req, 0)
@@ -539,7 +564,7 @@ cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,
     if ret != 0:
         log.error('fuse_setxattr(): fuse_reply_* failed with %s', strerror(-ret))
 
-IF TARGET_PLATFORM == 'darwin':        
+IF TARGET_PLATFORM == 'darwin':
     cdef void fuse_getxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,
                                     size_t size, uint32_t position) with gil:
         cdef int ret
@@ -586,7 +611,7 @@ cdef void fuse_listxattr (fuse_req_t req, fuse_ino_t ino, size_t size) with gil:
             buf = b'\0'.join(operations.listxattr(ino)) + b'\0'
 
         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
-        
+
         if len_ == 1: # No attributes
             len_ = 0
 
@@ -621,7 +646,7 @@ cdef void fuse_removexattr (fuse_req_t req, fuse_ino_t ino, const_char *cname) w
 
 cdef void fuse_access (fuse_req_t req, fuse_ino_t ino, int mask) with gil:
     cdef int ret
-    
+
     try:
         ctx = get_request_context(req)
         with lock:
@@ -643,7 +668,7 @@ cdef void fuse_create (fuse_req_t req, fuse_ino_t parent, const_char *cname,
                        mode_t mode, fuse_file_info *fi) with gil:
     cdef int ret
     cdef fuse_entry_param entry
-    
+
     try:
         ctx = get_request_context(req)
         name = PyBytes_FromString(cname)
@@ -653,7 +678,7 @@ cdef void fuse_create (fuse_req_t req, fuse_ino_t parent, const_char *cname,
         # Cached file data does not need to be invalidated.
         # http://article.gmane.org/gmane.comp.file-systems.fuse.devel/5325/
         fi.keep_cache = 1
-        
+
         fill_entry_param(attr, &entry)
         ret = fuse_reply_create(req, &entry, fi)
     except FUSEError as e:

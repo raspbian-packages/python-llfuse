@@ -1,17 +1,16 @@
 '''
-capi.pyx
+capi.pxy
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2013 Nikolaus Rath <Nikolaus.org>
 
-This file is part of LLFUSE (http://python-llfuse.googlecode.com).
-LLFUSE can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
 '''
-
 
 # Version is defined in setup.py
 cdef extern from *:
     char* LLFUSE_VERSION
-__version__ = LLFUSE_VERSION
+__version__ = LLFUSE_VERSION.decode('utf-8')
 
 
 ###########
@@ -56,7 +55,7 @@ cdef extern from "time.c" nogil:
     long GET_ATIME_NS(c_stat* buf)
     long GET_CTIME_NS(c_stat* buf)
     long GET_MTIME_NS(c_stat* buf)
-    
+
     void SET_ATIME_NS(c_stat* buf, long val)
     void SET_CTIME_NS(c_stat* buf, long val)
     void SET_MTIME_NS(c_stat* buf, long val)
@@ -115,7 +114,7 @@ ENOATTR = errno.ENOATTR
 #######################
 # FUSE REQUEST HANDLERS
 #######################
-    
+
 include "handlers.pxi"
 
 ####################
