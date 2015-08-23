@@ -13,13 +13,15 @@ Description: Force use of libattr1-dev API
 
 --- a/src/llfuse/capi.c
 +++ b/src/llfuse/capi.c
-@@ -7,12 +7,4 @@
+@@ -7,14 +7,4 @@
  the terms of the GNU LGPL.
  */
  
 -#ifdef __gnu_linux__
  #include "capi_linux.c"
 -#elif __FreeBSD__
+-#include "capi_freebsd.c"
+-#elif __NetBSD__
 -#include "capi_freebsd.c"
 -#elif __APPLE__ && __MACH__
 -#include "capi_darwin.c"
