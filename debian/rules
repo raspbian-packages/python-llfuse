@@ -3,8 +3,8 @@
 
 export DH_VERBOSE=1
 export PYBUILD_NAME=llfuse
-#export PYBUILD_BEFORE_BUILD="python setup.py build_cython"
-#export PYTHON_BEFORE_
+export PYBUILD_TEST_PYTEST=1
+export PYBUILD_TEST_ARGS=--installed "{dir}/test/"
 
 %:
 	dh $@ --with python2,python3,sphinxdoc --buildsystem=pybuild
@@ -24,8 +24,10 @@ build_sphinx:
 	touch $@
 
 override_dh_strip:
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip -ppython-llfuse --dbg-package=python-llfuse-dbg
 	dh_strip -ppython3-llfuse --dbg-package=python3-llfuse-dbg
+endif
 
 override_dh_auto_clean:
 	# Remove documentation and cython output

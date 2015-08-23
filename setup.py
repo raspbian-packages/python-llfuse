@@ -55,7 +55,7 @@ if DEVELOPER_MODE:
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-LLFUSE_VERSION = '0.41'
+LLFUSE_VERSION = '0.41.1'
 
 def main():
 
@@ -66,7 +66,7 @@ def main():
     else:
         fix_docutils()
 
-    with open(os.path.join(basedir, 'rst', 'about.rst'), 'r') as fh:
+    with open(os.path.join(basedir, 'README.rst'), 'r') as fh:
         long_desc = fh.read()
 
     compile_args = pkg_config('fuse', cflags=True, ldflags=False, min_ver='2.8.0')
@@ -101,7 +101,7 @@ def main():
         link_args.append('-lrt')
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
 
-    elif os.uname()[0] in ('Darwin', 'FreeBSD'):
+    elif os.uname()[0] in ('Darwin', 'FreeBSD', 'NetBSD'):
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
     else:
         print("NOTE: unknown system (%s), nanosecond resolution file times "

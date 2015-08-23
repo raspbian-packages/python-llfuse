@@ -246,6 +246,7 @@ void __Pyx_call_destructor(T* x) {
 #include "sys/xattr.h"
 #include "unistd.h"
 #include "signal.h"
+#include "sys/time.h"
 #include "lock.c"
 #include "time.c"
 #include "version.c"
@@ -745,6 +746,8 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_long(unsigned long valu
 
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value);
+
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_mode_t(mode_t value);
 
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uid_t(uid_t value);
@@ -789,8 +792,6 @@ static CYTHON_INLINE time_t __Pyx_PyInt_As_time_t(PyObject *);
 
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
 
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value);
-
 static CYTHON_INLINE fsblkcnt_t __Pyx_PyInt_As_fsblkcnt_t(PyObject *);
 
 static CYTHON_INLINE fsfilcnt_t __Pyx_PyInt_As_fsfilcnt_t(PyObject *);
@@ -833,6 +834,10 @@ static CYTHON_INLINE int __pyx_f_4libc_5xattr_getxattr(char *, char *, void *, i
 /* Module declarations from 'posix.types' */
 
 /* Module declarations from 'posix.unistd' */
+
+/* Module declarations from 'posix.signal' */
+
+/* Module declarations from 'posix.time' */
 
 /* Module declarations from 'cpython.ref' */
 
@@ -1164,6 +1169,7 @@ static char __pyx_k_fuse_releasedir_fuse_reply__fail[] = "fuse_releasedir(): fus
 static char __pyx_k_fuse_removexattr_fuse_reply__fai[] = "fuse_removexattr(): fuse_reply_* failed with %s";
 static char __pyx_k_fuse_rename_fuse_reply__failed_w[] = "fuse_rename(): fuse_reply_* failed with %s";
 static char __pyx_k_fuse_rmdir_fuse_reply__failed_wi[] = "fuse_rmdir(): fuse_reply_* failed with %s";
+static char __pyx_k_fuse_setattr_clock_gettime_CLOCK[] = "fuse_setattr(): clock_gettime(CLOCK_REALTIME) failed with %s";
 static char __pyx_k_fuse_setxattr_fuse_reply__failed[] = "fuse_setxattr(): fuse_reply_* failed with %s";
 static char __pyx_k_fuse_setxattr_fuse_reply_err_fai[] = "fuse_setxattr(): fuse_reply_err failed with %s";
 static char __pyx_k_fuse_statfs_fuse_reply__failed_w[] = "fuse_statfs(): fuse_reply_* failed with %s";
@@ -1286,6 +1292,7 @@ static PyObject *__pyx_kp_u_fuse_rmdir_fuse_reply__failed_wi;
 static PyObject *__pyx_kp_u_fuse_session_loop_failed;
 static PyObject *__pyx_kp_u_fuse_session_loop_mt_failed;
 static PyObject *__pyx_kp_u_fuse_set_signal_handlers_failed;
+static PyObject *__pyx_kp_u_fuse_setattr_clock_gettime_CLOCK;
 static PyObject *__pyx_kp_u_fuse_setattr_fuse_reply__failed;
 static PyObject *__pyx_kp_u_fuse_setxattr_fuse_reply__failed;
 static PyObject *__pyx_kp_u_fuse_setxattr_fuse_reply_err_fai;
@@ -3425,6 +3432,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
   int __pyx_v_ret;
   struct stat __pyx_v_stat_n;
   int __pyx_v_timeout;
+  struct timespec __pyx_v_now;
   PyObject *__pyx_v_attr = NULL;
   PyObject *__pyx_v_e = NULL;
   __Pyx_RefNannyDeclarations
@@ -3439,16 +3447,16 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
   PyObject *__pyx_t_9 = NULL;
   PyObject *__pyx_t_10 = NULL;
   PyObject *__pyx_t_11 = NULL;
-  PyObject *__pyx_t_12 = NULL;
-  Py_ssize_t __pyx_t_13;
+  Py_ssize_t __pyx_t_12;
+  PyObject *__pyx_t_13 = NULL;
   PyObject *__pyx_t_14 = NULL;
   PyObject *__pyx_t_15 = NULL;
-  int __pyx_t_16;
-  int __pyx_t_17;
+  PyObject *__pyx_t_16 = NULL;
+  PyObject *__pyx_t_17 = NULL;
   int __pyx_t_18;
-  char const *__pyx_t_19;
-  PyObject *__pyx_t_20 = NULL;
-  PyObject *__pyx_t_21 = NULL;
+  int __pyx_t_19;
+  int __pyx_t_20;
+  char const *__pyx_t_21;
   PyObject *__pyx_t_22 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -3458,12 +3466,12 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
   #endif
   __Pyx_RefNannySetupContext("fuse_setattr", 0);
 
-  /* "src/llfuse/handlers.pxi":89
- *     cdef int timeout
+  /* "src/llfuse/handlers.pxi":90
+ *     cdef timespec now
  * 
  *     try:             # <<<<<<<<<<<<<<
  *         attr = EntryAttributes()
- * 
+ *         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):
  */
   {
     __Pyx_ExceptionSave(&__pyx_t_1, &__pyx_t_2, &__pyx_t_3);
@@ -3472,14 +3480,14 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":90
+      /* "src/llfuse/handlers.pxi":91
  * 
  *     try:
  *         attr = EntryAttributes()             # <<<<<<<<<<<<<<
- * 
- *         # Type casting required on 64bit, where double
+ *         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):
+ *             ret = clock_gettime(CLOCK_REALTIME, &now)
  */
-      __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_EntryAttributes); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_EntryAttributes); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_t_6 = NULL;
       if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_5))) {
@@ -3492,17 +3500,131 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
         }
       }
       if (__pyx_t_6) {
-        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       } else {
-        __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __pyx_v_attr = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":94
+      /* "src/llfuse/handlers.pxi":92
+ *     try:
+ *         attr = EntryAttributes()
+ *         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):             # <<<<<<<<<<<<<<
+ *             ret = clock_gettime(CLOCK_REALTIME, &now)
+ *             if ret != 0:
+ */
+      __pyx_t_7 = ((__pyx_v_to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW)) != 0);
+      if (__pyx_t_7) {
+
+        /* "src/llfuse/handlers.pxi":93
+ *         attr = EntryAttributes()
+ *         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):
+ *             ret = clock_gettime(CLOCK_REALTIME, &now)             # <<<<<<<<<<<<<<
+ *             if ret != 0:
+ *                 log.error('fuse_setattr(): clock_gettime(CLOCK_REALTIME) failed with %s',
+ */
+        __pyx_v_ret = clock_gettime(CLOCK_REALTIME, (&__pyx_v_now));
+
+        /* "src/llfuse/handlers.pxi":94
+ *         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):
+ *             ret = clock_gettime(CLOCK_REALTIME, &now)
+ *             if ret != 0:             # <<<<<<<<<<<<<<
+ *                 log.error('fuse_setattr(): clock_gettime(CLOCK_REALTIME) failed with %s',
+ *                           strerror(errno.errno))
+ */
+        __pyx_t_7 = ((__pyx_v_ret != 0) != 0);
+        if (__pyx_t_7) {
+
+          /* "src/llfuse/handlers.pxi":95
+ *             ret = clock_gettime(CLOCK_REALTIME, &now)
+ *             if ret != 0:
+ *                 log.error('fuse_setattr(): clock_gettime(CLOCK_REALTIME) failed with %s',             # <<<<<<<<<<<<<<
+ *                           strerror(errno.errno))
+ * 
+ */
+          __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_GOTREF(__pyx_t_5);
+          __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_error); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+
+          /* "src/llfuse/handlers.pxi":96
+ *             if ret != 0:
+ *                 log.error('fuse_setattr(): clock_gettime(CLOCK_REALTIME) failed with %s',
+ *                           strerror(errno.errno))             # <<<<<<<<<<<<<<
+ * 
+ *         # Type casting required on 64bit, where double
+ */
+          __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_GOTREF(__pyx_t_8);
+          __pyx_t_9 = __Pyx_PyInt_From_int(errno); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_GOTREF(__pyx_t_9);
+          __pyx_t_10 = NULL;
+          if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
+            __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_8);
+            if (likely(__pyx_t_10)) {
+              PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
+              __Pyx_INCREF(__pyx_t_10);
+              __Pyx_INCREF(function);
+              __Pyx_DECREF_SET(__pyx_t_8, function);
+            }
+          }
+          if (!__pyx_t_10) {
+            __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+            __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+            __Pyx_GOTREF(__pyx_t_5);
+          } else {
+            __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+            __Pyx_GOTREF(__pyx_t_11);
+            PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_10); __Pyx_GIVEREF(__pyx_t_10); __pyx_t_10 = NULL;
+            PyTuple_SET_ITEM(__pyx_t_11, 0+1, __pyx_t_9);
+            __Pyx_GIVEREF(__pyx_t_9);
+            __pyx_t_9 = 0;
+            __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_11, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+            __Pyx_GOTREF(__pyx_t_5);
+            __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+          }
+          __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+          __pyx_t_8 = NULL;
+          __pyx_t_12 = 0;
+          if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_6))) {
+            __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
+            if (likely(__pyx_t_8)) {
+              PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+              __Pyx_INCREF(__pyx_t_8);
+              __Pyx_INCREF(function);
+              __Pyx_DECREF_SET(__pyx_t_6, function);
+              __pyx_t_12 = 1;
+            }
+          }
+          __pyx_t_11 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_GOTREF(__pyx_t_11);
+          if (__pyx_t_8) {
+            PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
+          }
+          __Pyx_INCREF(__pyx_kp_u_fuse_setattr_clock_gettime_CLOCK);
+          PyTuple_SET_ITEM(__pyx_t_11, 0+__pyx_t_12, __pyx_kp_u_fuse_setattr_clock_gettime_CLOCK);
+          __Pyx_GIVEREF(__pyx_kp_u_fuse_setattr_clock_gettime_CLOCK);
+          PyTuple_SET_ITEM(__pyx_t_11, 1+__pyx_t_12, __pyx_t_5);
+          __Pyx_GIVEREF(__pyx_t_5);
+          __pyx_t_5 = 0;
+          __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_11, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_GOTREF(__pyx_t_4);
+          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+          __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+          goto __pyx_L12;
+        }
+        __pyx_L12:;
+        goto __pyx_L11;
+      }
+      __pyx_L11:;
+
+      /* "src/llfuse/handlers.pxi":100
  *         # Type casting required on 64bit, where double
  *         # is smaller than long int.
  *         if to_set & FUSE_SET_ATTR_ATIME:             # <<<<<<<<<<<<<<
@@ -3512,46 +3634,82 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_ATIME) != 0);
       if (__pyx_t_7) {
 
-        /* "src/llfuse/handlers.pxi":95
+        /* "src/llfuse/handlers.pxi":101
  *         # is smaller than long int.
  *         if to_set & FUSE_SET_ATTR_ATIME:
  *             attr.st_atime = <double> stat.st_atime + <double> GET_ATIME_NS(stat) * 1e-9             # <<<<<<<<<<<<<<
  *             attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)
- *         else:
+ *         elif to_set & FUSE_SET_ATTR_ATIME_NOW:
  */
-        __pyx_t_4 = PyFloat_FromDouble((((double)__pyx_v_stat->st_atime) + (((double)GET_ATIME_NS(__pyx_v_stat)) * 1e-9))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = PyFloat_FromDouble((((double)__pyx_v_stat->st_atime) + (((double)GET_ATIME_NS(__pyx_v_stat)) * 1e-9))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-        /* "src/llfuse/handlers.pxi":96
+        /* "src/llfuse/handlers.pxi":102
  *         if to_set & FUSE_SET_ATTR_ATIME:
  *             attr.st_atime = <double> stat.st_atime + <double> GET_ATIME_NS(stat) * 1e-9
  *             attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)             # <<<<<<<<<<<<<<
+ *         elif to_set & FUSE_SET_ATTR_ATIME_NOW:
+ *             attr.st_atime = now.tv_sec
+ */
+        __pyx_t_4 = __Pyx_PyInt_From_long(((__pyx_v_stat->st_atime * 1000000000) + GET_ATIME_NS(__pyx_v_stat))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_GOTREF(__pyx_t_4);
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime_ns, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        goto __pyx_L13;
+      }
+
+      /* "src/llfuse/handlers.pxi":103
+ *             attr.st_atime = <double> stat.st_atime + <double> GET_ATIME_NS(stat) * 1e-9
+ *             attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)
+ *         elif to_set & FUSE_SET_ATTR_ATIME_NOW:             # <<<<<<<<<<<<<<
+ *             attr.st_atime = now.tv_sec
+ *             attr.st_atime_ns = now.tv_nsec
+ */
+      __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_ATIME_NOW) != 0);
+      if (__pyx_t_7) {
+
+        /* "src/llfuse/handlers.pxi":104
+ *             attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)
+ *         elif to_set & FUSE_SET_ATTR_ATIME_NOW:
+ *             attr.st_atime = now.tv_sec             # <<<<<<<<<<<<<<
+ *             attr.st_atime_ns = now.tv_nsec
+ *         else:
+ */
+        __pyx_t_4 = __Pyx_PyInt_From_time_t(__pyx_v_now.tv_sec); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_GOTREF(__pyx_t_4);
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+        /* "src/llfuse/handlers.pxi":105
+ *         elif to_set & FUSE_SET_ATTR_ATIME_NOW:
+ *             attr.st_atime = now.tv_sec
+ *             attr.st_atime_ns = now.tv_nsec             # <<<<<<<<<<<<<<
  *         else:
  *             attr.st_atime = attr.st_atime_ns = None
  */
-        __pyx_t_4 = __Pyx_PyInt_From_long(((__pyx_v_stat->st_atime * 1000000000) + GET_ATIME_NS(__pyx_v_stat))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyInt_From_long(__pyx_v_now.tv_nsec); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime_ns, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime_ns, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        goto __pyx_L11;
+        goto __pyx_L13;
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":98
- *             attr.st_atime_ns = stat.st_atime * 10**9 + GET_ATIME_NS(stat)
+        /* "src/llfuse/handlers.pxi":107
+ *             attr.st_atime_ns = now.tv_nsec
  *         else:
  *             attr.st_atime = attr.st_atime_ns = None             # <<<<<<<<<<<<<<
  * 
  *         if to_set & FUSE_SET_ATTR_MTIME:
  */
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime_ns, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_atime_ns, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      __pyx_L11:;
+      __pyx_L13:;
 
-      /* "src/llfuse/handlers.pxi":100
+      /* "src/llfuse/handlers.pxi":109
  *             attr.st_atime = attr.st_atime_ns = None
  * 
  *         if to_set & FUSE_SET_ATTR_MTIME:             # <<<<<<<<<<<<<<
@@ -3561,46 +3719,82 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_MTIME) != 0);
       if (__pyx_t_7) {
 
-        /* "src/llfuse/handlers.pxi":101
+        /* "src/llfuse/handlers.pxi":110
  * 
  *         if to_set & FUSE_SET_ATTR_MTIME:
  *             attr.st_mtime = <double> stat.st_mtime + <double> GET_MTIME_NS(stat) * 1e-9             # <<<<<<<<<<<<<<
  *             attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)
- *         else:
+ *         elif to_set & FUSE_SET_ATTR_MTIME_NOW:
  */
-        __pyx_t_4 = PyFloat_FromDouble((((double)__pyx_v_stat->st_mtime) + (((double)GET_MTIME_NS(__pyx_v_stat)) * 1e-9))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = PyFloat_FromDouble((((double)__pyx_v_stat->st_mtime) + (((double)GET_MTIME_NS(__pyx_v_stat)) * 1e-9))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 101; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-        /* "src/llfuse/handlers.pxi":102
+        /* "src/llfuse/handlers.pxi":111
  *         if to_set & FUSE_SET_ATTR_MTIME:
  *             attr.st_mtime = <double> stat.st_mtime + <double> GET_MTIME_NS(stat) * 1e-9
  *             attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)             # <<<<<<<<<<<<<<
+ *         elif to_set & FUSE_SET_ATTR_MTIME_NOW:
+ *             attr.st_mtime = now.tv_sec
+ */
+        __pyx_t_4 = __Pyx_PyInt_From_long(((__pyx_v_stat->st_mtime * 1000000000) + GET_MTIME_NS(__pyx_v_stat))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_GOTREF(__pyx_t_4);
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime_ns, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        goto __pyx_L14;
+      }
+
+      /* "src/llfuse/handlers.pxi":112
+ *             attr.st_mtime = <double> stat.st_mtime + <double> GET_MTIME_NS(stat) * 1e-9
+ *             attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)
+ *         elif to_set & FUSE_SET_ATTR_MTIME_NOW:             # <<<<<<<<<<<<<<
+ *             attr.st_mtime = now.tv_sec
+ *             attr.st_mtime_ns = now.tv_nsec
+ */
+      __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_MTIME_NOW) != 0);
+      if (__pyx_t_7) {
+
+        /* "src/llfuse/handlers.pxi":113
+ *             attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)
+ *         elif to_set & FUSE_SET_ATTR_MTIME_NOW:
+ *             attr.st_mtime = now.tv_sec             # <<<<<<<<<<<<<<
+ *             attr.st_mtime_ns = now.tv_nsec
+ *         else:
+ */
+        __pyx_t_4 = __Pyx_PyInt_From_time_t(__pyx_v_now.tv_sec); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_GOTREF(__pyx_t_4);
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+        /* "src/llfuse/handlers.pxi":114
+ *         elif to_set & FUSE_SET_ATTR_MTIME_NOW:
+ *             attr.st_mtime = now.tv_sec
+ *             attr.st_mtime_ns = now.tv_nsec             # <<<<<<<<<<<<<<
  *         else:
  *             attr.st_mtime = attr.st_mtime_ns = None
  */
-        __pyx_t_4 = __Pyx_PyInt_From_long(((__pyx_v_stat->st_mtime * 1000000000) + GET_MTIME_NS(__pyx_v_stat))); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyInt_From_long(__pyx_v_now.tv_nsec); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime_ns, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 102; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime_ns, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        goto __pyx_L12;
+        goto __pyx_L14;
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":104
- *             attr.st_mtime_ns = stat.st_mtime * 10**9 + GET_MTIME_NS(stat)
+        /* "src/llfuse/handlers.pxi":116
+ *             attr.st_mtime_ns = now.tv_nsec
  *         else:
  *             attr.st_mtime = attr.st_mtime_ns = None             # <<<<<<<<<<<<<<
  * 
  *         if to_set & FUSE_SET_ATTR_MODE:
  */
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime_ns, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mtime_ns, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      __pyx_L12:;
+      __pyx_L14:;
 
-      /* "src/llfuse/handlers.pxi":106
+      /* "src/llfuse/handlers.pxi":118
  *             attr.st_mtime = attr.st_mtime_ns = None
  * 
  *         if to_set & FUSE_SET_ATTR_MODE:             # <<<<<<<<<<<<<<
@@ -3610,33 +3804,33 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_MODE) != 0);
       if (__pyx_t_7) {
 
-        /* "src/llfuse/handlers.pxi":107
+        /* "src/llfuse/handlers.pxi":119
  * 
  *         if to_set & FUSE_SET_ATTR_MODE:
  *             attr.st_mode = stat.st_mode             # <<<<<<<<<<<<<<
  *         else:
  *             attr.st_mode = None
  */
-        __pyx_t_4 = __Pyx_PyInt_From_mode_t(__pyx_v_stat->st_mode); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyInt_From_mode_t(__pyx_v_stat->st_mode); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mode, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mode, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        goto __pyx_L13;
+        goto __pyx_L15;
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":109
+        /* "src/llfuse/handlers.pxi":121
  *             attr.st_mode = stat.st_mode
  *         else:
  *             attr.st_mode = None             # <<<<<<<<<<<<<<
  * 
  *         if to_set & FUSE_SET_ATTR_UID:
  */
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mode, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_mode, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      __pyx_L13:;
+      __pyx_L15:;
 
-      /* "src/llfuse/handlers.pxi":111
+      /* "src/llfuse/handlers.pxi":123
  *             attr.st_mode = None
  * 
  *         if to_set & FUSE_SET_ATTR_UID:             # <<<<<<<<<<<<<<
@@ -3646,33 +3840,33 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_UID) != 0);
       if (__pyx_t_7) {
 
-        /* "src/llfuse/handlers.pxi":112
+        /* "src/llfuse/handlers.pxi":124
  * 
  *         if to_set & FUSE_SET_ATTR_UID:
  *             attr.st_uid = stat.st_uid             # <<<<<<<<<<<<<<
  *         else:
  *             attr.st_uid = None
  */
-        __pyx_t_4 = __Pyx_PyInt_From_uid_t(__pyx_v_stat->st_uid); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyInt_From_uid_t(__pyx_v_stat->st_uid); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_uid, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_uid, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        goto __pyx_L14;
+        goto __pyx_L16;
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":114
+        /* "src/llfuse/handlers.pxi":126
  *             attr.st_uid = stat.st_uid
  *         else:
  *             attr.st_uid = None             # <<<<<<<<<<<<<<
  * 
  *         if to_set & FUSE_SET_ATTR_GID:
  */
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_uid, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_uid, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      __pyx_L14:;
+      __pyx_L16:;
 
-      /* "src/llfuse/handlers.pxi":116
+      /* "src/llfuse/handlers.pxi":128
  *             attr.st_uid = None
  * 
  *         if to_set & FUSE_SET_ATTR_GID:             # <<<<<<<<<<<<<<
@@ -3682,33 +3876,33 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_GID) != 0);
       if (__pyx_t_7) {
 
-        /* "src/llfuse/handlers.pxi":117
+        /* "src/llfuse/handlers.pxi":129
  * 
  *         if to_set & FUSE_SET_ATTR_GID:
  *             attr.st_gid = stat.st_gid             # <<<<<<<<<<<<<<
  *         else:
  *             attr.st_gid = None
  */
-        __pyx_t_4 = __Pyx_PyInt_From_gid_t(__pyx_v_stat->st_gid); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyInt_From_gid_t(__pyx_v_stat->st_gid); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_gid, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_gid, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        goto __pyx_L15;
+        goto __pyx_L17;
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":119
+        /* "src/llfuse/handlers.pxi":131
  *             attr.st_gid = stat.st_gid
  *         else:
  *             attr.st_gid = None             # <<<<<<<<<<<<<<
  * 
  *         if to_set & FUSE_SET_ATTR_SIZE:
  */
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_gid, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_gid, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      __pyx_L15:;
+      __pyx_L17:;
 
-      /* "src/llfuse/handlers.pxi":121
+      /* "src/llfuse/handlers.pxi":133
  *             attr.st_gid = None
  * 
  *         if to_set & FUSE_SET_ATTR_SIZE:             # <<<<<<<<<<<<<<
@@ -3718,33 +3912,33 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_t_7 = ((__pyx_v_to_set & FUSE_SET_ATTR_SIZE) != 0);
       if (__pyx_t_7) {
 
-        /* "src/llfuse/handlers.pxi":122
+        /* "src/llfuse/handlers.pxi":134
  * 
  *         if to_set & FUSE_SET_ATTR_SIZE:
  *             attr.st_size = stat.st_size             # <<<<<<<<<<<<<<
  *         else:
  *             attr.st_size = None
  */
-        __pyx_t_4 = __Pyx_PyInt_From_off_t(__pyx_v_stat->st_size); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyInt_From_off_t(__pyx_v_stat->st_size); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_size, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 122; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_size, __pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        goto __pyx_L16;
+        goto __pyx_L18;
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":124
+        /* "src/llfuse/handlers.pxi":136
  *             attr.st_size = stat.st_size
  *         else:
  *             attr.st_size = None             # <<<<<<<<<<<<<<
  * 
  *         with lock:
  */
-        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_size, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (__Pyx_PyObject_SetAttrStr(__pyx_v_attr, __pyx_n_s_st_size, Py_None) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 136; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-      __pyx_L16:;
+      __pyx_L18:;
 
-      /* "src/llfuse/handlers.pxi":126
+      /* "src/llfuse/handlers.pxi":138
  *             attr.st_size = None
  * 
  *         with lock:             # <<<<<<<<<<<<<<
@@ -3752,93 +3946,95 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
  * 
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
-        __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_9 = NULL;
-        if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
-          __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_6);
-          if (likely(__pyx_t_9)) {
-            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-            __Pyx_INCREF(__pyx_t_9);
+        __pyx_t_13 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __Pyx_GOTREF(__pyx_t_13);
+        __pyx_t_11 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L19_error;}
+        __Pyx_GOTREF(__pyx_t_11);
+        __pyx_t_5 = NULL;
+        if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_11))) {
+          __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_11);
+          if (likely(__pyx_t_5)) {
+            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
+            __Pyx_INCREF(__pyx_t_5);
             __Pyx_INCREF(function);
-            __Pyx_DECREF_SET(__pyx_t_6, function);
+            __Pyx_DECREF_SET(__pyx_t_11, function);
           }
         }
-        if (__pyx_t_9) {
-          __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_9); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
-          __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        if (__pyx_t_5) {
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_11, __pyx_t_5); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L19_error;}
+          __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         } else {
-          __pyx_t_5 = __Pyx_PyObject_CallNoArg(__pyx_t_6); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_11); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L19_error;}
         }
-        __Pyx_GOTREF(__pyx_t_5);
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         /*try:*/ {
           {
-            __Pyx_ExceptionSave(&__pyx_t_10, &__pyx_t_11, &__pyx_t_12);
-            __Pyx_XGOTREF(__pyx_t_10);
-            __Pyx_XGOTREF(__pyx_t_11);
-            __Pyx_XGOTREF(__pyx_t_12);
+            __Pyx_ExceptionSave(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
+            __Pyx_XGOTREF(__pyx_t_14);
+            __Pyx_XGOTREF(__pyx_t_15);
+            __Pyx_XGOTREF(__pyx_t_16);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":127
+              /* "src/llfuse/handlers.pxi":139
  * 
  *         with lock:
  *             attr = operations.setattr(ino, attr)             # <<<<<<<<<<<<<<
  * 
  *         fill_c_stat(attr, &stat_n)
  */
-              __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_setattr); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L23_error;}
-              __Pyx_GOTREF(__pyx_t_5);
-              __pyx_t_6 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L23_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_setattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L25_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_9 = NULL;
-              __pyx_t_13 = 0;
-              if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_5))) {
-                __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_5);
-                if (likely(__pyx_t_9)) {
-                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-                  __Pyx_INCREF(__pyx_t_9);
+              __pyx_t_11 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L25_error;}
+              __Pyx_GOTREF(__pyx_t_11);
+              __pyx_t_5 = NULL;
+              __pyx_t_12 = 0;
+              if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
+                __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_6);
+                if (likely(__pyx_t_5)) {
+                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+                  __Pyx_INCREF(__pyx_t_5);
                   __Pyx_INCREF(function);
-                  __Pyx_DECREF_SET(__pyx_t_5, function);
-                  __pyx_t_13 = 1;
+                  __Pyx_DECREF_SET(__pyx_t_6, function);
+                  __pyx_t_12 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L23_error;}
-              __Pyx_GOTREF(__pyx_t_14);
-              if (__pyx_t_9) {
-                PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_9); __Pyx_GIVEREF(__pyx_t_9); __pyx_t_9 = NULL;
+              __pyx_t_8 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L25_error;}
+              __Pyx_GOTREF(__pyx_t_8);
+              if (__pyx_t_5) {
+                PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5); __Pyx_GIVEREF(__pyx_t_5); __pyx_t_5 = NULL;
               }
-              PyTuple_SET_ITEM(__pyx_t_14, 0+__pyx_t_13, __pyx_t_6);
-              __Pyx_GIVEREF(__pyx_t_6);
+              PyTuple_SET_ITEM(__pyx_t_8, 0+__pyx_t_12, __pyx_t_11);
+              __Pyx_GIVEREF(__pyx_t_11);
               __Pyx_INCREF(__pyx_v_attr);
-              PyTuple_SET_ITEM(__pyx_t_14, 1+__pyx_t_13, __pyx_v_attr);
+              PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_12, __pyx_v_attr);
               __Pyx_GIVEREF(__pyx_v_attr);
-              __pyx_t_6 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L23_error;}
+              __pyx_t_11 = 0;
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 139; __pyx_clineno = __LINE__; goto __pyx_L25_error;}
               __Pyx_GOTREF(__pyx_t_4);
-              __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-              __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+              __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+              __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
               __Pyx_DECREF_SET(__pyx_v_attr, __pyx_t_4);
               __pyx_t_4 = 0;
             }
-            __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
-            __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
-            __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-            goto __pyx_L30_try_end;
-            __pyx_L23_error:;
-            __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-            __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
+            __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
+            __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
+            goto __pyx_L32_try_end;
+            __pyx_L25_error:;
+            __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+            __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
             __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+            __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
+            __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+            __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":126
+            /* "src/llfuse/handlers.pxi":138
  *             attr.st_size = None
  * 
  *         with lock:             # <<<<<<<<<<<<<<
@@ -3847,93 +4043,93 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_setattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L25_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_8) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L27_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
-              __Pyx_GOTREF(__pyx_t_5);
-              __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_6 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_5, __pyx_t_14); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L25_except_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, NULL);
-              __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L25_except_error;}
-              __Pyx_GOTREF(__pyx_t_15);
-              __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_15);
-              __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-              if (__pyx_t_7 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L25_except_error;}
-              __pyx_t_16 = ((!(__pyx_t_7 != 0)) != 0);
-              if (__pyx_t_16) {
+              __Pyx_GOTREF(__pyx_t_8);
+              __pyx_t_11 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L27_except_error;}
+              __Pyx_GOTREF(__pyx_t_11);
+              __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_11, NULL);
+              __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+              if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L27_except_error;}
+              __Pyx_GOTREF(__pyx_t_17);
+              __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_17);
+              __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
+              if (__pyx_t_7 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L27_except_error;}
+              __pyx_t_18 = ((!(__pyx_t_7 != 0)) != 0);
+              if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
-                __Pyx_GIVEREF(__pyx_t_5);
-                __Pyx_XGIVEREF(__pyx_t_14);
-                __Pyx_ErrRestore(__pyx_t_4, __pyx_t_5, __pyx_t_14);
-                __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L25_except_error;}
+                __Pyx_GIVEREF(__pyx_t_6);
+                __Pyx_XGIVEREF(__pyx_t_8);
+                __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_8);
+                __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_8 = 0; 
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L27_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-              __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-              goto __pyx_L24_exception_handled;
+              __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+              __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+              goto __pyx_L26_exception_handled;
             }
-            __pyx_L25_except_error:;
-            __Pyx_XGIVEREF(__pyx_t_10);
-            __Pyx_XGIVEREF(__pyx_t_11);
-            __Pyx_XGIVEREF(__pyx_t_12);
-            __Pyx_ExceptionReset(__pyx_t_10, __pyx_t_11, __pyx_t_12);
+            __pyx_L27_except_error:;
+            __Pyx_XGIVEREF(__pyx_t_14);
+            __Pyx_XGIVEREF(__pyx_t_15);
+            __Pyx_XGIVEREF(__pyx_t_16);
+            __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
             goto __pyx_L3_error;
-            __pyx_L24_exception_handled:;
-            __Pyx_XGIVEREF(__pyx_t_10);
-            __Pyx_XGIVEREF(__pyx_t_11);
-            __Pyx_XGIVEREF(__pyx_t_12);
-            __Pyx_ExceptionReset(__pyx_t_10, __pyx_t_11, __pyx_t_12);
-            __pyx_L30_try_end:;
+            __pyx_L26_exception_handled:;
+            __Pyx_XGIVEREF(__pyx_t_14);
+            __Pyx_XGIVEREF(__pyx_t_15);
+            __Pyx_XGIVEREF(__pyx_t_16);
+            __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_15, __pyx_t_16);
+            __pyx_L32_try_end:;
           }
         }
         /*finally:*/ {
           /*normal exit:*/{
-            if (__pyx_t_8) {
-              __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_tuple__6, NULL);
-              __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-              __Pyx_GOTREF(__pyx_t_12);
-              __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
+            if (__pyx_t_13) {
+              __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_tuple__6, NULL);
+              __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              __Pyx_GOTREF(__pyx_t_16);
+              __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
             }
-            goto __pyx_L22;
+            goto __pyx_L24;
           }
-          __pyx_L22:;
+          __pyx_L24:;
         }
-        goto __pyx_L34;
-        __pyx_L17_error:;
-        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        goto __pyx_L36;
+        __pyx_L19_error:;
+        __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         goto __pyx_L3_error;
-        __pyx_L34:;
+        __pyx_L36:;
       }
 
-      /* "src/llfuse/handlers.pxi":129
+      /* "src/llfuse/handlers.pxi":141
  *             attr = operations.setattr(ino, attr)
  * 
  *         fill_c_stat(attr, &stat_n)             # <<<<<<<<<<<<<<
  *         timeout = attr.attr_timeout
  *         ret = fuse_reply_attr(req, &stat_n, timeout)
  */
-      __pyx_t_14 = __pyx_f_6llfuse_4capi_fill_c_stat(__pyx_v_attr, (&__pyx_v_stat_n)); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-      __Pyx_GOTREF(__pyx_t_14);
-      __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+      __pyx_t_8 = __pyx_f_6llfuse_4capi_fill_c_stat(__pyx_v_attr, (&__pyx_v_stat_n)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-      /* "src/llfuse/handlers.pxi":130
+      /* "src/llfuse/handlers.pxi":142
  * 
  *         fill_c_stat(attr, &stat_n)
  *         timeout = attr.attr_timeout             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_attr(req, &stat_n, timeout)
  *     except FUSEError as e:
  */
-      __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_v_attr, __pyx_n_s_attr_timeout); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 130; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-      __Pyx_GOTREF(__pyx_t_14);
-      __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_14); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 130; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-      __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-      __pyx_v_timeout = __pyx_t_17;
+      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_attr, __pyx_n_s_attr_timeout); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __Pyx_GOTREF(__pyx_t_8);
+      __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+      __pyx_v_timeout = __pyx_t_19;
 
-      /* "src/llfuse/handlers.pxi":131
+      /* "src/llfuse/handlers.pxi":143
  *         fill_c_stat(attr, &stat_n)
  *         timeout = attr.attr_timeout
  *         ret = fuse_reply_attr(req, &stat_n, timeout)             # <<<<<<<<<<<<<<
@@ -3947,48 +4143,50 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     goto __pyx_L10_try_end;
     __pyx_L3_error:;
+    __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-    __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
+    __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-    /* "src/llfuse/handlers.pxi":132
+    /* "src/llfuse/handlers.pxi":144
  *         timeout = attr.attr_timeout
  *         ret = fuse_reply_attr(req, &stat_n, timeout)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
-    __Pyx_GOTREF(__pyx_t_14);
-    __pyx_t_17 = PyErr_ExceptionMatches(__pyx_t_14);
-    __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-    if (__pyx_t_17) {
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __Pyx_GOTREF(__pyx_t_8);
+    __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_setattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_5, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 132; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
-      __Pyx_GOTREF(__pyx_t_14);
-      __Pyx_GOTREF(__pyx_t_5);
+      if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __pyx_v_e = __pyx_t_5;
+      __Pyx_INCREF(__pyx_t_6);
+      __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":133
+        /* "src/llfuse/handlers.pxi":145
  *         ret = fuse_reply_attr(req, &stat_n, timeout)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('setattr', e, req)
  */
-        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L40_error;}
-        __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L40_error;}
-        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-        __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_17);
+        __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L42_error;}
+        __Pyx_GOTREF(__pyx_t_11);
+        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_11); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L42_error;}
+        __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+        __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_19);
       }
 
-      /* "src/llfuse/handlers.pxi":132
+      /* "src/llfuse/handlers.pxi":144
  *         timeout = attr.attr_timeout
  *         ret = fuse_reply_attr(req, &stat_n, timeout)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -3999,67 +4197,69 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
         /*normal exit:*/{
           __Pyx_DECREF(__pyx_v_e);
           __pyx_v_e = NULL;
-          goto __pyx_L41;
+          goto __pyx_L43;
         }
         /*exception exit:*/{
-          __pyx_L40_error:;
-          __pyx_t_8 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0; __pyx_t_10 = 0; __pyx_t_15 = 0; __pyx_t_20 = 0;
+          __pyx_L42_error:;
+          __pyx_t_13 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_17 = 0; __pyx_t_22 = 0;
+          __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
-          __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-          if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_10, &__pyx_t_15, &__pyx_t_20);
-          if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_8, &__pyx_t_12, &__pyx_t_11) < 0)) __Pyx_ErrFetch(&__pyx_t_8, &__pyx_t_12, &__pyx_t_11);
-          __Pyx_XGOTREF(__pyx_t_8);
-          __Pyx_XGOTREF(__pyx_t_12);
-          __Pyx_XGOTREF(__pyx_t_11);
-          __Pyx_XGOTREF(__pyx_t_10);
+          __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+          __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
+          if (PY_MAJOR_VERSION >= 3) __Pyx_ExceptionSwap(&__pyx_t_14, &__pyx_t_17, &__pyx_t_22);
+          if ((PY_MAJOR_VERSION < 3) || unlikely(__Pyx_GetException(&__pyx_t_13, &__pyx_t_16, &__pyx_t_15) < 0)) __Pyx_ErrFetch(&__pyx_t_13, &__pyx_t_16, &__pyx_t_15);
+          __Pyx_XGOTREF(__pyx_t_13);
+          __Pyx_XGOTREF(__pyx_t_16);
           __Pyx_XGOTREF(__pyx_t_15);
-          __Pyx_XGOTREF(__pyx_t_20);
-          __pyx_t_17 = __pyx_lineno; __pyx_t_18 = __pyx_clineno; __pyx_t_19 = __pyx_filename;
+          __Pyx_XGOTREF(__pyx_t_14);
+          __Pyx_XGOTREF(__pyx_t_17);
+          __Pyx_XGOTREF(__pyx_t_22);
+          __pyx_t_19 = __pyx_lineno; __pyx_t_20 = __pyx_clineno; __pyx_t_21 = __pyx_filename;
           {
             __Pyx_DECREF(__pyx_v_e);
             __pyx_v_e = NULL;
           }
           if (PY_MAJOR_VERSION >= 3) {
-            __Pyx_XGIVEREF(__pyx_t_10);
-            __Pyx_XGIVEREF(__pyx_t_15);
-            __Pyx_XGIVEREF(__pyx_t_20);
-            __Pyx_ExceptionReset(__pyx_t_10, __pyx_t_15, __pyx_t_20);
+            __Pyx_XGIVEREF(__pyx_t_14);
+            __Pyx_XGIVEREF(__pyx_t_17);
+            __Pyx_XGIVEREF(__pyx_t_22);
+            __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_17, __pyx_t_22);
           }
-          __Pyx_XGIVEREF(__pyx_t_8);
-          __Pyx_XGIVEREF(__pyx_t_12);
-          __Pyx_XGIVEREF(__pyx_t_11);
-          __Pyx_ErrRestore(__pyx_t_8, __pyx_t_12, __pyx_t_11);
-          __pyx_t_8 = 0; __pyx_t_12 = 0; __pyx_t_11 = 0; __pyx_t_10 = 0; __pyx_t_15 = 0; __pyx_t_20 = 0;
-          __pyx_lineno = __pyx_t_17; __pyx_clineno = __pyx_t_18; __pyx_filename = __pyx_t_19;
+          __Pyx_XGIVEREF(__pyx_t_13);
+          __Pyx_XGIVEREF(__pyx_t_16);
+          __Pyx_XGIVEREF(__pyx_t_15);
+          __Pyx_ErrRestore(__pyx_t_13, __pyx_t_16, __pyx_t_15);
+          __pyx_t_13 = 0; __pyx_t_16 = 0; __pyx_t_15 = 0; __pyx_t_14 = 0; __pyx_t_17 = 0; __pyx_t_22 = 0;
+          __pyx_lineno = __pyx_t_19; __pyx_clineno = __pyx_t_20; __pyx_filename = __pyx_t_21;
           goto __pyx_L5_except_error;
         }
-        __pyx_L41:;
+        __pyx_L43:;
       }
-      __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":134
+    /* "src/llfuse/handlers.pxi":146
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
  *         ret = handle_exc('setattr', e, req)
  * 
  */
-    __pyx_t_18 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
-    if (__pyx_t_18) {
+    __pyx_t_20 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
+    if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_setattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_8) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_GOTREF(__pyx_t_5);
-      __Pyx_GOTREF(__pyx_t_14);
-      __Pyx_INCREF(__pyx_t_5);
-      __pyx_v_e = __pyx_t_5;
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_GOTREF(__pyx_t_8);
+      __Pyx_INCREF(__pyx_t_6);
+      __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":135
+        /* "src/llfuse/handlers.pxi":147
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('setattr', e, req)             # <<<<<<<<<<<<<<
@@ -4069,7 +4269,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_setattr, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":134
+      /* "src/llfuse/handlers.pxi":146
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -4080,13 +4280,13 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
         /*normal exit:*/{
           __Pyx_DECREF(__pyx_v_e);
           __pyx_v_e = NULL;
-          goto __pyx_L52;
+          goto __pyx_L54;
         }
-        __pyx_L52:;
+        __pyx_L54:;
       }
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       goto __pyx_L4_exception_handled;
     }
     goto __pyx_L5_except_error;
@@ -4104,89 +4304,89 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":137
+  /* "src/llfuse/handlers.pxi":149
  *         ret = handle_exc('setattr', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
  *         log.error('fuse_setattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  */
-  __pyx_t_16 = ((__pyx_v_ret != 0) != 0);
-  if (__pyx_t_16) {
+  __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
+  if (__pyx_t_18) {
 
-    /* "src/llfuse/handlers.pxi":138
+    /* "src/llfuse/handlers.pxi":150
  * 
  *     if ret != 0:
  *         log.error('fuse_setattr(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_readlink (fuse_req_t req, fuse_ino_t ino) with gil:
  */
-    __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_9 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_9);
-    __pyx_t_21 = NULL;
-    if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_21 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_21)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_21);
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_11 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_11);
+    __pyx_t_5 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_9 = NULL;
+    if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_11))) {
+      __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_11);
+      if (likely(__pyx_t_9)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
+        __Pyx_INCREF(__pyx_t_9);
         __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
+        __Pyx_DECREF_SET(__pyx_t_11, function);
       }
     }
-    if (!__pyx_t_21) {
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_9); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-      __Pyx_GOTREF(__pyx_t_5);
+    if (!__pyx_t_9) {
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_11, __pyx_t_5); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_22);
-      PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_21); __Pyx_GIVEREF(__pyx_t_21); __pyx_t_21 = NULL;
-      PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_9);
-      __Pyx_GIVEREF(__pyx_t_9);
-      __pyx_t_9 = 0;
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_22, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_5);
-      __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
+      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_10);
+      PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_9); __Pyx_GIVEREF(__pyx_t_9); __pyx_t_9 = NULL;
+      PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_5);
+      __Pyx_GIVEREF(__pyx_t_5);
+      __pyx_t_5 = 0;
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_11, __pyx_t_10, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     }
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = NULL;
-    __pyx_t_13 = 0;
+    __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+    __pyx_t_11 = NULL;
+    __pyx_t_12 = 0;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_4))) {
-      __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_4);
-      if (likely(__pyx_t_6)) {
+      __pyx_t_11 = PyMethod_GET_SELF(__pyx_t_4);
+      if (likely(__pyx_t_11)) {
         PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-        __Pyx_INCREF(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_11);
         __Pyx_INCREF(function);
         __Pyx_DECREF_SET(__pyx_t_4, function);
-        __pyx_t_13 = 1;
+        __pyx_t_12 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_22);
-    if (__pyx_t_6) {
-      PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_6); __Pyx_GIVEREF(__pyx_t_6); __pyx_t_6 = NULL;
+    __pyx_t_10 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_10);
+    if (__pyx_t_11) {
+      PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_11); __Pyx_GIVEREF(__pyx_t_11); __pyx_t_11 = NULL;
     }
     __Pyx_INCREF(__pyx_kp_u_fuse_setattr_fuse_reply__failed);
-    PyTuple_SET_ITEM(__pyx_t_22, 0+__pyx_t_13, __pyx_kp_u_fuse_setattr_fuse_reply__failed);
+    PyTuple_SET_ITEM(__pyx_t_10, 0+__pyx_t_12, __pyx_kp_u_fuse_setattr_fuse_reply__failed);
     __Pyx_GIVEREF(__pyx_kp_u_fuse_setattr_fuse_reply__failed);
-    PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_5);
-    __Pyx_GIVEREF(__pyx_t_5);
-    __pyx_t_5 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_14);
-    __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
+    PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_12, __pyx_t_6);
+    __Pyx_GIVEREF(__pyx_t_6);
+    __pyx_t_6 = 0;
+    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_10, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-    goto __pyx_L53;
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    goto __pyx_L55;
   }
-  __pyx_L53:;
+  __pyx_L55:;
 
   /* "src/llfuse/handlers.pxi":83
  *         log.error('fuse_getattr(): fuse_reply_* failed with %s', strerror(-ret))
@@ -4202,10 +4402,10 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_14);
-  __Pyx_XDECREF(__pyx_t_21);
-  __Pyx_XDECREF(__pyx_t_22);
+  __Pyx_XDECREF(__pyx_t_10);
+  __Pyx_XDECREF(__pyx_t_11);
   __Pyx_WriteUnraisable("llfuse.capi.fuse_setattr", __pyx_clineno, __pyx_lineno, __pyx_filename, 0);
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_attr);
@@ -4216,7 +4416,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setattr(fuse_req_t __pyx_v_req, fuse_ino_
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":140
+/* "src/llfuse/handlers.pxi":152
  *         log.error('fuse_setattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_readlink (fuse_req_t req, fuse_ino_t ino) with gil:             # <<<<<<<<<<<<<<
@@ -4261,7 +4461,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
   #endif
   __Pyx_RefNannySetupContext("fuse_readlink", 0);
 
-  /* "src/llfuse/handlers.pxi":143
+  /* "src/llfuse/handlers.pxi":155
  *     cdef int ret
  *     cdef char* name
  *     try:             # <<<<<<<<<<<<<<
@@ -4275,7 +4475,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":144
+      /* "src/llfuse/handlers.pxi":156
  *     cdef char* name
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -4283,11 +4483,11 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
  *         name = PyBytes_AsString(target)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -4300,10 +4500,10 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -4317,16 +4517,16 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":145
+              /* "src/llfuse/handlers.pxi":157
  *     try:
  *         with lock:
  *             target = operations.readlink(ino)             # <<<<<<<<<<<<<<
  *         name = PyBytes_AsString(target)
  *         ret = fuse_reply_readlink(req, name)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_readlink); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_readlink); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -4339,17 +4539,17 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
                 }
               }
               if (!__pyx_t_8) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_GOTREF(__pyx_t_4);
               } else {
-                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                 PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_7);
                 __Pyx_GIVEREF(__pyx_t_7);
                 __pyx_t_7 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
               }
@@ -4368,7 +4568,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":144
+            /* "src/llfuse/handlers.pxi":156
  *     cdef char* name
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -4377,20 +4577,20 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_readlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_13);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_15 = ((!(__pyx_t_14 != 0)) != 0);
               if (__pyx_t_15) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -4398,7 +4598,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
                 __Pyx_XGIVEREF(__pyx_t_12);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_12);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_12 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4424,7 +4624,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -4439,18 +4639,18 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":146
+      /* "src/llfuse/handlers.pxi":158
  *         with lock:
  *             target = operations.readlink(ino)
  *         name = PyBytes_AsString(target)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_readlink(req, name)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_target)) { __Pyx_RaiseUnboundLocalError("target"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_16 = PyBytes_AsString(__pyx_v_target); if (unlikely(__pyx_t_16 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_target)) { __Pyx_RaiseUnboundLocalError("target"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_16 = PyBytes_AsString(__pyx_v_target); if (unlikely(__pyx_t_16 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __pyx_v_name = __pyx_t_16;
 
-      /* "src/llfuse/handlers.pxi":147
+      /* "src/llfuse/handlers.pxi":159
  *             target = operations.readlink(ino)
  *         name = PyBytes_AsString(target)
  *         ret = fuse_reply_readlink(req, name)             # <<<<<<<<<<<<<<
@@ -4470,20 +4670,20 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "src/llfuse/handlers.pxi":148
+    /* "src/llfuse/handlers.pxi":160
  *         name = PyBytes_AsString(target)
  *         ret = fuse_reply_readlink(req, name)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 148; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_readlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 148; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -4491,21 +4691,21 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":149
+        /* "src/llfuse/handlers.pxi":161
  *         ret = fuse_reply_readlink(req, name)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('readlink', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_17);
       }
 
-      /* "src/llfuse/handlers.pxi":148
+      /* "src/llfuse/handlers.pxi":160
  *         name = PyBytes_AsString(target)
  *         ret = fuse_reply_readlink(req, name)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -4558,7 +4758,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":150
+    /* "src/llfuse/handlers.pxi":162
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -4568,7 +4768,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_readlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_12);
@@ -4576,7 +4776,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":151
+        /* "src/llfuse/handlers.pxi":163
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('readlink', e, req)             # <<<<<<<<<<<<<<
@@ -4586,7 +4786,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_readlink, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":150
+      /* "src/llfuse/handlers.pxi":162
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -4621,7 +4821,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":153
+  /* "src/llfuse/handlers.pxi":165
  *         ret = handle_exc('readlink', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -4631,21 +4831,21 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
   __pyx_t_15 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_15) {
 
-    /* "src/llfuse/handlers.pxi":154
+    /* "src/llfuse/handlers.pxi":166
  * 
  *     if ret != 0:
  *         log.error('fuse_readlink(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_mknod (fuse_req_t req, fuse_ino_t parent, const_char *name,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_21 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -4658,17 +4858,17 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
       }
     }
     if (!__pyx_t_21) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_21); __Pyx_GIVEREF(__pyx_t_21); __pyx_t_21 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -4685,7 +4885,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_t_23 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_23); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_23); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -4696,7 +4896,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_23, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 154; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -4705,7 +4905,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":140
+  /* "src/llfuse/handlers.pxi":152
  *         log.error('fuse_setattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_readlink (fuse_req_t req, fuse_ino_t ino) with gil:             # <<<<<<<<<<<<<<
@@ -4733,7 +4933,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readlink(fuse_req_t __pyx_v_req, fuse_ino
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":156
+/* "src/llfuse/handlers.pxi":168
  *         log.error('fuse_readlink(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_mknod (fuse_req_t req, fuse_ino_t parent, const_char *name,             # <<<<<<<<<<<<<<
@@ -4779,7 +4979,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
   #endif
   __Pyx_RefNannySetupContext("fuse_mknod", 0);
 
-  /* "src/llfuse/handlers.pxi":161
+  /* "src/llfuse/handlers.pxi":173
  *     cdef fuse_entry_param entry
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4793,19 +4993,19 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":162
+      /* "src/llfuse/handlers.pxi":174
  * 
  *     try:
  *         ctx = get_request_context(req)             # <<<<<<<<<<<<<<
  *         with lock:
  *             attr = operations.mknod(parent, PyBytes_FromString(name), mode,
  */
-      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_ctx = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":163
+      /* "src/llfuse/handlers.pxi":175
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -4813,11 +5013,11 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
  *                                     rdev, ctx)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -4830,10 +5030,10 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -4847,30 +5047,30 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":164
+              /* "src/llfuse/handlers.pxi":176
  *         ctx = get_request_context(req)
  *         with lock:
  *             attr = operations.mknod(parent, PyBytes_FromString(name), mode,             # <<<<<<<<<<<<<<
  *                                     rdev, ctx)
  *         fill_entry_param(attr, &entry)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_mknod); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_mknod); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_12 = __Pyx_PyInt_From_mode_t(__pyx_v_mode); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = __Pyx_PyInt_From_mode_t(__pyx_v_mode); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
 
-              /* "src/llfuse/handlers.pxi":165
+              /* "src/llfuse/handlers.pxi":177
  *         with lock:
  *             attr = operations.mknod(parent, PyBytes_FromString(name), mode,
  *                                     rdev, ctx)             # <<<<<<<<<<<<<<
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  */
-              __pyx_t_13 = __Pyx_PyInt_From_dev_t(__pyx_v_rdev); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 165; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_13 = __Pyx_PyInt_From_dev_t(__pyx_v_rdev); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = NULL;
               __pyx_t_15 = 0;
@@ -4884,7 +5084,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
                   __pyx_t_15 = 1;
                 }
               }
-              __pyx_t_16 = PyTuple_New(5+__pyx_t_15); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_16 = PyTuple_New(5+__pyx_t_15); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_16);
               if (__pyx_t_14) {
                 PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_14); __Pyx_GIVEREF(__pyx_t_14); __pyx_t_14 = NULL;
@@ -4904,7 +5104,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
               __pyx_t_13 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_16, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_16, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4925,7 +5125,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":163
+            /* "src/llfuse/handlers.pxi":175
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -4934,20 +5134,20 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_mknod", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_16);
-              __pyx_t_13 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_16); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_13 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_16); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_13, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_17);
               __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_17);
               __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-              if (__pyx_t_18 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_18 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_19 = ((!(__pyx_t_18 != 0)) != 0);
               if (__pyx_t_19) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -4955,7 +5155,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
                 __Pyx_XGIVEREF(__pyx_t_16);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_16);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_16 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4981,7 +5181,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -4996,19 +5196,19 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":166
+      /* "src/llfuse/handlers.pxi":178
  *             attr = operations.mknod(parent, PyBytes_FromString(name), mode,
  *                                     rdev, ctx)
  *         fill_entry_param(attr, &entry)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_16 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 166; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_16 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
 
-      /* "src/llfuse/handlers.pxi":167
+      /* "src/llfuse/handlers.pxi":179
  *                                     rdev, ctx)
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)             # <<<<<<<<<<<<<<
@@ -5031,20 +5231,20 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
 
-    /* "src/llfuse/handlers.pxi":168
+    /* "src/llfuse/handlers.pxi":180
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 180; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_16);
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_t_16);
     __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_mknod", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_16, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_16, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 180; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -5052,21 +5252,21 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":169
+        /* "src/llfuse/handlers.pxi":181
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('mknod', e, req)
  */
-        __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_13);
-        __pyx_t_20 = __Pyx_PyInt_As_int(__pyx_t_13); if (unlikely((__pyx_t_20 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_20 = __Pyx_PyInt_As_int(__pyx_t_13); if (unlikely((__pyx_t_20 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_20);
       }
 
-      /* "src/llfuse/handlers.pxi":168
+      /* "src/llfuse/handlers.pxi":180
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -5122,7 +5322,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":170
+    /* "src/llfuse/handlers.pxi":182
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -5132,7 +5332,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
     __pyx_t_21 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_21) {
       __Pyx_AddTraceback("llfuse.capi.fuse_mknod", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_16);
@@ -5140,7 +5340,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":171
+        /* "src/llfuse/handlers.pxi":183
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('mknod', e, req)             # <<<<<<<<<<<<<<
@@ -5150,7 +5350,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_mknod, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":170
+      /* "src/llfuse/handlers.pxi":182
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -5185,7 +5385,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":173
+  /* "src/llfuse/handlers.pxi":185
  *         ret = handle_exc('mknod', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -5195,21 +5395,21 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
   __pyx_t_19 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_19) {
 
-    /* "src/llfuse/handlers.pxi":174
+    /* "src/llfuse/handlers.pxi":186
  * 
  *     if ret != 0:
  *         log.error('fuse_mknod(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_mkdir (fuse_req_t req, fuse_ino_t parent, const_char *name,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
-    __pyx_t_12 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_8 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_13))) {
@@ -5222,17 +5422,17 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
       }
     }
     if (!__pyx_t_8) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_12); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_12); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_7);
       PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
       PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_12);
       __Pyx_GIVEREF(__pyx_t_12);
       __pyx_t_12 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -5249,7 +5449,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_t_15 = 1;
       }
     }
-    __pyx_t_7 = PyTuple_New(2+__pyx_t_15); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_15); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     if (__pyx_t_13) {
       PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -5260,7 +5460,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
     PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_15, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_16);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -5269,7 +5469,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":156
+  /* "src/llfuse/handlers.pxi":168
  *         log.error('fuse_readlink(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_mknod (fuse_req_t req, fuse_ino_t parent, const_char *name,             # <<<<<<<<<<<<<<
@@ -5299,7 +5499,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mknod(fuse_req_t __pyx_v_req, fuse_ino_t 
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":176
+/* "src/llfuse/handlers.pxi":188
  *         log.error('fuse_mknod(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_mkdir (fuse_req_t req, fuse_ino_t parent, const_char *name,             # <<<<<<<<<<<<<<
@@ -5344,7 +5544,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   #endif
   __Pyx_RefNannySetupContext("fuse_mkdir", 0);
 
-  /* "src/llfuse/handlers.pxi":181
+  /* "src/llfuse/handlers.pxi":193
  *     cdef fuse_entry_param entry
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -5358,7 +5558,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":184
+      /* "src/llfuse/handlers.pxi":196
  *         # Force the entry type to directory. We need to explicitly cast,
  *         # because on BSD the S_* are not of type mode_t.
  *         mode = <mode_t> ((mode & ~S_IFMT) | S_IFDIR)             # <<<<<<<<<<<<<<
@@ -5367,19 +5567,19 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
  */
       __pyx_v_mode = ((mode_t)((__pyx_v_mode & (~S_IFMT)) | S_IFDIR));
 
-      /* "src/llfuse/handlers.pxi":185
+      /* "src/llfuse/handlers.pxi":197
  *         # because on BSD the S_* are not of type mode_t.
  *         mode = <mode_t> ((mode & ~S_IFMT) | S_IFDIR)
  *         ctx = get_request_context(req)             # <<<<<<<<<<<<<<
  *         with lock:
  *             attr = operations.mkdir(parent, PyBytes_FromString(name), mode, ctx)
  */
-      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 185; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_ctx = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":186
+      /* "src/llfuse/handlers.pxi":198
  *         mode = <mode_t> ((mode & ~S_IFMT) | S_IFDIR)
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -5387,11 +5587,11 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
  *         fill_entry_param(attr, &entry)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -5404,10 +5604,10 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -5421,20 +5621,20 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":187
+              /* "src/llfuse/handlers.pxi":199
  *         ctx = get_request_context(req)
  *         with lock:
  *             attr = operations.mkdir(parent, PyBytes_FromString(name), mode, ctx)             # <<<<<<<<<<<<<<
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_mkdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_mkdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_12 = __Pyx_PyInt_From_mode_t(__pyx_v_mode); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = __Pyx_PyInt_From_mode_t(__pyx_v_mode); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_13 = NULL;
               __pyx_t_14 = 0;
@@ -5448,7 +5648,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
                   __pyx_t_14 = 1;
                 }
               }
-              __pyx_t_15 = PyTuple_New(4+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = PyTuple_New(4+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_15);
               if (__pyx_t_13) {
                 PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -5465,7 +5665,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -5485,7 +5685,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":186
+            /* "src/llfuse/handlers.pxi":198
  *         mode = <mode_t> ((mode & ~S_IFMT) | S_IFDIR)
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -5494,20 +5694,20 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_mkdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_15);
-              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_16);
               __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_16);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_18 = ((!(__pyx_t_17 != 0)) != 0);
               if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -5515,7 +5715,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
                 __Pyx_XGIVEREF(__pyx_t_15);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_15);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_15 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -5541,7 +5741,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__9, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -5556,19 +5756,19 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":188
+      /* "src/llfuse/handlers.pxi":200
  *         with lock:
  *             attr = operations.mkdir(parent, PyBytes_FromString(name), mode, ctx)
  *         fill_entry_param(attr, &entry)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_15 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 200; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_15 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 200; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-      /* "src/llfuse/handlers.pxi":189
+      /* "src/llfuse/handlers.pxi":201
  *             attr = operations.mkdir(parent, PyBytes_FromString(name), mode, ctx)
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)             # <<<<<<<<<<<<<<
@@ -5590,20 +5790,20 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-    /* "src/llfuse/handlers.pxi":190
+    /* "src/llfuse/handlers.pxi":202
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_mkdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -5611,21 +5811,21 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":191
+        /* "src/llfuse/handlers.pxi":203
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('mkdir', e, req)
  */
-        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_12);
-        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_19);
       }
 
-      /* "src/llfuse/handlers.pxi":190
+      /* "src/llfuse/handlers.pxi":202
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -5680,7 +5880,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":192
+    /* "src/llfuse/handlers.pxi":204
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -5690,7 +5890,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_mkdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 204; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_15);
@@ -5698,7 +5898,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":193
+        /* "src/llfuse/handlers.pxi":205
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('mkdir', e, req)             # <<<<<<<<<<<<<<
@@ -5708,7 +5908,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_mkdir, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":192
+      /* "src/llfuse/handlers.pxi":204
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -5743,7 +5943,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":195
+  /* "src/llfuse/handlers.pxi":207
  *         ret = handle_exc('mkdir', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -5753,21 +5953,21 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_18) {
 
-    /* "src/llfuse/handlers.pxi":196
+    /* "src/llfuse/handlers.pxi":208
  * 
  *     if ret != 0:
  *         log.error('fuse_mkdir(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_unlink (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_7 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -5780,17 +5980,17 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       }
     }
     if (!__pyx_t_7) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_13);
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
       PyTuple_SET_ITEM(__pyx_t_13, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     }
@@ -5807,7 +6007,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_t_14 = 1;
       }
     }
-    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     if (__pyx_t_12) {
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -5818,7 +6018,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_14, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 208; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -5827,7 +6027,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":176
+  /* "src/llfuse/handlers.pxi":188
  *         log.error('fuse_mknod(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_mkdir (fuse_req_t req, fuse_ino_t parent, const_char *name,             # <<<<<<<<<<<<<<
@@ -5856,7 +6056,7 @@ static void __pyx_f_6llfuse_4capi_fuse_mkdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":198
+/* "src/llfuse/handlers.pxi":210
  *         log.error('fuse_mkdir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_unlink (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:             # <<<<<<<<<<<<<<
@@ -5898,7 +6098,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
   __Pyx_RefNannySetupContext("fuse_unlink", 0);
 
-  /* "src/llfuse/handlers.pxi":201
+  /* "src/llfuse/handlers.pxi":213
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -5912,7 +6112,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":202
+      /* "src/llfuse/handlers.pxi":214
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -5920,11 +6120,11 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -5937,10 +6137,10 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -5954,18 +6154,18 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":203
+              /* "src/llfuse/handlers.pxi":215
  *     try:
  *         with lock:
  *             operations.unlink(parent, PyBytes_FromString(name))             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_unlink); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_unlink); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -5979,7 +6179,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -5990,7 +6190,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
               __Pyx_GIVEREF(__pyx_t_8);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6008,7 +6208,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":202
+            /* "src/llfuse/handlers.pxi":214
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -6017,20 +6217,20 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_unlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_15);
               __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_15);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_17 = ((!(__pyx_t_16 != 0)) != 0);
               if (__pyx_t_17) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -6038,7 +6238,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6064,7 +6264,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__10, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -6079,7 +6279,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":204
+      /* "src/llfuse/handlers.pxi":216
  *         with lock:
  *             operations.unlink(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -6100,20 +6300,20 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":205
+    /* "src/llfuse/handlers.pxi":217
  *             operations.unlink(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_unlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -6121,21 +6321,21 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":206
+        /* "src/llfuse/handlers.pxi":218
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('unlink', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_18);
       }
 
-      /* "src/llfuse/handlers.pxi":205
+      /* "src/llfuse/handlers.pxi":217
  *             operations.unlink(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -6189,7 +6389,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":207
+    /* "src/llfuse/handlers.pxi":219
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -6199,7 +6399,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_unlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 219; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_14);
@@ -6207,7 +6407,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":208
+        /* "src/llfuse/handlers.pxi":220
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('unlink', e, req)             # <<<<<<<<<<<<<<
@@ -6217,7 +6417,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_unlink, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":207
+      /* "src/llfuse/handlers.pxi":219
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -6252,7 +6452,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":210
+  /* "src/llfuse/handlers.pxi":222
  *         ret = handle_exc('unlink', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -6262,21 +6462,21 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
   __pyx_t_17 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_17) {
 
-    /* "src/llfuse/handlers.pxi":211
+    /* "src/llfuse/handlers.pxi":223
  * 
  *     if ret != 0:
  *         log.error('fuse_unlink(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_rmdir (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -6289,17 +6489,17 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -6316,7 +6516,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -6327,7 +6527,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 223; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6336,7 +6536,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":198
+  /* "src/llfuse/handlers.pxi":210
  *         log.error('fuse_mkdir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_unlink (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:             # <<<<<<<<<<<<<<
@@ -6363,7 +6563,7 @@ static void __pyx_f_6llfuse_4capi_fuse_unlink(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":213
+/* "src/llfuse/handlers.pxi":225
  *         log.error('fuse_unlink(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_rmdir (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:             # <<<<<<<<<<<<<<
@@ -6405,7 +6605,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   #endif
   __Pyx_RefNannySetupContext("fuse_rmdir", 0);
 
-  /* "src/llfuse/handlers.pxi":216
+  /* "src/llfuse/handlers.pxi":228
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -6419,7 +6619,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":217
+      /* "src/llfuse/handlers.pxi":229
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -6427,11 +6627,11 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -6444,10 +6644,10 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -6461,18 +6661,18 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":218
+              /* "src/llfuse/handlers.pxi":230
  *     try:
  *         with lock:
  *             operations.rmdir(parent, PyBytes_FromString(name))             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_rmdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_rmdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -6486,7 +6686,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -6497,7 +6697,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
               __Pyx_GIVEREF(__pyx_t_8);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6515,7 +6715,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":217
+            /* "src/llfuse/handlers.pxi":229
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -6524,20 +6724,20 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_rmdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_15);
               __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_15);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_17 = ((!(__pyx_t_16 != 0)) != 0);
               if (__pyx_t_17) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -6545,7 +6745,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6571,7 +6771,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__11, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -6586,7 +6786,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":219
+      /* "src/llfuse/handlers.pxi":231
  *         with lock:
  *             operations.rmdir(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -6607,20 +6807,20 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":220
+    /* "src/llfuse/handlers.pxi":232
  *             operations.rmdir(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_rmdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 220; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -6628,21 +6828,21 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":221
+        /* "src/llfuse/handlers.pxi":233
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('rmdir', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_18);
       }
 
-      /* "src/llfuse/handlers.pxi":220
+      /* "src/llfuse/handlers.pxi":232
  *             operations.rmdir(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -6696,7 +6896,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":222
+    /* "src/llfuse/handlers.pxi":234
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -6706,7 +6906,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_rmdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_14);
@@ -6714,7 +6914,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":223
+        /* "src/llfuse/handlers.pxi":235
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('rmdir', e, req)             # <<<<<<<<<<<<<<
@@ -6724,7 +6924,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_rmdir, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":222
+      /* "src/llfuse/handlers.pxi":234
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -6759,7 +6959,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":225
+  /* "src/llfuse/handlers.pxi":237
  *         ret = handle_exc('rmdir', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -6769,21 +6969,21 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   __pyx_t_17 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_17) {
 
-    /* "src/llfuse/handlers.pxi":226
+    /* "src/llfuse/handlers.pxi":238
  * 
  *     if ret != 0:
  *         log.error('fuse_rmdir(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_symlink (fuse_req_t req, const_char *link, fuse_ino_t parent,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -6796,17 +6996,17 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -6823,7 +7023,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -6834,7 +7034,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 226; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6843,7 +7043,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":213
+  /* "src/llfuse/handlers.pxi":225
  *         log.error('fuse_unlink(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_rmdir (fuse_req_t req, fuse_ino_t parent, const_char *name) with gil:             # <<<<<<<<<<<<<<
@@ -6870,7 +7070,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rmdir(fuse_req_t __pyx_v_req, fuse_ino_t 
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":228
+/* "src/llfuse/handlers.pxi":240
  *         log.error('fuse_rmdir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_symlink (fuse_req_t req, const_char *link, fuse_ino_t parent,             # <<<<<<<<<<<<<<
@@ -6915,7 +7115,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
   #endif
   __Pyx_RefNannySetupContext("fuse_symlink", 0);
 
-  /* "src/llfuse/handlers.pxi":233
+  /* "src/llfuse/handlers.pxi":245
  *     cdef fuse_entry_param entry
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -6929,19 +7129,19 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":234
+      /* "src/llfuse/handlers.pxi":246
  * 
  *     try:
  *         ctx = get_request_context(req)             # <<<<<<<<<<<<<<
  *         with lock:
  *             attr = operations.symlink(parent, PyBytes_FromString(name),
  */
-      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 234; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_ctx = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":235
+      /* "src/llfuse/handlers.pxi":247
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -6949,11 +7149,11 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
  *                                       PyBytes_FromString(link), ctx)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -6966,10 +7166,10 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -6983,28 +7183,28 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":236
+              /* "src/llfuse/handlers.pxi":248
  *         ctx = get_request_context(req)
  *         with lock:
  *             attr = operations.symlink(parent, PyBytes_FromString(name),             # <<<<<<<<<<<<<<
  *                                       PyBytes_FromString(link), ctx)
  *         fill_entry_param(attr, &entry)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_symlink); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_symlink); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
 
-              /* "src/llfuse/handlers.pxi":237
+              /* "src/llfuse/handlers.pxi":249
  *         with lock:
  *             attr = operations.symlink(parent, PyBytes_FromString(name),
  *                                       PyBytes_FromString(link), ctx)             # <<<<<<<<<<<<<<
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  */
-              __pyx_t_12 = PyBytes_FromString(__pyx_v_link); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 237; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = PyBytes_FromString(__pyx_v_link); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_13 = NULL;
               __pyx_t_14 = 0;
@@ -7018,7 +7218,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
                   __pyx_t_14 = 1;
                 }
               }
-              __pyx_t_15 = PyTuple_New(4+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = PyTuple_New(4+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_15);
               if (__pyx_t_13) {
                 PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -7035,7 +7235,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 236; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 248; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7055,7 +7255,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":235
+            /* "src/llfuse/handlers.pxi":247
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -7064,20 +7264,20 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_symlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_15);
-              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_16);
               __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_16);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_18 = ((!(__pyx_t_17 != 0)) != 0);
               if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -7085,7 +7285,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
                 __Pyx_XGIVEREF(__pyx_t_15);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_15);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_15 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7111,7 +7311,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__12, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -7126,19 +7326,19 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":238
+      /* "src/llfuse/handlers.pxi":250
  *             attr = operations.symlink(parent, PyBytes_FromString(name),
  *                                       PyBytes_FromString(link), ctx)
  *         fill_entry_param(attr, &entry)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_15 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_15 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-      /* "src/llfuse/handlers.pxi":239
+      /* "src/llfuse/handlers.pxi":251
  *                                       PyBytes_FromString(link), ctx)
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)             # <<<<<<<<<<<<<<
@@ -7160,20 +7360,20 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-    /* "src/llfuse/handlers.pxi":240
+    /* "src/llfuse/handlers.pxi":252
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 252; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_symlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 240; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 252; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -7181,21 +7381,21 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":241
+        /* "src/llfuse/handlers.pxi":253
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('symlink', e, req)
  */
-        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_12);
-        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 241; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_19);
       }
 
-      /* "src/llfuse/handlers.pxi":240
+      /* "src/llfuse/handlers.pxi":252
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -7250,7 +7450,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":242
+    /* "src/llfuse/handlers.pxi":254
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -7260,7 +7460,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_symlink", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 242; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_15);
@@ -7268,7 +7468,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":243
+        /* "src/llfuse/handlers.pxi":255
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('symlink', e, req)             # <<<<<<<<<<<<<<
@@ -7278,7 +7478,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_symlink, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":242
+      /* "src/llfuse/handlers.pxi":254
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -7313,7 +7513,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":245
+  /* "src/llfuse/handlers.pxi":257
  *         ret = handle_exc('symlink', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -7323,21 +7523,21 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
   __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_18) {
 
-    /* "src/llfuse/handlers.pxi":246
+    /* "src/llfuse/handlers.pxi":258
  * 
  *     if ret != 0:
  *         log.error('fuse_symlink(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_rename (fuse_req_t req, fuse_ino_t parent, const_char *name,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_7 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -7350,17 +7550,17 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
       }
     }
     if (!__pyx_t_7) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_13);
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
       PyTuple_SET_ITEM(__pyx_t_13, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     }
@@ -7377,7 +7577,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
         __pyx_t_14 = 1;
       }
     }
-    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     if (__pyx_t_12) {
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -7388,7 +7588,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
     PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_14, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 246; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -7397,7 +7597,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":228
+  /* "src/llfuse/handlers.pxi":240
  *         log.error('fuse_rmdir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_symlink (fuse_req_t req, const_char *link, fuse_ino_t parent,             # <<<<<<<<<<<<<<
@@ -7426,7 +7626,7 @@ static void __pyx_f_6llfuse_4capi_fuse_symlink(fuse_req_t __pyx_v_req, const cha
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":248
+/* "src/llfuse/handlers.pxi":260
  *         log.error('fuse_symlink(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_rename (fuse_req_t req, fuse_ino_t parent, const_char *name,             # <<<<<<<<<<<<<<
@@ -7469,7 +7669,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
   __Pyx_RefNannySetupContext("fuse_rename", 0);
 
-  /* "src/llfuse/handlers.pxi":252
+  /* "src/llfuse/handlers.pxi":264
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -7483,7 +7683,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":253
+      /* "src/llfuse/handlers.pxi":265
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -7491,11 +7691,11 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
  *                               newparent, PyBytes_FromString(newname))
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -7508,10 +7708,10 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -7525,30 +7725,30 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":254
+              /* "src/llfuse/handlers.pxi":266
  *     try:
  *         with lock:
  *             operations.rename(parent, PyBytes_FromString(name),             # <<<<<<<<<<<<<<
  *                               newparent, PyBytes_FromString(newname))
  *         ret = fuse_reply_err(req, 0)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_rename); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_rename); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = PyBytes_FromString(__pyx_v_name); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
 
-              /* "src/llfuse/handlers.pxi":255
+              /* "src/llfuse/handlers.pxi":267
  *         with lock:
  *             operations.rename(parent, PyBytes_FromString(name),
  *                               newparent, PyBytes_FromString(newname))             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_12 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_newparent); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_newparent); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_13 = PyBytes_FromString(__pyx_v_newname); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_13 = PyBytes_FromString(__pyx_v_newname); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 267; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = NULL;
               __pyx_t_15 = 0;
@@ -7562,7 +7762,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
                   __pyx_t_15 = 1;
                 }
               }
-              __pyx_t_16 = PyTuple_New(4+__pyx_t_15); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_16 = PyTuple_New(4+__pyx_t_15); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_16);
               if (__pyx_t_14) {
                 PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_14); __Pyx_GIVEREF(__pyx_t_14); __pyx_t_14 = NULL;
@@ -7579,7 +7779,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
               __pyx_t_13 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_16, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_16, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 266; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7599,7 +7799,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":253
+            /* "src/llfuse/handlers.pxi":265
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -7608,20 +7808,20 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_rename", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_16);
-              __pyx_t_13 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_16); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_13 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_16); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_17 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_13, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_17);
               __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_t_17);
               __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-              if (__pyx_t_18 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_18 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_19 = ((!(__pyx_t_18 != 0)) != 0);
               if (__pyx_t_19) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -7629,7 +7829,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_XGIVEREF(__pyx_t_16);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_16);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_16 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7655,7 +7855,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__13, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -7670,7 +7870,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":256
+      /* "src/llfuse/handlers.pxi":268
  *             operations.rename(parent, PyBytes_FromString(name),
  *                               newparent, PyBytes_FromString(newname))
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -7693,20 +7893,20 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
 
-    /* "src/llfuse/handlers.pxi":257
+    /* "src/llfuse/handlers.pxi":269
  *                               newparent, PyBytes_FromString(newname))
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 257; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_16 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 269; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_16);
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_t_16);
     __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_rename", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_16, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 257; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_16, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 269; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -7714,21 +7914,21 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":258
+        /* "src/llfuse/handlers.pxi":270
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('rename', e, req)
  */
-        __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_13);
-        __pyx_t_20 = __Pyx_PyInt_As_int(__pyx_t_13); if (unlikely((__pyx_t_20 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_20 = __Pyx_PyInt_As_int(__pyx_t_13); if (unlikely((__pyx_t_20 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_20);
       }
 
-      /* "src/llfuse/handlers.pxi":257
+      /* "src/llfuse/handlers.pxi":269
  *                               newparent, PyBytes_FromString(newname))
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -7784,7 +7984,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":259
+    /* "src/llfuse/handlers.pxi":271
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -7794,7 +7994,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_t_21 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_21) {
       __Pyx_AddTraceback("llfuse.capi.fuse_rename", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 259; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_16) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_16);
@@ -7802,7 +8002,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":260
+        /* "src/llfuse/handlers.pxi":272
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('rename', e, req)             # <<<<<<<<<<<<<<
@@ -7812,7 +8012,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_rename, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":259
+      /* "src/llfuse/handlers.pxi":271
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -7847,7 +8047,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":262
+  /* "src/llfuse/handlers.pxi":274
  *         ret = handle_exc('rename', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -7857,21 +8057,21 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
   __pyx_t_19 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_19) {
 
-    /* "src/llfuse/handlers.pxi":263
+    /* "src/llfuse/handlers.pxi":275
  * 
  *     if ret != 0:
  *         log.error('fuse_rename(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_link (fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
-    __pyx_t_12 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_8 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_13))) {
@@ -7884,17 +8084,17 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
       }
     }
     if (!__pyx_t_8) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_12); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_12); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_7);
       PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
       PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_12);
       __Pyx_GIVEREF(__pyx_t_12);
       __pyx_t_12 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_13, __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -7911,7 +8111,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_t_15 = 1;
       }
     }
-    __pyx_t_7 = PyTuple_New(2+__pyx_t_15); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_15); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     if (__pyx_t_13) {
       PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -7922,7 +8122,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
     PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_15, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 263; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_16);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -7931,7 +8131,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":248
+  /* "src/llfuse/handlers.pxi":260
  *         log.error('fuse_symlink(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_rename (fuse_req_t req, fuse_ino_t parent, const_char *name,             # <<<<<<<<<<<<<<
@@ -7959,7 +8159,7 @@ static void __pyx_f_6llfuse_4capi_fuse_rename(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":265
+/* "src/llfuse/handlers.pxi":277
  *         log.error('fuse_rename(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_link (fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,             # <<<<<<<<<<<<<<
@@ -8003,7 +8203,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
   #endif
   __Pyx_RefNannySetupContext("fuse_link", 0);
 
-  /* "src/llfuse/handlers.pxi":270
+  /* "src/llfuse/handlers.pxi":282
  *     cdef fuse_entry_param entry
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8017,7 +8217,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":271
+      /* "src/llfuse/handlers.pxi":283
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -8025,11 +8225,11 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
  *         fill_entry_param(attr, &entry)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -8042,10 +8242,10 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -8059,20 +8259,20 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":272
+              /* "src/llfuse/handlers.pxi":284
  *     try:
  *         with lock:
  *             attr = operations.link(ino, newparent, PyBytes_FromString(newname))             # <<<<<<<<<<<<<<
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_link); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_link); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_newparent); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_newparent); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_12 = PyBytes_FromString(__pyx_v_newname); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = PyBytes_FromString(__pyx_v_newname); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_13 = NULL;
               __pyx_t_14 = 0;
@@ -8086,7 +8286,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
                   __pyx_t_14 = 1;
                 }
               }
-              __pyx_t_15 = PyTuple_New(3+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = PyTuple_New(3+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_15);
               if (__pyx_t_13) {
                 PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -8100,7 +8300,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 272; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -8120,7 +8320,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":271
+            /* "src/llfuse/handlers.pxi":283
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -8129,20 +8329,20 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_link", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_15);
-              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_16);
               __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_16);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_18 = ((!(__pyx_t_17 != 0)) != 0);
               if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -8150,7 +8350,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
                 __Pyx_XGIVEREF(__pyx_t_15);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_15);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_15 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -8176,7 +8376,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__14, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -8191,19 +8391,19 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":273
+      /* "src/llfuse/handlers.pxi":285
  *         with lock:
  *             attr = operations.link(ino, newparent, PyBytes_FromString(newname))
  *         fill_entry_param(attr, &entry)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_15 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 273; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_15 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-      /* "src/llfuse/handlers.pxi":274
+      /* "src/llfuse/handlers.pxi":286
  *             attr = operations.link(ino, newparent, PyBytes_FromString(newname))
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)             # <<<<<<<<<<<<<<
@@ -8225,20 +8425,20 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-    /* "src/llfuse/handlers.pxi":275
+    /* "src/llfuse/handlers.pxi":287
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_link", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 287; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -8246,21 +8446,21 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":276
+        /* "src/llfuse/handlers.pxi":288
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('link', e, req)
  */
-        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_12);
-        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 276; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_19);
       }
 
-      /* "src/llfuse/handlers.pxi":275
+      /* "src/llfuse/handlers.pxi":287
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_entry(req, &entry)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -8315,7 +8515,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":277
+    /* "src/llfuse/handlers.pxi":289
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -8325,7 +8525,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_link", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_15);
@@ -8333,7 +8533,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":278
+        /* "src/llfuse/handlers.pxi":290
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('link', e, req)             # <<<<<<<<<<<<<<
@@ -8343,7 +8543,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_link, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":277
+      /* "src/llfuse/handlers.pxi":289
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -8378,7 +8578,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":280
+  /* "src/llfuse/handlers.pxi":292
  *         ret = handle_exc('link', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -8388,21 +8588,21 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
   __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_18) {
 
-    /* "src/llfuse/handlers.pxi":281
+    /* "src/llfuse/handlers.pxi":293
  * 
  *     if ret != 0:
  *         log.error('fuse_link(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_7 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -8415,17 +8615,17 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
       }
     }
     if (!__pyx_t_7) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_13);
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
       PyTuple_SET_ITEM(__pyx_t_13, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     }
@@ -8442,7 +8642,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
         __pyx_t_14 = 1;
       }
     }
-    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     if (__pyx_t_12) {
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -8453,7 +8653,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
     PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_14, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -8462,7 +8662,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":265
+  /* "src/llfuse/handlers.pxi":277
  *         log.error('fuse_rename(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_link (fuse_req_t req, fuse_ino_t ino, fuse_ino_t newparent,             # <<<<<<<<<<<<<<
@@ -8490,7 +8690,7 @@ static void __pyx_f_6llfuse_4capi_fuse_link(fuse_req_t __pyx_v_req, fuse_ino_t _
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":284
+/* "src/llfuse/handlers.pxi":296
  * 
  * 
  * cdef void fuse_open (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -8533,7 +8733,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
   #endif
   __Pyx_RefNannySetupContext("fuse_open", 0);
 
-  /* "src/llfuse/handlers.pxi":287
+  /* "src/llfuse/handlers.pxi":299
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -8547,7 +8747,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":288
+      /* "src/llfuse/handlers.pxi":300
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -8555,11 +8755,11 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
  * 
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -8572,10 +8772,10 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -8589,18 +8789,18 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":289
+              /* "src/llfuse/handlers.pxi":301
  *     try:
  *         with lock:
  *             fi.fh = operations.open(ino, fi.flags)             # <<<<<<<<<<<<<<
  * 
  *         # Cached file data does not need to be invalidated.
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_open); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_open); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_fi->flags); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_fi->flags); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -8614,7 +8814,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -8625,11 +8825,11 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
               __Pyx_GIVEREF(__pyx_t_8);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-              __pyx_t_15 = __Pyx_PyInt_As_uint64_t(__pyx_t_4); if (unlikely((__pyx_t_15 == (uint64_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 289; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = __Pyx_PyInt_As_uint64_t(__pyx_t_4); if (unlikely((__pyx_t_15 == (uint64_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 301; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __pyx_v_fi->fh = __pyx_t_15;
             }
@@ -8645,7 +8845,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":288
+            /* "src/llfuse/handlers.pxi":300
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -8654,20 +8854,20 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_open", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_16);
               __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_16);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_18 = ((!(__pyx_t_17 != 0)) != 0);
               if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -8675,7 +8875,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -8701,7 +8901,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__15, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -8716,7 +8916,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":293
+      /* "src/llfuse/handlers.pxi":305
  *         # Cached file data does not need to be invalidated.
  *         # http://article.gmane.org/gmane.comp.file-systems.fuse.devel/5325/
  *         fi.keep_cache = 1             # <<<<<<<<<<<<<<
@@ -8725,7 +8925,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
  */
       __pyx_v_fi->keep_cache = 1;
 
-      /* "src/llfuse/handlers.pxi":295
+      /* "src/llfuse/handlers.pxi":307
  *         fi.keep_cache = 1
  * 
  *         ret = fuse_reply_open(req, fi)             # <<<<<<<<<<<<<<
@@ -8746,20 +8946,20 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":296
+    /* "src/llfuse/handlers.pxi":308
  * 
  *         ret = fuse_reply_open(req, fi)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 296; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_open", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 296; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -8767,21 +8967,21 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":297
+        /* "src/llfuse/handlers.pxi":309
  *         ret = fuse_reply_open(req, fi)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('open', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 309; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 309; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_19);
       }
 
-      /* "src/llfuse/handlers.pxi":296
+      /* "src/llfuse/handlers.pxi":308
  * 
  *         ret = fuse_reply_open(req, fi)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -8835,7 +9035,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":298
+    /* "src/llfuse/handlers.pxi":310
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -8845,7 +9045,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_open", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 298; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_14);
@@ -8853,7 +9053,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":299
+        /* "src/llfuse/handlers.pxi":311
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('open', e, req)             # <<<<<<<<<<<<<<
@@ -8863,7 +9063,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_open, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":298
+      /* "src/llfuse/handlers.pxi":310
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -8898,7 +9098,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":301
+  /* "src/llfuse/handlers.pxi":313
  *         ret = handle_exc('open', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -8908,21 +9108,21 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
   __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_18) {
 
-    /* "src/llfuse/handlers.pxi":302
+    /* "src/llfuse/handlers.pxi":314
  * 
  *     if ret != 0:
  *         log.error('fuse_link(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_read (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -8935,17 +9135,17 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_23 = PyTuple_New(1+1); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_23 = PyTuple_New(1+1); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_23);
       PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_23, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_23, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_23, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
     }
@@ -8962,7 +9162,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_23 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_23 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_23);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -8973,7 +9173,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
     PyTuple_SET_ITEM(__pyx_t_23, 1+__pyx_t_13, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_23, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 302; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_23, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 314; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -8982,7 +9182,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":284
+  /* "src/llfuse/handlers.pxi":296
  * 
  * 
  * cdef void fuse_open (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -9009,7 +9209,7 @@ static void __pyx_f_6llfuse_4capi_fuse_open(fuse_req_t __pyx_v_req, fuse_ino_t _
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":304
+/* "src/llfuse/handlers.pxi":316
  *         log.error('fuse_link(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_read (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,             # <<<<<<<<<<<<<<
@@ -9054,7 +9254,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
   #endif
   __Pyx_RefNannySetupContext("fuse_read", 0);
 
-  /* "src/llfuse/handlers.pxi":310
+  /* "src/llfuse/handlers.pxi":322
  *     cdef char* cbuf
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -9068,7 +9268,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":311
+      /* "src/llfuse/handlers.pxi":323
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -9076,11 +9276,11 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -9093,10 +9293,10 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -9110,20 +9310,20 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":312
+              /* "src/llfuse/handlers.pxi":324
  *     try:
  *         with lock:
  *             buf = operations.read(fi.fh, off, size)             # <<<<<<<<<<<<<<
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  *         ret = fuse_reply_buf(req, cbuf, len_)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_read); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 312; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_read); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 312; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyInt_From_off_t(__pyx_v_off); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 312; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyInt_From_off_t(__pyx_v_off); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_12 = __Pyx_PyInt_FromSize_t(__pyx_v_size); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 312; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = __Pyx_PyInt_FromSize_t(__pyx_v_size); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_13 = NULL;
               __pyx_t_14 = 0;
@@ -9137,7 +9337,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
                   __pyx_t_14 = 1;
                 }
               }
-              __pyx_t_15 = PyTuple_New(3+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 312; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = PyTuple_New(3+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_15);
               if (__pyx_t_13) {
                 PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -9151,7 +9351,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 312; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -9171,7 +9371,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":311
+            /* "src/llfuse/handlers.pxi":323
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -9180,20 +9380,20 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_read", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_15);
-              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_15); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_16);
               __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_16);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_18 = ((!(__pyx_t_17 != 0)) != 0);
               if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -9201,7 +9401,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
                 __Pyx_XGIVEREF(__pyx_t_15);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_15);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_15 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -9227,7 +9427,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__16, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -9242,17 +9442,17 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":313
+      /* "src/llfuse/handlers.pxi":325
  *         with lock:
  *             buf = operations.read(fi.fh, off, size)
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_buf(req, cbuf, len_)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_buf)) { __Pyx_RaiseUnboundLocalError("buf"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_19 = PyBytes_AsStringAndSize(__pyx_v_buf, (&__pyx_v_cbuf), ((Py_ssize_t *)(&__pyx_v_len_))); if (unlikely(__pyx_t_19 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 313; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_buf)) { __Pyx_RaiseUnboundLocalError("buf"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_19 = PyBytes_AsStringAndSize(__pyx_v_buf, (&__pyx_v_cbuf), ((Py_ssize_t *)(&__pyx_v_len_))); if (unlikely(__pyx_t_19 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
 
-      /* "src/llfuse/handlers.pxi":314
+      /* "src/llfuse/handlers.pxi":326
  *             buf = operations.read(fi.fh, off, size)
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  *         ret = fuse_reply_buf(req, cbuf, len_)             # <<<<<<<<<<<<<<
@@ -9274,20 +9474,20 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
 
-    /* "src/llfuse/handlers.pxi":315
+    /* "src/llfuse/handlers.pxi":327
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  *         ret = fuse_reply_buf(req, cbuf, len_)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 327; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_read", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_15, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 327; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -9295,21 +9495,21 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":316
+        /* "src/llfuse/handlers.pxi":328
  *         ret = fuse_reply_buf(req, cbuf, len_)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('read', e, req)
  */
-        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 316; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_12);
-        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 316; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_19 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_19 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_19);
       }
 
-      /* "src/llfuse/handlers.pxi":315
+      /* "src/llfuse/handlers.pxi":327
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  *         ret = fuse_reply_buf(req, cbuf, len_)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -9364,7 +9564,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":317
+    /* "src/llfuse/handlers.pxi":329
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -9374,7 +9574,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_read", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_15) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 329; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_15);
@@ -9382,7 +9582,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":318
+        /* "src/llfuse/handlers.pxi":330
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('read', e, req)             # <<<<<<<<<<<<<<
@@ -9392,7 +9592,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_read, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":317
+      /* "src/llfuse/handlers.pxi":329
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -9427,7 +9627,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":320
+  /* "src/llfuse/handlers.pxi":332
  *         ret = handle_exc('read', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -9437,21 +9637,21 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
   __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_18) {
 
-    /* "src/llfuse/handlers.pxi":321
+    /* "src/llfuse/handlers.pxi":333
  * 
  *     if ret != 0:
  *         log.error('fuse_read(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_write (fuse_req_t req, fuse_ino_t ino, const_char *buf,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_7 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -9464,17 +9664,17 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
       }
     }
     if (!__pyx_t_7) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_13);
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
       PyTuple_SET_ITEM(__pyx_t_13, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     }
@@ -9491,7 +9691,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
         __pyx_t_14 = 1;
       }
     }
-    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     if (__pyx_t_12) {
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -9502,7 +9702,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
     PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_14, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9511,7 +9711,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":304
+  /* "src/llfuse/handlers.pxi":316
  *         log.error('fuse_link(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_read (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,             # <<<<<<<<<<<<<<
@@ -9539,7 +9739,7 @@ static void __pyx_f_6llfuse_4capi_fuse_read(fuse_req_t __pyx_v_req, CYTHON_UNUSE
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":323
+/* "src/llfuse/handlers.pxi":335
  *         log.error('fuse_read(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_write (fuse_req_t req, fuse_ino_t ino, const_char *buf,             # <<<<<<<<<<<<<<
@@ -9588,7 +9788,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
   #endif
   __Pyx_RefNannySetupContext("fuse_write", 0);
 
-  /* "src/llfuse/handlers.pxi":329
+  /* "src/llfuse/handlers.pxi":341
  * 
  *     # GCC thinks this may end up uninitialized
  *     len_ = 0             # <<<<<<<<<<<<<<
@@ -9597,7 +9797,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
  */
   __pyx_v_len_ = 0;
 
-  /* "src/llfuse/handlers.pxi":331
+  /* "src/llfuse/handlers.pxi":343
  *     len_ = 0
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -9611,19 +9811,19 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":332
+      /* "src/llfuse/handlers.pxi":344
  * 
  *     try:
  *         pbuf = PyBytes_FromStringAndSize(buf, size)             # <<<<<<<<<<<<<<
  *         with lock:
  *             len_ = operations.write(fi.fh, off, pbuf)
  */
-      __pyx_t_4 = PyBytes_FromStringAndSize(__pyx_v_buf, __pyx_v_size); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = PyBytes_FromStringAndSize(__pyx_v_buf, __pyx_v_size); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 344; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_pbuf = ((PyObject*)__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":333
+      /* "src/llfuse/handlers.pxi":345
  *     try:
  *         pbuf = PyBytes_FromStringAndSize(buf, size)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -9631,11 +9831,11 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
  *         ret = fuse_reply_write(req, len_)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -9648,10 +9848,10 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -9665,18 +9865,18 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":334
+              /* "src/llfuse/handlers.pxi":346
  *         pbuf = PyBytes_FromStringAndSize(buf, size)
  *         with lock:
  *             len_ = operations.write(fi.fh, off, pbuf)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_write(req, len_)
  *         if ret != 0:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_write); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_write); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyInt_From_off_t(__pyx_v_off); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyInt_From_off_t(__pyx_v_off); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -9690,7 +9890,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(3+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(3+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -9704,11 +9904,11 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
               __Pyx_GIVEREF(__pyx_v_pbuf);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-              __pyx_t_15 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_15 == (size_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 334; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_15 == (size_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __pyx_v_len_ = __pyx_t_15;
             }
@@ -9724,7 +9924,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":333
+            /* "src/llfuse/handlers.pxi":345
  *     try:
  *         pbuf = PyBytes_FromStringAndSize(buf, size)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -9733,20 +9933,20 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_write", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_16);
               __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_16);
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_18 = ((!(__pyx_t_17 != 0)) != 0);
               if (__pyx_t_18) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -9754,7 +9954,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -9780,7 +9980,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__17, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -9795,7 +9995,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":335
+      /* "src/llfuse/handlers.pxi":347
  *         with lock:
  *             len_ = operations.write(fi.fh, off, pbuf)
  *         ret = fuse_reply_write(req, len_)             # <<<<<<<<<<<<<<
@@ -9804,7 +10004,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
  */
       __pyx_v_ret = fuse_reply_write(__pyx_v_req, __pyx_v_len_);
 
-      /* "src/llfuse/handlers.pxi":336
+      /* "src/llfuse/handlers.pxi":348
  *             len_ = operations.write(fi.fh, off, pbuf)
  *         ret = fuse_reply_write(req, len_)
  *         if ret != 0:             # <<<<<<<<<<<<<<
@@ -9814,21 +10014,21 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
       if (__pyx_t_18) {
 
-        /* "src/llfuse/handlers.pxi":337
+        /* "src/llfuse/handlers.pxi":349
  *         ret = fuse_reply_write(req, len_)
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_write failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  */
-        __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-        __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_12 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -9841,17 +10041,17 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
           }
         }
         if (!__pyx_t_12) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
           __Pyx_GOTREF(__pyx_t_6);
         } else {
-          __pyx_t_19 = PyTuple_New(1+1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_19 = PyTuple_New(1+1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_19);
           PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
           PyTuple_SET_ITEM(__pyx_t_19, 0+1, __pyx_t_7);
           __Pyx_GIVEREF(__pyx_t_7);
           __pyx_t_7 = 0;
-          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_19, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_19, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
         }
@@ -9868,7 +10068,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __pyx_t_13 = 1;
           }
         }
-        __pyx_t_19 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_19 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_19);
         if (__pyx_t_8) {
           PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -9879,7 +10079,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
         PyTuple_SET_ITEM(__pyx_t_19, 1+__pyx_t_13, __pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_6);
         __pyx_t_6 = 0;
-        __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_19, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_19, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 349; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_14);
         __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -9901,20 +10101,20 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":338
+    /* "src/llfuse/handlers.pxi":350
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_write failed with %s', strerror(-ret))
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *         if ret != 0:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_20 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_20) {
       __Pyx_AddTraceback("llfuse.capi.fuse_write", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_4, &__pyx_t_19) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 338; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_4, &__pyx_t_19) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 350; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_19);
@@ -9922,20 +10122,20 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_v_e = __pyx_t_4;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":339
+        /* "src/llfuse/handlers.pxi":351
  *             log.error('fuse_write(): fuse_reply_write failed with %s', strerror(-ret))
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_err(%d) failed with %s', strerror(-ret), e.errno)
  */
-        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 339; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+        __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 351; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
         __Pyx_GOTREF(__pyx_t_6);
-        __pyx_t_20 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_20 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 339; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+        __pyx_t_20 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_20 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 351; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_20);
 
-        /* "src/llfuse/handlers.pxi":340
+        /* "src/llfuse/handlers.pxi":352
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *         if ret != 0:             # <<<<<<<<<<<<<<
@@ -9945,21 +10145,21 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
         if (__pyx_t_18) {
 
-          /* "src/llfuse/handlers.pxi":341
+          /* "src/llfuse/handlers.pxi":353
  *         ret = fuse_reply_err(req, e.errno)
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_err(%d) failed with %s', strerror(-ret), e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('write', e, req)
  */
-          __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_error); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_error); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-          __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_21 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_21 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_21);
           __pyx_t_22 = NULL;
           if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -9972,22 +10172,22 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
             }
           }
           if (!__pyx_t_22) {
-            __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_21); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+            __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_21); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
             __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
             __Pyx_GOTREF(__pyx_t_8);
           } else {
-            __pyx_t_23 = PyTuple_New(1+1); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+            __pyx_t_23 = PyTuple_New(1+1); if (unlikely(!__pyx_t_23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
             __Pyx_GOTREF(__pyx_t_23);
             PyTuple_SET_ITEM(__pyx_t_23, 0, __pyx_t_22); __Pyx_GIVEREF(__pyx_t_22); __pyx_t_22 = NULL;
             PyTuple_SET_ITEM(__pyx_t_23, 0+1, __pyx_t_21);
             __Pyx_GIVEREF(__pyx_t_21);
             __pyx_t_21 = 0;
-            __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_23, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+            __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_23, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
             __Pyx_GOTREF(__pyx_t_8);
             __Pyx_DECREF(__pyx_t_23); __pyx_t_23 = 0;
           }
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_12);
           __pyx_t_23 = NULL;
           __pyx_t_13 = 0;
@@ -10001,7 +10201,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
               __pyx_t_13 = 1;
             }
           }
-          __pyx_t_21 = PyTuple_New(3+__pyx_t_13); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_21 = PyTuple_New(3+__pyx_t_13); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_21);
           if (__pyx_t_23) {
             PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_23); __Pyx_GIVEREF(__pyx_t_23); __pyx_t_23 = NULL;
@@ -10015,7 +10215,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
           __Pyx_GIVEREF(__pyx_t_12);
           __pyx_t_8 = 0;
           __pyx_t_12 = 0;
-          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 341; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -10025,7 +10225,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_L37:;
       }
 
-      /* "src/llfuse/handlers.pxi":338
+      /* "src/llfuse/handlers.pxi":350
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_write failed with %s', strerror(-ret))
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -10083,7 +10283,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":342
+    /* "src/llfuse/handlers.pxi":354
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_err(%d) failed with %s', strerror(-ret), e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -10093,7 +10293,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __pyx_t_24 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_24) {
       __Pyx_AddTraceback("llfuse.capi.fuse_write", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_19, &__pyx_t_4, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 342; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_19, &__pyx_t_4, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 354; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_19);
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_14);
@@ -10101,7 +10301,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_v_e = __pyx_t_4;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":343
+        /* "src/llfuse/handlers.pxi":355
  *             log.error('fuse_write(): fuse_reply_err(%d) failed with %s', strerror(-ret), e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('write', e, req)             # <<<<<<<<<<<<<<
@@ -10110,7 +10310,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
  */
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_write, __pyx_v_e, __pyx_v_req);
 
-        /* "src/llfuse/handlers.pxi":345
+        /* "src/llfuse/handlers.pxi":357
  *         ret = handle_exc('write', e, req)
  * 
  *         if ret != 0:             # <<<<<<<<<<<<<<
@@ -10120,21 +10320,21 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_t_18 = ((__pyx_v_ret != 0) != 0);
         if (__pyx_t_18) {
 
-          /* "src/llfuse/handlers.pxi":346
+          /* "src/llfuse/handlers.pxi":358
  * 
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_err failed with %s after exception', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_flush (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
  */
-          __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+          __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
           __Pyx_GOTREF(__pyx_t_7);
-          __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_error); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+          __pyx_t_21 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_error); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
           __Pyx_GOTREF(__pyx_t_21);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-          __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+          __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
           __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+          __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
           __Pyx_GOTREF(__pyx_t_8);
           __pyx_t_23 = NULL;
           if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -10147,17 +10347,17 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
             }
           }
           if (!__pyx_t_23) {
-            __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+            __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_7);
           } else {
-            __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+            __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
             __Pyx_GOTREF(__pyx_t_22);
             PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_23); __Pyx_GIVEREF(__pyx_t_23); __pyx_t_23 = NULL;
             PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_8);
             __Pyx_GIVEREF(__pyx_t_8);
             __pyx_t_8 = 0;
-            __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_22, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+            __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_22, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
           }
@@ -10174,7 +10374,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
               __pyx_t_13 = 1;
             }
           }
-          __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+          __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
           __Pyx_GOTREF(__pyx_t_22);
           if (__pyx_t_12) {
             PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -10185,7 +10385,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
           PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_7);
           __Pyx_GIVEREF(__pyx_t_7);
           __pyx_t_7 = 0;
-          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 346; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_21, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 358; __pyx_clineno = __LINE__; goto __pyx_L47_error;}
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
           __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
@@ -10195,7 +10395,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_L49:;
       }
 
-      /* "src/llfuse/handlers.pxi":342
+      /* "src/llfuse/handlers.pxi":354
  *         if ret != 0:
  *             log.error('fuse_write(): fuse_reply_err(%d) failed with %s', strerror(-ret), e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -10267,7 +10467,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":323
+  /* "src/llfuse/handlers.pxi":335
  *         log.error('fuse_read(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_write (fuse_req_t req, fuse_ino_t ino, const_char *buf,             # <<<<<<<<<<<<<<
@@ -10298,7 +10498,7 @@ static void __pyx_f_6llfuse_4capi_fuse_write(fuse_req_t __pyx_v_req, CYTHON_UNUS
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":348
+/* "src/llfuse/handlers.pxi":360
  *             log.error('fuse_write(): fuse_reply_err failed with %s after exception', strerror(-ret))
  * 
  * cdef void fuse_flush (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -10340,7 +10540,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
   #endif
   __Pyx_RefNannySetupContext("fuse_flush", 0);
 
-  /* "src/llfuse/handlers.pxi":351
+  /* "src/llfuse/handlers.pxi":363
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -10354,7 +10554,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":352
+      /* "src/llfuse/handlers.pxi":364
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -10362,11 +10562,11 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -10379,10 +10579,10 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -10396,16 +10596,16 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":353
+              /* "src/llfuse/handlers.pxi":365
  *     try:
  *         with lock:
  *             operations.flush(fi.fh)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_flush); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_flush); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -10418,17 +10618,17 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
                 }
               }
               if (!__pyx_t_8) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_GOTREF(__pyx_t_4);
               } else {
-                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                 PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_7);
                 __Pyx_GIVEREF(__pyx_t_7);
                 __pyx_t_7 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 353; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 365; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
               }
@@ -10446,7 +10646,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":352
+            /* "src/llfuse/handlers.pxi":364
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -10455,20 +10655,20 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_flush", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_13);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_15 = ((!(__pyx_t_14 != 0)) != 0);
               if (__pyx_t_15) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -10476,7 +10676,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
                 __Pyx_XGIVEREF(__pyx_t_12);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_12);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_12 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -10502,7 +10702,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__18, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -10517,7 +10717,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":354
+      /* "src/llfuse/handlers.pxi":366
  *         with lock:
  *             operations.flush(fi.fh)
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -10537,20 +10737,20 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "src/llfuse/handlers.pxi":355
+    /* "src/llfuse/handlers.pxi":367
  *             operations.flush(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 355; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_16 = PyErr_ExceptionMatches(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     if (__pyx_t_16) {
       __Pyx_AddTraceback("llfuse.capi.fuse_flush", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 355; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -10558,21 +10758,21 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":356
+        /* "src/llfuse/handlers.pxi":368
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('flush', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 356; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_16);
       }
 
-      /* "src/llfuse/handlers.pxi":355
+      /* "src/llfuse/handlers.pxi":367
  *             operations.flush(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -10625,7 +10825,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":357
+    /* "src/llfuse/handlers.pxi":369
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -10635,7 +10835,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_flush", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 357; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 369; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_12);
@@ -10643,7 +10843,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":358
+        /* "src/llfuse/handlers.pxi":370
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('flush', e, req)             # <<<<<<<<<<<<<<
@@ -10653,7 +10853,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_flush, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":357
+      /* "src/llfuse/handlers.pxi":369
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -10688,7 +10888,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":360
+  /* "src/llfuse/handlers.pxi":372
  *         ret = handle_exc('flush', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -10698,21 +10898,21 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
   __pyx_t_15 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_15) {
 
-    /* "src/llfuse/handlers.pxi":361
+    /* "src/llfuse/handlers.pxi":373
  * 
  *     if ret != 0:
  *         log.error('fuse_flush(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_release (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_20 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -10725,17 +10925,17 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
       }
     }
     if (!__pyx_t_20) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_21);
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_20); __Pyx_GIVEREF(__pyx_t_20); __pyx_t_20 = NULL;
       PyTuple_SET_ITEM(__pyx_t_21, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     }
@@ -10752,7 +10952,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_t_22 = 1;
       }
     }
-    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_21);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -10763,7 +10963,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
     PyTuple_SET_ITEM(__pyx_t_21, 1+__pyx_t_22, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 361; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 373; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -10772,7 +10972,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":348
+  /* "src/llfuse/handlers.pxi":360
  *             log.error('fuse_write(): fuse_reply_err failed with %s after exception', strerror(-ret))
  * 
  * cdef void fuse_flush (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -10799,7 +10999,7 @@ static void __pyx_f_6llfuse_4capi_fuse_flush(fuse_req_t __pyx_v_req, CYTHON_UNUS
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":363
+/* "src/llfuse/handlers.pxi":375
  *         log.error('fuse_flush(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_release (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -10841,7 +11041,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
   #endif
   __Pyx_RefNannySetupContext("fuse_release", 0);
 
-  /* "src/llfuse/handlers.pxi":366
+  /* "src/llfuse/handlers.pxi":378
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -10855,7 +11055,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":367
+      /* "src/llfuse/handlers.pxi":379
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -10863,11 +11063,11 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -10880,10 +11080,10 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -10897,16 +11097,16 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":368
+              /* "src/llfuse/handlers.pxi":380
  *     try:
  *         with lock:
  *             operations.release(fi.fh)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_release); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_release); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 380; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 380; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -10919,17 +11119,17 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
                 }
               }
               if (!__pyx_t_8) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 380; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_GOTREF(__pyx_t_4);
               } else {
-                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 380; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                 PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_7);
                 __Pyx_GIVEREF(__pyx_t_7);
                 __pyx_t_7 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 368; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 380; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
               }
@@ -10947,7 +11147,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":367
+            /* "src/llfuse/handlers.pxi":379
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -10956,20 +11156,20 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_release", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_13);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_15 = ((!(__pyx_t_14 != 0)) != 0);
               if (__pyx_t_15) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -10977,7 +11177,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
                 __Pyx_XGIVEREF(__pyx_t_12);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_12);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_12 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -11003,7 +11203,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__19, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -11018,7 +11218,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":369
+      /* "src/llfuse/handlers.pxi":381
  *         with lock:
  *             operations.release(fi.fh)
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -11038,20 +11238,20 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "src/llfuse/handlers.pxi":370
+    /* "src/llfuse/handlers.pxi":382
  *             operations.release(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 370; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 382; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_16 = PyErr_ExceptionMatches(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     if (__pyx_t_16) {
       __Pyx_AddTraceback("llfuse.capi.fuse_release", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 370; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 382; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -11059,21 +11259,21 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":371
+        /* "src/llfuse/handlers.pxi":383
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('release', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 371; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 371; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_16);
       }
 
-      /* "src/llfuse/handlers.pxi":370
+      /* "src/llfuse/handlers.pxi":382
  *             operations.release(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -11126,7 +11326,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":372
+    /* "src/llfuse/handlers.pxi":384
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -11136,7 +11336,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_release", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 372; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_12);
@@ -11144,7 +11344,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":373
+        /* "src/llfuse/handlers.pxi":385
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('release', e, req)             # <<<<<<<<<<<<<<
@@ -11154,7 +11354,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_release, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":372
+      /* "src/llfuse/handlers.pxi":384
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -11189,7 +11389,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":375
+  /* "src/llfuse/handlers.pxi":387
  *         ret = handle_exc('release', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -11199,21 +11399,21 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
   __pyx_t_15 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_15) {
 
-    /* "src/llfuse/handlers.pxi":376
+    /* "src/llfuse/handlers.pxi":388
  * 
  *     if ret != 0:
  *         log.error('fuse_release(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_fsync (fuse_req_t req, fuse_ino_t ino, int datasync,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_20 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -11226,17 +11426,17 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
       }
     }
     if (!__pyx_t_20) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_21);
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_20); __Pyx_GIVEREF(__pyx_t_20); __pyx_t_20 = NULL;
       PyTuple_SET_ITEM(__pyx_t_21, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     }
@@ -11253,7 +11453,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_t_22 = 1;
       }
     }
-    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_21);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -11264,7 +11464,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
     PyTuple_SET_ITEM(__pyx_t_21, 1+__pyx_t_22, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 376; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -11273,7 +11473,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":363
+  /* "src/llfuse/handlers.pxi":375
  *         log.error('fuse_flush(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_release (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -11300,7 +11500,7 @@ static void __pyx_f_6llfuse_4capi_fuse_release(fuse_req_t __pyx_v_req, CYTHON_UN
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":378
+/* "src/llfuse/handlers.pxi":390
  *         log.error('fuse_release(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_fsync (fuse_req_t req, fuse_ino_t ino, int datasync,             # <<<<<<<<<<<<<<
@@ -11342,7 +11542,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
   #endif
   __Pyx_RefNannySetupContext("fuse_fsync", 0);
 
-  /* "src/llfuse/handlers.pxi":382
+  /* "src/llfuse/handlers.pxi":394
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -11356,7 +11556,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":383
+      /* "src/llfuse/handlers.pxi":395
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -11364,11 +11564,11 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -11381,10 +11581,10 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -11398,18 +11598,18 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":384
+              /* "src/llfuse/handlers.pxi":396
  *     try:
  *         with lock:
  *             operations.fsync(fi.fh, datasync != 0)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_fsync); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_fsync); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyBool_FromLong((__pyx_v_datasync != 0)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyBool_FromLong((__pyx_v_datasync != 0)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -11423,7 +11623,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -11434,7 +11634,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
               __Pyx_GIVEREF(__pyx_t_8);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 384; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 396; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -11452,7 +11652,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":383
+            /* "src/llfuse/handlers.pxi":395
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -11461,20 +11661,20 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_fsync", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_15);
               __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_15);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_17 = ((!(__pyx_t_16 != 0)) != 0);
               if (__pyx_t_17) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -11482,7 +11682,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -11508,7 +11708,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__20, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -11523,7 +11723,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":385
+      /* "src/llfuse/handlers.pxi":397
  *         with lock:
  *             operations.fsync(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -11544,20 +11744,20 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":386
+    /* "src/llfuse/handlers.pxi":398
  *             operations.fsync(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_fsync", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 386; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -11565,21 +11765,21 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":387
+        /* "src/llfuse/handlers.pxi":399
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('fsync', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 387; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_18);
       }
 
-      /* "src/llfuse/handlers.pxi":386
+      /* "src/llfuse/handlers.pxi":398
  *             operations.fsync(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -11633,7 +11833,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":388
+    /* "src/llfuse/handlers.pxi":400
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -11643,7 +11843,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_fsync", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 388; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 400; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_14);
@@ -11651,7 +11851,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":389
+        /* "src/llfuse/handlers.pxi":401
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('fsync', e, req)             # <<<<<<<<<<<<<<
@@ -11661,7 +11861,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_fsync, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":388
+      /* "src/llfuse/handlers.pxi":400
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -11696,7 +11896,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":391
+  /* "src/llfuse/handlers.pxi":403
  *         ret = handle_exc('fsync', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -11706,21 +11906,21 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
   __pyx_t_17 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_17) {
 
-    /* "src/llfuse/handlers.pxi":392
+    /* "src/llfuse/handlers.pxi":404
  * 
  *     if ret != 0:
  *         log.error('fuse_fsync(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_opendir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -11733,17 +11933,17 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -11760,7 +11960,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -11771,7 +11971,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 392; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -11780,7 +11980,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":378
+  /* "src/llfuse/handlers.pxi":390
  *         log.error('fuse_release(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_fsync (fuse_req_t req, fuse_ino_t ino, int datasync,             # <<<<<<<<<<<<<<
@@ -11807,7 +12007,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsync(fuse_req_t __pyx_v_req, CYTHON_UNUS
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":394
+/* "src/llfuse/handlers.pxi":406
  *         log.error('fuse_fsync(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_opendir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -11850,7 +12050,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
   #endif
   __Pyx_RefNannySetupContext("fuse_opendir", 0);
 
-  /* "src/llfuse/handlers.pxi":397
+  /* "src/llfuse/handlers.pxi":409
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -11864,7 +12064,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":398
+      /* "src/llfuse/handlers.pxi":410
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -11872,11 +12072,11 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
  * 
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -11889,10 +12089,10 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -11906,16 +12106,16 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":399
+              /* "src/llfuse/handlers.pxi":411
  *     try:
  *         with lock:
  *             fi.fh = operations.opendir(ino)             # <<<<<<<<<<<<<<
  * 
  *         ret = fuse_reply_open(req, fi)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_opendir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_opendir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -11928,22 +12128,22 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
                 }
               }
               if (!__pyx_t_8) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_GOTREF(__pyx_t_4);
               } else {
-                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                 PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_7);
                 __Pyx_GIVEREF(__pyx_t_7);
                 __pyx_t_7 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
               }
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-              __pyx_t_13 = __Pyx_PyInt_As_uint64_t(__pyx_t_4); if (unlikely((__pyx_t_13 == (uint64_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 399; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_13 = __Pyx_PyInt_As_uint64_t(__pyx_t_4); if (unlikely((__pyx_t_13 == (uint64_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 411; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __pyx_v_fi->fh = __pyx_t_13;
             }
@@ -11958,7 +12158,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":398
+            /* "src/llfuse/handlers.pxi":410
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -11967,20 +12167,20 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_opendir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_14);
               __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_14);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-              if (__pyx_t_15 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_15 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_16 = ((!(__pyx_t_15 != 0)) != 0);
               if (__pyx_t_16) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -11988,7 +12188,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
                 __Pyx_XGIVEREF(__pyx_t_12);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_12);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_12 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -12014,7 +12214,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__21, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -12029,7 +12229,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":401
+      /* "src/llfuse/handlers.pxi":413
  *             fi.fh = operations.opendir(ino)
  * 
  *         ret = fuse_reply_open(req, fi)             # <<<<<<<<<<<<<<
@@ -12049,20 +12249,20 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "src/llfuse/handlers.pxi":402
+    /* "src/llfuse/handlers.pxi":414
  * 
  *         ret = fuse_reply_open(req, fi)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 402; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_opendir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 402; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 414; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -12070,21 +12270,21 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":403
+        /* "src/llfuse/handlers.pxi":415
  *         ret = fuse_reply_open(req, fi)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('opendir', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 403; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 415; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 403; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 415; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_17);
       }
 
-      /* "src/llfuse/handlers.pxi":402
+      /* "src/llfuse/handlers.pxi":414
  * 
  *         ret = fuse_reply_open(req, fi)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -12137,7 +12337,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":404
+    /* "src/llfuse/handlers.pxi":416
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -12147,7 +12347,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_opendir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 404; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 416; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_12);
@@ -12155,7 +12355,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":405
+        /* "src/llfuse/handlers.pxi":417
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('opendir', e, req)             # <<<<<<<<<<<<<<
@@ -12165,7 +12365,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_opendir, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":404
+      /* "src/llfuse/handlers.pxi":416
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -12200,7 +12400,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":407
+  /* "src/llfuse/handlers.pxi":419
  *         ret = handle_exc('opendir', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -12210,21 +12410,21 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
   __pyx_t_16 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_16) {
 
-    /* "src/llfuse/handlers.pxi":408
+    /* "src/llfuse/handlers.pxi":420
  * 
  *     if ret != 0:
  *         log.error('fuse_opendir(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_readdir (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_21 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -12237,17 +12437,17 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
       }
     }
     if (!__pyx_t_21) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_21); __Pyx_GIVEREF(__pyx_t_21); __pyx_t_21 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -12264,7 +12464,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
         __pyx_t_23 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_23); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_23); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -12275,7 +12475,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_23, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 408; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 420; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -12284,7 +12484,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":394
+  /* "src/llfuse/handlers.pxi":406
  *         log.error('fuse_fsync(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_opendir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -12311,7 +12511,7 @@ static void __pyx_f_6llfuse_4capi_fuse_opendir(fuse_req_t __pyx_v_req, fuse_ino_
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":410
+/* "src/llfuse/handlers.pxi":422
  *         log.error('fuse_opendir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_readdir (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,             # <<<<<<<<<<<<<<
@@ -12366,7 +12566,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
   #endif
   __Pyx_RefNannySetupContext("fuse_readdir", 0);
 
-  /* "src/llfuse/handlers.pxi":419
+  /* "src/llfuse/handlers.pxi":431
  * 
  *     # GCC thinks this may end up uninitialized
  *     ret = 0             # <<<<<<<<<<<<<<
@@ -12375,7 +12575,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  */
   __pyx_v_ret = 0;
 
-  /* "src/llfuse/handlers.pxi":421
+  /* "src/llfuse/handlers.pxi":433
  *     ret = 0
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -12390,7 +12590,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
       __Pyx_XGOTREF(__pyx_t_3);
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":422
+        /* "src/llfuse/handlers.pxi":434
  * 
  *     try:
  *         acc_size = 0             # <<<<<<<<<<<<<<
@@ -12399,7 +12599,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  */
         __pyx_v_acc_size = 0;
 
-        /* "src/llfuse/handlers.pxi":423
+        /* "src/llfuse/handlers.pxi":435
  *     try:
  *         acc_size = 0
  *         buf = NULL             # <<<<<<<<<<<<<<
@@ -12408,7 +12608,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  */
         __pyx_v_buf = NULL;
 
-        /* "src/llfuse/handlers.pxi":424
+        /* "src/llfuse/handlers.pxi":436
  *         acc_size = 0
  *         buf = NULL
  *         with lock:             # <<<<<<<<<<<<<<
@@ -12416,11 +12616,11 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  *                 if buf == NULL:
  */
         /*with:*/ {
-          __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L6_error;}
+          __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L6_error;}
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L6_error;}
+          __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L6_error;}
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L14_error;}
+          __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L14_error;}
           __Pyx_GOTREF(__pyx_t_7);
           __pyx_t_8 = NULL;
           if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -12433,10 +12633,10 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
             }
           }
           if (__pyx_t_8) {
-            __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L14_error;}
+            __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L14_error;}
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           } else {
-            __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L14_error;}
+            __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L14_error;}
           }
           __Pyx_GOTREF(__pyx_t_6);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -12450,18 +12650,18 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
               __Pyx_XGOTREF(__pyx_t_11);
               /*try:*/ {
 
-                /* "src/llfuse/handlers.pxi":425
+                /* "src/llfuse/handlers.pxi":437
  *         buf = NULL
  *         with lock:
  *             for (name, attr, next_) in operations.readdir(fi.fh, off):             # <<<<<<<<<<<<<<
  *                 if buf == NULL:
  *                     buf = <char*> stdlib.malloc(size * sizeof(char))
  */
-                __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_readdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_readdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                 __Pyx_GOTREF(__pyx_t_6);
-                __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                 __Pyx_GOTREF(__pyx_t_7);
-                __pyx_t_8 = __Pyx_PyInt_From_off_t(__pyx_v_off); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                __pyx_t_8 = __Pyx_PyInt_From_off_t(__pyx_v_off); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                 __Pyx_GOTREF(__pyx_t_8);
                 __pyx_t_12 = NULL;
                 __pyx_t_13 = 0;
@@ -12475,7 +12675,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     __pyx_t_13 = 1;
                   }
                 }
-                __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                 __Pyx_GOTREF(__pyx_t_14);
                 if (__pyx_t_12) {
                   PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -12486,7 +12686,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                 __Pyx_GIVEREF(__pyx_t_8);
                 __pyx_t_7 = 0;
                 __pyx_t_8 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
                 __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -12494,9 +12694,9 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                   __pyx_t_6 = __pyx_t_4; __Pyx_INCREF(__pyx_t_6); __pyx_t_13 = 0;
                   __pyx_t_15 = NULL;
                 } else {
-                  __pyx_t_13 = -1; __pyx_t_6 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                  __pyx_t_13 = -1; __pyx_t_6 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                   __Pyx_GOTREF(__pyx_t_6);
-                  __pyx_t_15 = Py_TYPE(__pyx_t_6)->tp_iternext; if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                  __pyx_t_15 = Py_TYPE(__pyx_t_6)->tp_iternext; if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                 }
                 __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                 for (;;) {
@@ -12504,16 +12704,16 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     if (likely(PyList_CheckExact(__pyx_t_6))) {
                       if (__pyx_t_13 >= PyList_GET_SIZE(__pyx_t_6)) break;
                       #if CYTHON_COMPILING_IN_CPYTHON
-                      __pyx_t_4 = PyList_GET_ITEM(__pyx_t_6, __pyx_t_13); __Pyx_INCREF(__pyx_t_4); __pyx_t_13++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                      __pyx_t_4 = PyList_GET_ITEM(__pyx_t_6, __pyx_t_13); __Pyx_INCREF(__pyx_t_4); __pyx_t_13++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                       #else
-                      __pyx_t_4 = PySequence_ITEM(__pyx_t_6, __pyx_t_13); __pyx_t_13++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                      __pyx_t_4 = PySequence_ITEM(__pyx_t_6, __pyx_t_13); __pyx_t_13++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                       #endif
                     } else {
                       if (__pyx_t_13 >= PyTuple_GET_SIZE(__pyx_t_6)) break;
                       #if CYTHON_COMPILING_IN_CPYTHON
-                      __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_6, __pyx_t_13); __Pyx_INCREF(__pyx_t_4); __pyx_t_13++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                      __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_6, __pyx_t_13); __Pyx_INCREF(__pyx_t_4); __pyx_t_13++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                       #else
-                      __pyx_t_4 = PySequence_ITEM(__pyx_t_6, __pyx_t_13); __pyx_t_13++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                      __pyx_t_4 = PySequence_ITEM(__pyx_t_6, __pyx_t_13); __pyx_t_13++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                       #endif
                     }
                   } else {
@@ -12522,7 +12722,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                       PyObject* exc_type = PyErr_Occurred();
                       if (exc_type) {
                         if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-                        else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                        else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                       }
                       break;
                     }
@@ -12538,7 +12738,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     if (unlikely(size != 3)) {
                       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
                       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     }
                     #if CYTHON_COMPILING_IN_CPYTHON
                     if (likely(PyTuple_CheckExact(sequence))) {
@@ -12554,17 +12754,17 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     __Pyx_INCREF(__pyx_t_8);
                     __Pyx_INCREF(__pyx_t_7);
                     #else
-                    __pyx_t_14 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                    __pyx_t_14 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     __Pyx_GOTREF(__pyx_t_14);
-                    __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                    __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     __Pyx_GOTREF(__pyx_t_8);
-                    __pyx_t_7 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                    __pyx_t_7 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     __Pyx_GOTREF(__pyx_t_7);
                     #endif
                     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                   } else {
                     Py_ssize_t index = -1;
-                    __pyx_t_12 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                    __pyx_t_12 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     __Pyx_GOTREF(__pyx_t_12);
                     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                     __pyx_t_16 = Py_TYPE(__pyx_t_12)->tp_iternext;
@@ -12574,7 +12774,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     __Pyx_GOTREF(__pyx_t_8);
                     index = 2; __pyx_t_7 = __pyx_t_16(__pyx_t_12); if (unlikely(!__pyx_t_7)) goto __pyx_L30_unpacking_failed;
                     __Pyx_GOTREF(__pyx_t_7);
-                    if (__Pyx_IternextUnpackEndCheck(__pyx_t_16(__pyx_t_12), 3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                    if (__Pyx_IternextUnpackEndCheck(__pyx_t_16(__pyx_t_12), 3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     __pyx_t_16 = NULL;
                     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
                     goto __pyx_L31_unpacking_done;
@@ -12582,7 +12782,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
                     __pyx_t_16 = NULL;
                     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-                    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 425; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                     __pyx_L31_unpacking_done:;
                   }
                   __Pyx_XDECREF_SET(__pyx_v_name, __pyx_t_14);
@@ -12592,7 +12792,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                   __Pyx_XDECREF_SET(__pyx_v_next_, __pyx_t_7);
                   __pyx_t_7 = 0;
 
-                  /* "src/llfuse/handlers.pxi":426
+                  /* "src/llfuse/handlers.pxi":438
  *         with lock:
  *             for (name, attr, next_) in operations.readdir(fi.fh, off):
  *                 if buf == NULL:             # <<<<<<<<<<<<<<
@@ -12602,7 +12802,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                   __pyx_t_17 = ((__pyx_v_buf == NULL) != 0);
                   if (__pyx_t_17) {
 
-                    /* "src/llfuse/handlers.pxi":427
+                    /* "src/llfuse/handlers.pxi":439
  *             for (name, attr, next_) in operations.readdir(fi.fh, off):
  *                 if buf == NULL:
  *                     buf = <char*> stdlib.malloc(size * sizeof(char))             # <<<<<<<<<<<<<<
@@ -12614,37 +12814,37 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                   }
                   __pyx_L32:;
 
-                  /* "src/llfuse/handlers.pxi":428
+                  /* "src/llfuse/handlers.pxi":440
  *                 if buf == NULL:
  *                     buf = <char*> stdlib.malloc(size * sizeof(char))
  *                 cname = PyBytes_AsString(name)             # <<<<<<<<<<<<<<
  *                 fill_c_stat(attr, &stat)
  *                 len_ = fuse_add_direntry(req, buf + acc_size, size - acc_size,
  */
-                  __pyx_t_18 = PyBytes_AsString(__pyx_v_name); if (unlikely(__pyx_t_18 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 428; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                  __pyx_t_18 = PyBytes_AsString(__pyx_v_name); if (unlikely(__pyx_t_18 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 440; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                   __pyx_v_cname = __pyx_t_18;
 
-                  /* "src/llfuse/handlers.pxi":429
+                  /* "src/llfuse/handlers.pxi":441
  *                     buf = <char*> stdlib.malloc(size * sizeof(char))
  *                 cname = PyBytes_AsString(name)
  *                 fill_c_stat(attr, &stat)             # <<<<<<<<<<<<<<
  *                 len_ = fuse_add_direntry(req, buf + acc_size, size - acc_size,
  *                                          cname, &stat, next_)
  */
-                  __pyx_t_4 = __pyx_f_6llfuse_4capi_fill_c_stat(__pyx_v_attr, (&__pyx_v_stat)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 429; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                  __pyx_t_4 = __pyx_f_6llfuse_4capi_fill_c_stat(__pyx_v_attr, (&__pyx_v_stat)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 441; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
                   __Pyx_GOTREF(__pyx_t_4);
                   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-                  /* "src/llfuse/handlers.pxi":431
+                  /* "src/llfuse/handlers.pxi":443
  *                 fill_c_stat(attr, &stat)
  *                 len_ = fuse_add_direntry(req, buf + acc_size, size - acc_size,
  *                                          cname, &stat, next_)             # <<<<<<<<<<<<<<
  *                 if len_ > (size - acc_size):
  *                     break
  */
-                  __pyx_t_19 = __Pyx_PyInt_As_off_t(__pyx_v_next_); if (unlikely((__pyx_t_19 == (off_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 431; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
+                  __pyx_t_19 = __Pyx_PyInt_As_off_t(__pyx_v_next_); if (unlikely((__pyx_t_19 == (off_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 443; __pyx_clineno = __LINE__; goto __pyx_L20_error;}
 
-                  /* "src/llfuse/handlers.pxi":430
+                  /* "src/llfuse/handlers.pxi":442
  *                 cname = PyBytes_AsString(name)
  *                 fill_c_stat(attr, &stat)
  *                 len_ = fuse_add_direntry(req, buf + acc_size, size - acc_size,             # <<<<<<<<<<<<<<
@@ -12653,7 +12853,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  */
                   __pyx_v_len_ = fuse_add_direntry(__pyx_v_req, (__pyx_v_buf + __pyx_v_acc_size), (__pyx_v_size - __pyx_v_acc_size), __pyx_v_cname, (&__pyx_v_stat), __pyx_t_19);
 
-                  /* "src/llfuse/handlers.pxi":432
+                  /* "src/llfuse/handlers.pxi":444
  *                 len_ = fuse_add_direntry(req, buf + acc_size, size - acc_size,
  *                                          cname, &stat, next_)
  *                 if len_ > (size - acc_size):             # <<<<<<<<<<<<<<
@@ -12663,7 +12863,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                   __pyx_t_17 = ((__pyx_v_len_ > (__pyx_v_size - __pyx_v_acc_size)) != 0);
                   if (__pyx_t_17) {
 
-                    /* "src/llfuse/handlers.pxi":433
+                    /* "src/llfuse/handlers.pxi":445
  *                                          cname, &stat, next_)
  *                 if len_ > (size - acc_size):
  *                     break             # <<<<<<<<<<<<<<
@@ -12673,7 +12873,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                     goto __pyx_L29_break;
                   }
 
-                  /* "src/llfuse/handlers.pxi":434
+                  /* "src/llfuse/handlers.pxi":446
  *                 if len_ > (size - acc_size):
  *                     break
  *                 acc_size += len_             # <<<<<<<<<<<<<<
@@ -12682,7 +12882,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  */
                   __pyx_v_acc_size = (__pyx_v_acc_size + __pyx_v_len_);
 
-                  /* "src/llfuse/handlers.pxi":425
+                  /* "src/llfuse/handlers.pxi":437
  *         buf = NULL
  *         with lock:
  *             for (name, attr, next_) in operations.readdir(fi.fh, off):             # <<<<<<<<<<<<<<
@@ -12705,7 +12905,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
               __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-              /* "src/llfuse/handlers.pxi":424
+              /* "src/llfuse/handlers.pxi":436
  *         acc_size = 0
  *         buf = NULL
  *         with lock:             # <<<<<<<<<<<<<<
@@ -12714,20 +12914,20 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
  */
               /*except:*/ {
                 __Pyx_AddTraceback("llfuse.capi.fuse_readdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
+                if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
                 __Pyx_GOTREF(__pyx_t_6);
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_GOTREF(__pyx_t_7);
-                __pyx_t_8 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
+                __pyx_t_8 = PyTuple_Pack(3, __pyx_t_6, __pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
                 __Pyx_GOTREF(__pyx_t_8);
                 __pyx_t_20 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
                 __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
                 __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
+                if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
                 __Pyx_GOTREF(__pyx_t_20);
                 __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_t_20);
                 __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
-                if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
+                if (__pyx_t_17 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
                 __pyx_t_21 = ((!(__pyx_t_17 != 0)) != 0);
                 if (__pyx_t_21) {
                   __Pyx_GIVEREF(__pyx_t_6);
@@ -12735,7 +12935,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
                   __Pyx_XGIVEREF(__pyx_t_7);
                   __Pyx_ErrRestore(__pyx_t_6, __pyx_t_4, __pyx_t_7);
                   __pyx_t_6 = 0; __pyx_t_4 = 0; __pyx_t_7 = 0; 
-                  {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
+                  {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L22_except_error;}
                 }
                 __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
                 __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -12761,7 +12961,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
               if (__pyx_t_5) {
                 __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__22, NULL);
                 __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-                if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L6_error;}
+                if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L6_error;}
                 __Pyx_GOTREF(__pyx_t_11);
                 __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
               }
@@ -12776,7 +12976,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
           __pyx_L37:;
         }
 
-        /* "src/llfuse/handlers.pxi":435
+        /* "src/llfuse/handlers.pxi":447
  *                     break
  *                 acc_size += len_
  *         ret = fuse_reply_buf(req, buf, acc_size)             # <<<<<<<<<<<<<<
@@ -12797,20 +12997,20 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-      /* "src/llfuse/handlers.pxi":436
+      /* "src/llfuse/handlers.pxi":448
  *                 acc_size += len_
  *         ret = fuse_reply_buf(req, buf, acc_size)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-      __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L8_except_error;}
+      __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 448; __pyx_clineno = __LINE__; goto __pyx_L8_except_error;}
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_t_22 = PyErr_ExceptionMatches(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       if (__pyx_t_22) {
         __Pyx_AddTraceback("llfuse.capi.fuse_readdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_4, &__pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L8_except_error;}
+        if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_4, &__pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 448; __pyx_clineno = __LINE__; goto __pyx_L8_except_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_GOTREF(__pyx_t_6);
@@ -12818,21 +13018,21 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_v_e = __pyx_t_4;
         /*try:*/ {
 
-          /* "src/llfuse/handlers.pxi":437
+          /* "src/llfuse/handlers.pxi":449
  *         ret = fuse_reply_buf(req, buf, acc_size)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('readdir', e, req)
  */
-          __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+          __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 449; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
           __Pyx_GOTREF(__pyx_t_8);
-          __pyx_t_22 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_22 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 437; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+          __pyx_t_22 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_22 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 449; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_22);
         }
 
-        /* "src/llfuse/handlers.pxi":436
+        /* "src/llfuse/handlers.pxi":448
  *                 acc_size += len_
  *         ret = fuse_reply_buf(req, buf, acc_size)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -12886,7 +13086,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
         goto __pyx_L7_exception_handled;
       }
 
-      /* "src/llfuse/handlers.pxi":438
+      /* "src/llfuse/handlers.pxi":450
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -12896,7 +13096,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
       __pyx_t_23 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
       if (__pyx_t_23) {
         __Pyx_AddTraceback("llfuse.capi.fuse_readdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 438; __pyx_clineno = __LINE__; goto __pyx_L8_except_error;}
+        if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 450; __pyx_clineno = __LINE__; goto __pyx_L8_except_error;}
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_GOTREF(__pyx_t_7);
@@ -12904,7 +13104,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_v_e = __pyx_t_4;
         /*try:*/ {
 
-          /* "src/llfuse/handlers.pxi":439
+          /* "src/llfuse/handlers.pxi":451
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('readdir', e, req)             # <<<<<<<<<<<<<<
@@ -12914,7 +13114,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
           __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_readdir, __pyx_v_e, __pyx_v_req);
         }
 
-        /* "src/llfuse/handlers.pxi":438
+        /* "src/llfuse/handlers.pxi":450
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -12950,7 +13150,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
     }
   }
 
-  /* "src/llfuse/handlers.pxi":441
+  /* "src/llfuse/handlers.pxi":453
  *         ret = handle_exc('readdir', e, req)
  *     finally:
  *         if buf != NULL:             # <<<<<<<<<<<<<<
@@ -12962,7 +13162,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
       __pyx_t_21 = ((__pyx_v_buf != NULL) != 0);
       if (__pyx_t_21) {
 
-        /* "src/llfuse/handlers.pxi":442
+        /* "src/llfuse/handlers.pxi":454
  *     finally:
  *         if buf != NULL:
  *             stdlib.free(buf)             # <<<<<<<<<<<<<<
@@ -12995,7 +13195,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
       __pyx_t_23 = __pyx_lineno; __pyx_t_22 = __pyx_clineno; __pyx_t_26 = __pyx_filename;
       {
 
-        /* "src/llfuse/handlers.pxi":441
+        /* "src/llfuse/handlers.pxi":453
  *         ret = handle_exc('readdir', e, req)
  *     finally:
  *         if buf != NULL:             # <<<<<<<<<<<<<<
@@ -13005,7 +13205,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_t_21 = ((__pyx_v_buf != NULL) != 0);
         if (__pyx_t_21) {
 
-          /* "src/llfuse/handlers.pxi":442
+          /* "src/llfuse/handlers.pxi":454
  *     finally:
  *         if buf != NULL:
  *             stdlib.free(buf)             # <<<<<<<<<<<<<<
@@ -13034,7 +13234,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
     __pyx_L5:;
   }
 
-  /* "src/llfuse/handlers.pxi":444
+  /* "src/llfuse/handlers.pxi":456
  *             stdlib.free(buf)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -13044,21 +13244,21 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
   __pyx_t_21 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_21) {
 
-    /* "src/llfuse/handlers.pxi":445
+    /* "src/llfuse/handlers.pxi":457
  * 
  *     if ret != 0:
  *         log.error('fuse_readdir(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_releasedir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:
  */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_14 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -13071,17 +13271,17 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_14); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_14); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else {
-      __pyx_t_27 = PyTuple_New(1+1); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_27 = PyTuple_New(1+1); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_27);
       PyTuple_SET_ITEM(__pyx_t_27, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_27, 0+1, __pyx_t_14);
       __Pyx_GIVEREF(__pyx_t_14);
       __pyx_t_14 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_27, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_27, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
     }
@@ -13098,7 +13298,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_27 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_27 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_27);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_27, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -13109,7 +13309,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
     PyTuple_SET_ITEM(__pyx_t_27, 1+__pyx_t_13, __pyx_t_4);
     __Pyx_GIVEREF(__pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_27, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 445; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_27, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 457; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -13118,7 +13318,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
   }
   __pyx_L60:;
 
-  /* "src/llfuse/handlers.pxi":410
+  /* "src/llfuse/handlers.pxi":422
  *         log.error('fuse_opendir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_readdir (fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,             # <<<<<<<<<<<<<<
@@ -13148,7 +13348,7 @@ static void __pyx_f_6llfuse_4capi_fuse_readdir(fuse_req_t __pyx_v_req, CYTHON_UN
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":447
+/* "src/llfuse/handlers.pxi":459
  *         log.error('fuse_readdir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_releasedir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -13190,7 +13390,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
   #endif
   __Pyx_RefNannySetupContext("fuse_releasedir", 0);
 
-  /* "src/llfuse/handlers.pxi":450
+  /* "src/llfuse/handlers.pxi":462
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -13204,7 +13404,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":451
+      /* "src/llfuse/handlers.pxi":463
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -13212,11 +13412,11 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -13229,10 +13429,10 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -13246,16 +13446,16 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":452
+              /* "src/llfuse/handlers.pxi":464
  *     try:
  *         with lock:
  *             operations.releasedir(fi.fh)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_releasedir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_releasedir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 464; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 464; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -13268,17 +13468,17 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
                 }
               }
               if (!__pyx_t_8) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 464; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_GOTREF(__pyx_t_4);
               } else {
-                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 464; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                 PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_7);
                 __Pyx_GIVEREF(__pyx_t_7);
                 __pyx_t_7 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 452; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 464; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
               }
@@ -13296,7 +13496,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":451
+            /* "src/llfuse/handlers.pxi":463
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -13305,20 +13505,20 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_releasedir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_13);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_15 = ((!(__pyx_t_14 != 0)) != 0);
               if (__pyx_t_15) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -13326,7 +13526,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
                 __Pyx_XGIVEREF(__pyx_t_12);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_12);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_12 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -13352,7 +13552,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__23, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -13367,7 +13567,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":453
+      /* "src/llfuse/handlers.pxi":465
  *         with lock:
  *             operations.releasedir(fi.fh)
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -13387,20 +13587,20 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "src/llfuse/handlers.pxi":454
+    /* "src/llfuse/handlers.pxi":466
  *             operations.releasedir(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 466; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_16 = PyErr_ExceptionMatches(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     if (__pyx_t_16) {
       __Pyx_AddTraceback("llfuse.capi.fuse_releasedir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 454; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 466; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -13408,21 +13608,21 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":455
+        /* "src/llfuse/handlers.pxi":467
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('releasedir', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 467; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 455; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 467; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_16);
       }
 
-      /* "src/llfuse/handlers.pxi":454
+      /* "src/llfuse/handlers.pxi":466
  *             operations.releasedir(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -13475,7 +13675,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":456
+    /* "src/llfuse/handlers.pxi":468
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -13485,7 +13685,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_releasedir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 456; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_12);
@@ -13493,7 +13693,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":457
+        /* "src/llfuse/handlers.pxi":469
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('releasedir', e, req)             # <<<<<<<<<<<<<<
@@ -13503,7 +13703,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_releasedir, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":456
+      /* "src/llfuse/handlers.pxi":468
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -13538,7 +13738,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":459
+  /* "src/llfuse/handlers.pxi":471
  *         ret = handle_exc('releasedir', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -13548,21 +13748,21 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
   __pyx_t_15 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_15) {
 
-    /* "src/llfuse/handlers.pxi":460
+    /* "src/llfuse/handlers.pxi":472
  * 
  *     if ret != 0:
  *         log.error('fuse_releasedir(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_20 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -13575,17 +13775,17 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
       }
     }
     if (!__pyx_t_20) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_21);
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_20); __Pyx_GIVEREF(__pyx_t_20); __pyx_t_20 = NULL;
       PyTuple_SET_ITEM(__pyx_t_21, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     }
@@ -13602,7 +13802,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
         __pyx_t_22 = 1;
       }
     }
-    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_21);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -13613,7 +13813,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
     PyTuple_SET_ITEM(__pyx_t_21, 1+__pyx_t_22, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 460; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -13622,7 +13822,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":447
+  /* "src/llfuse/handlers.pxi":459
  *         log.error('fuse_readdir(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_releasedir (fuse_req_t req, fuse_ino_t ino, fuse_file_info *fi) with gil:             # <<<<<<<<<<<<<<
@@ -13649,7 +13849,7 @@ static void __pyx_f_6llfuse_4capi_fuse_releasedir(fuse_req_t __pyx_v_req, CYTHON
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":463
+/* "src/llfuse/handlers.pxi":475
  * 
  * 
  * cdef void fuse_fsyncdir (fuse_req_t req, fuse_ino_t ino, int datasync,             # <<<<<<<<<<<<<<
@@ -13691,7 +13891,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
   #endif
   __Pyx_RefNannySetupContext("fuse_fsyncdir", 0);
 
-  /* "src/llfuse/handlers.pxi":467
+  /* "src/llfuse/handlers.pxi":479
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -13705,7 +13905,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":468
+      /* "src/llfuse/handlers.pxi":480
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -13713,11 +13913,11 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -13730,10 +13930,10 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -13747,18 +13947,18 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":469
+              /* "src/llfuse/handlers.pxi":481
  *     try:
  *         with lock:
  *             operations.fsyncdir(fi.fh, datasync != 0)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_fsyncdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_fsyncdir); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 481; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_uint64_t(__pyx_v_fi->fh); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 481; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyBool_FromLong((__pyx_v_datasync != 0)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyBool_FromLong((__pyx_v_datasync != 0)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 481; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -13772,7 +13972,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 481; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -13783,7 +13983,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
               __Pyx_GIVEREF(__pyx_t_8);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 469; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 481; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -13801,7 +14001,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":468
+            /* "src/llfuse/handlers.pxi":480
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -13810,20 +14010,20 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_fsyncdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_15);
               __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_15);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_17 = ((!(__pyx_t_16 != 0)) != 0);
               if (__pyx_t_17) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -13831,7 +14031,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -13857,7 +14057,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__24, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -13872,7 +14072,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":470
+      /* "src/llfuse/handlers.pxi":482
  *         with lock:
  *             operations.fsyncdir(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -13893,20 +14093,20 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":471
+    /* "src/llfuse/handlers.pxi":483
  *             operations.fsyncdir(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 471; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 483; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_fsyncdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 471; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 483; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -13914,21 +14114,21 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":472
+        /* "src/llfuse/handlers.pxi":484
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('fsyncdir', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 472; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 484; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_18);
       }
 
-      /* "src/llfuse/handlers.pxi":471
+      /* "src/llfuse/handlers.pxi":483
  *             operations.fsyncdir(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -13982,7 +14182,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":473
+    /* "src/llfuse/handlers.pxi":485
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -13992,7 +14192,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_fsyncdir", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 473; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 485; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_14);
@@ -14000,7 +14200,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":474
+        /* "src/llfuse/handlers.pxi":486
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('fsyncdir', e, req)             # <<<<<<<<<<<<<<
@@ -14010,7 +14210,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_fsyncdir, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":473
+      /* "src/llfuse/handlers.pxi":485
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -14045,7 +14245,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":476
+  /* "src/llfuse/handlers.pxi":488
  *         ret = handle_exc('fsyncdir', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -14055,21 +14255,21 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
   __pyx_t_17 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_17) {
 
-    /* "src/llfuse/handlers.pxi":477
+    /* "src/llfuse/handlers.pxi":489
  * 
  *     if ret != 0:
  *         log.error('fuse_fsyncdir(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -14082,17 +14282,17 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -14109,7 +14309,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -14120,7 +14320,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 477; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 489; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -14129,7 +14329,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":463
+  /* "src/llfuse/handlers.pxi":475
  * 
  * 
  * cdef void fuse_fsyncdir (fuse_req_t req, fuse_ino_t ino, int datasync,             # <<<<<<<<<<<<<<
@@ -14156,7 +14356,7 @@ static void __pyx_f_6llfuse_4capi_fuse_fsyncdir(fuse_req_t __pyx_v_req, CYTHON_U
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":480
+/* "src/llfuse/handlers.pxi":492
  * 
  * 
  * cdef void fuse_statfs (fuse_req_t req, fuse_ino_t ino) with gil:             # <<<<<<<<<<<<<<
@@ -14200,7 +14400,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
   #endif
   __Pyx_RefNannySetupContext("fuse_statfs", 0);
 
-  /* "src/llfuse/handlers.pxi":485
+  /* "src/llfuse/handlers.pxi":497
  * 
  *     # We don't set all the components
  *     string.memset(&cstats, 0, sizeof(cstats))             # <<<<<<<<<<<<<<
@@ -14209,7 +14409,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
  */
   memset((&__pyx_v_cstats), 0, (sizeof(__pyx_v_cstats)));
 
-  /* "src/llfuse/handlers.pxi":486
+  /* "src/llfuse/handlers.pxi":498
  *     # We don't set all the components
  *     string.memset(&cstats, 0, sizeof(cstats))
  *     try:             # <<<<<<<<<<<<<<
@@ -14223,7 +14423,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":487
+      /* "src/llfuse/handlers.pxi":499
  *     string.memset(&cstats, 0, sizeof(cstats))
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -14231,11 +14431,11 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
  * 
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -14248,10 +14448,10 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -14265,14 +14465,14 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":488
+              /* "src/llfuse/handlers.pxi":500
  *     try:
  *         with lock:
  *             stats = operations.statfs()             # <<<<<<<<<<<<<<
  * 
  *         fill_statvfs(stats, &cstats)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_statfs); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 488; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_statfs); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 500; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
               __pyx_t_7 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -14285,10 +14485,10 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
                 }
               }
               if (__pyx_t_7) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 488; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 500; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
               } else {
-                __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 488; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 500; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               }
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -14305,7 +14505,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":487
+            /* "src/llfuse/handlers.pxi":499
  *     string.memset(&cstats, 0, sizeof(cstats))
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -14314,20 +14514,20 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_statfs", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_12);
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-              if (__pyx_t_13 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_13 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_14 = ((!(__pyx_t_13 != 0)) != 0);
               if (__pyx_t_14) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -14335,7 +14535,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
                 __Pyx_XGIVEREF(__pyx_t_7);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_7);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_7 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -14361,7 +14561,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__25, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -14376,19 +14576,19 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":490
+      /* "src/llfuse/handlers.pxi":502
  *             stats = operations.statfs()
  * 
  *         fill_statvfs(stats, &cstats)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_statfs(req, &cstats)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_stats)) { __Pyx_RaiseUnboundLocalError("stats"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 490; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_7 = __pyx_f_6llfuse_4capi_fill_statvfs(__pyx_v_stats, (&__pyx_v_cstats)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 490; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_stats)) { __Pyx_RaiseUnboundLocalError("stats"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_7 = __pyx_f_6llfuse_4capi_fill_statvfs(__pyx_v_stats, (&__pyx_v_cstats)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 502; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-      /* "src/llfuse/handlers.pxi":491
+      /* "src/llfuse/handlers.pxi":503
  * 
  *         fill_statvfs(stats, &cstats)
  *         ret = fuse_reply_statfs(req, &cstats)             # <<<<<<<<<<<<<<
@@ -14407,20 +14607,20 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "src/llfuse/handlers.pxi":492
+    /* "src/llfuse/handlers.pxi":504
  *         fill_statvfs(stats, &cstats)
  *         ret = fuse_reply_statfs(req, &cstats)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 492; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 504; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_15 = PyErr_ExceptionMatches(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     if (__pyx_t_15) {
       __Pyx_AddTraceback("llfuse.capi.fuse_statfs", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 492; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 504; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -14428,21 +14628,21 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":493
+        /* "src/llfuse/handlers.pxi":505
  *         ret = fuse_reply_statfs(req, &cstats)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('statfs', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 493; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 505; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_15 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_15 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 493; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_15 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_15 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 505; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_15);
       }
 
-      /* "src/llfuse/handlers.pxi":492
+      /* "src/llfuse/handlers.pxi":504
  *         fill_statvfs(stats, &cstats)
  *         ret = fuse_reply_statfs(req, &cstats)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -14494,7 +14694,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":494
+    /* "src/llfuse/handlers.pxi":506
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -14504,7 +14704,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
     __pyx_t_16 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_16) {
       __Pyx_AddTraceback("llfuse.capi.fuse_statfs", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 494; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 506; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_7);
@@ -14512,7 +14712,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":495
+        /* "src/llfuse/handlers.pxi":507
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('statfs', e, req)             # <<<<<<<<<<<<<<
@@ -14522,7 +14722,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_statfs, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":494
+      /* "src/llfuse/handlers.pxi":506
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -14557,7 +14757,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":497
+  /* "src/llfuse/handlers.pxi":509
  *         ret = handle_exc('statfs', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -14567,21 +14767,21 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
   __pyx_t_14 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_14) {
 
-    /* "src/llfuse/handlers.pxi":498
+    /* "src/llfuse/handlers.pxi":510
  * 
  *     if ret != 0:
  *         log.error('fuse_statfs(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * IF TARGET_PLATFORM == 'darwin':
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_19 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_19 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_19);
     __pyx_t_20 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -14594,17 +14794,17 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
       }
     }
     if (!__pyx_t_20) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_19); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_19); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_21);
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_20); __Pyx_GIVEREF(__pyx_t_20); __pyx_t_20 = NULL;
       PyTuple_SET_ITEM(__pyx_t_21, 0+1, __pyx_t_19);
       __Pyx_GIVEREF(__pyx_t_19);
       __pyx_t_19 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     }
@@ -14621,7 +14821,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
         __pyx_t_22 = 1;
       }
     }
-    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_21);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -14632,7 +14832,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
     PyTuple_SET_ITEM(__pyx_t_21, 1+__pyx_t_22, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 498; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -14641,7 +14841,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":480
+  /* "src/llfuse/handlers.pxi":492
  * 
  * 
  * cdef void fuse_statfs (fuse_req_t req, fuse_ino_t ino) with gil:             # <<<<<<<<<<<<<<
@@ -14669,7 +14869,7 @@ static void __pyx_f_6llfuse_4capi_fuse_statfs(fuse_req_t __pyx_v_req, CYTHON_UNU
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":501
+/* "src/llfuse/handlers.pxi":513
  * 
  * IF TARGET_PLATFORM == 'darwin':
  *     cdef void fuse_setxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -14697,7 +14897,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
   #endif
   __Pyx_RefNannySetupContext("fuse_setxattr_darwin", 0);
 
-  /* "src/llfuse/handlers.pxi":506
+  /* "src/llfuse/handlers.pxi":518
  *         cdef int ret
  * 
  *         if position != 0:             # <<<<<<<<<<<<<<
@@ -14707,19 +14907,19 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
   __pyx_t_1 = ((__pyx_v_position != 0) != 0);
   if (__pyx_t_1) {
 
-    /* "src/llfuse/handlers.pxi":507
+    /* "src/llfuse/handlers.pxi":519
  * 
  *         if position != 0:
  *             log.error('fuse_setxattr(): non-zero position (%d) not supported', position)             # <<<<<<<<<<<<<<
  *             ret = fuse_reply_err(req, errno.EIO)
  *             if ret != 0:
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 507; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 519; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 507; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 519; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_From_uint32_t(__pyx_v_position); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 507; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyInt_From_uint32_t(__pyx_v_position); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 519; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_5 = NULL;
     __pyx_t_6 = 0;
@@ -14733,7 +14933,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
         __pyx_t_6 = 1;
       }
     }
-    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 507; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 519; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     if (__pyx_t_5) {
       PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __Pyx_GIVEREF(__pyx_t_5); __pyx_t_5 = NULL;
@@ -14744,13 +14944,13 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
     PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_3);
     __pyx_t_3 = 0;
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 507; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 519; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "src/llfuse/handlers.pxi":508
+    /* "src/llfuse/handlers.pxi":520
  *         if position != 0:
  *             log.error('fuse_setxattr(): non-zero position (%d) not supported', position)
  *             ret = fuse_reply_err(req, errno.EIO)             # <<<<<<<<<<<<<<
@@ -14759,7 +14959,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
  */
     __pyx_v_ret = fuse_reply_err(__pyx_v_req, EIO);
 
-    /* "src/llfuse/handlers.pxi":509
+    /* "src/llfuse/handlers.pxi":521
  *             log.error('fuse_setxattr(): non-zero position (%d) not supported', position)
  *             ret = fuse_reply_err(req, errno.EIO)
  *             if ret != 0:             # <<<<<<<<<<<<<<
@@ -14769,21 +14969,21 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
     __pyx_t_1 = ((__pyx_v_ret != 0) != 0);
     if (__pyx_t_1) {
 
-      /* "src/llfuse/handlers.pxi":510
+      /* "src/llfuse/handlers.pxi":522
  *             ret = fuse_reply_err(req, errno.EIO)
  *             if ret != 0:
  *                 log.error('fuse_setxattr(): fuse_reply_err failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  *             return
  * 
  */
-      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __pyx_t_8 = NULL;
       if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -14796,17 +14996,17 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
         }
       }
       if (!__pyx_t_8) {
-        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_4);
       } else {
-        __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
         PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_5);
         __Pyx_GIVEREF(__pyx_t_5);
         __pyx_t_5 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       }
@@ -14823,7 +15023,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
           __pyx_t_6 = 1;
         }
       }
-      __pyx_t_9 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_9 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_9);
       if (__pyx_t_3) {
         PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __Pyx_GIVEREF(__pyx_t_3); __pyx_t_3 = NULL;
@@ -14834,7 +15034,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
       PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_6, __pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_4);
       __pyx_t_4 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 510; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 522; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -14843,7 +15043,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
     }
     __pyx_L4:;
 
-    /* "src/llfuse/handlers.pxi":511
+    /* "src/llfuse/handlers.pxi":523
  *             if ret != 0:
  *                 log.error('fuse_setxattr(): fuse_reply_err failed with %s', strerror(-ret))
  *             return             # <<<<<<<<<<<<<<
@@ -14853,7 +15053,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
     goto __pyx_L0;
   }
 
-  /* "src/llfuse/handlers.pxi":517
+  /* "src/llfuse/handlers.pxi":529
  *         # passes through.
  *         # (cf. https://groups.google.com/d/msg/fuse4x/bRnh7J_nsts/Z7raJ06DB4sJ)
  *         flags &= ~(xattr.XATTR_NOFOLLOW | xattr.XATTR_NODEFAULT |             # <<<<<<<<<<<<<<
@@ -14862,7 +15062,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
  */
   __pyx_v_flags = (__pyx_v_flags & (~((XATTR_NOFOLLOW | XATTR_NODEFAULT) | XATTR_NOSECURITY)));
 
-  /* "src/llfuse/handlers.pxi":519
+  /* "src/llfuse/handlers.pxi":531
  *         flags &= ~(xattr.XATTR_NOFOLLOW | xattr.XATTR_NODEFAULT |
  *                    xattr.XATTR_NOSECURITY)
  *         fuse_setxattr(req, ino, cname, cvalue, size, flags)             # <<<<<<<<<<<<<<
@@ -14871,7 +15071,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
  */
   __pyx_f_6llfuse_4capi_fuse_setxattr(__pyx_v_req, __pyx_v_ino, __pyx_v_cname, __pyx_v_cvalue, __pyx_v_size, __pyx_v_flags);
 
-  /* "src/llfuse/handlers.pxi":501
+  /* "src/llfuse/handlers.pxi":513
  * 
  * IF TARGET_PLATFORM == 'darwin':
  *     cdef void fuse_setxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -14897,7 +15097,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr_darwin(fuse_req_t __pyx_v_req, f
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":522
+/* "src/llfuse/handlers.pxi":534
  * 
  * 
  * cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -14949,7 +15149,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
   #endif
   __Pyx_RefNannySetupContext("fuse_setxattr", 0);
 
-  /* "src/llfuse/handlers.pxi":526
+  /* "src/llfuse/handlers.pxi":538
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -14963,31 +15163,31 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":527
+      /* "src/llfuse/handlers.pxi":539
  * 
  *     try:
  *         name = PyBytes_FromString(cname)             # <<<<<<<<<<<<<<
  *         value = PyBytes_FromStringAndSize(cvalue, size)
  * 
  */
-      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 527; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 539; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_name = ((PyObject*)__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":528
+      /* "src/llfuse/handlers.pxi":540
  *     try:
  *         name = PyBytes_FromString(cname)
  *         value = PyBytes_FromStringAndSize(cvalue, size)             # <<<<<<<<<<<<<<
  * 
  *         # Special case for deadlock debugging
  */
-      __pyx_t_4 = PyBytes_FromStringAndSize(__pyx_v_cvalue, __pyx_v_size); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 528; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = PyBytes_FromStringAndSize(__pyx_v_cvalue, __pyx_v_size); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 540; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_value = ((PyObject*)__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":531
+      /* "src/llfuse/handlers.pxi":543
  * 
  *         # Special case for deadlock debugging
  *         if ino == FUSE_ROOT_ID and string.strcmp(cname, 'fuse_stacktrace') == 0:             # <<<<<<<<<<<<<<
@@ -15005,14 +15205,14 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_L12_bool_binop_done:;
       if (__pyx_t_5) {
 
-        /* "src/llfuse/handlers.pxi":532
+        /* "src/llfuse/handlers.pxi":544
  *         # Special case for deadlock debugging
  *         if ino == FUSE_ROOT_ID and string.strcmp(cname, 'fuse_stacktrace') == 0:
  *             operations.stacktrace()             # <<<<<<<<<<<<<<
  *         else:
  *             IF TARGET_PLATFORM == 'freebsd':
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_stacktrace); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 532; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_stacktrace); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 544; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -15025,10 +15225,10 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 532; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 544; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 532; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 544; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -15037,7 +15237,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":540
+        /* "src/llfuse/handlers.pxi":552
  *             ELSE:
  *                 # Make sure we know all the flags
  *                 if flags & ~(xattr.XATTR_CREATE | xattr.XATTR_REPLACE):             # <<<<<<<<<<<<<<
@@ -15047,32 +15247,32 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_t_5 = ((__pyx_v_flags & (~(XATTR_CREATE | XATTR_REPLACE))) != 0);
         if (__pyx_t_5) {
 
-          /* "src/llfuse/handlers.pxi":541
+          /* "src/llfuse/handlers.pxi":553
  *                 # Make sure we know all the flags
  *                 if flags & ~(xattr.XATTR_CREATE | xattr.XATTR_REPLACE):
  *                     raise ValueError('unknown flag(s): %o' % flags)             # <<<<<<<<<<<<<<
  * 
  *                 with lock:
  */
-          __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_flags); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 541; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_flags); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_7 = PyUnicode_Format(__pyx_kp_u_unknown_flag_s_o, __pyx_t_4); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 541; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_7 = PyUnicode_Format(__pyx_kp_u_unknown_flag_s_o, __pyx_t_4); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 541; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_4);
           PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_7);
           __Pyx_GIVEREF(__pyx_t_7);
           __pyx_t_7 = 0;
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 541; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_t_4, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_Raise(__pyx_t_7, 0, 0, 0);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 541; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
 
-        /* "src/llfuse/handlers.pxi":543
+        /* "src/llfuse/handlers.pxi":555
  *                     raise ValueError('unknown flag(s): %o' % flags)
  * 
  *                 with lock:             # <<<<<<<<<<<<<<
@@ -15080,11 +15280,11 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
  *                         try:
  */
         /*with:*/ {
-          __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_7);
-          __pyx_t_9 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_n_s_exit); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __pyx_t_9 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_n_s_exit); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
           __Pyx_GOTREF(__pyx_t_9);
-          __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_n_s_enter); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L15_error;}
+          __pyx_t_8 = __Pyx_PyObject_LookupSpecial(__pyx_t_7, __pyx_n_s_enter); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L15_error;}
           __Pyx_GOTREF(__pyx_t_8);
           __pyx_t_10 = NULL;
           if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_8))) {
@@ -15097,10 +15297,10 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
             }
           }
           if (__pyx_t_10) {
-            __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_10); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L15_error;}
+            __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_10); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L15_error;}
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           } else {
-            __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_8); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L15_error;}
+            __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_8); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L15_error;}
           }
           __Pyx_GOTREF(__pyx_t_4);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -15114,7 +15314,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
               __Pyx_XGOTREF(__pyx_t_13);
               /*try:*/ {
 
-                /* "src/llfuse/handlers.pxi":544
+                /* "src/llfuse/handlers.pxi":556
  * 
  *                 with lock:
  *                     if flags & xattr.XATTR_CREATE: # Attribute must not exist             # <<<<<<<<<<<<<<
@@ -15124,7 +15324,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                 __pyx_t_5 = ((__pyx_v_flags & XATTR_CREATE) != 0);
                 if (__pyx_t_5) {
 
-                  /* "src/llfuse/handlers.pxi":545
+                  /* "src/llfuse/handlers.pxi":557
  *                 with lock:
  *                     if flags & xattr.XATTR_CREATE: # Attribute must not exist
  *                         try:             # <<<<<<<<<<<<<<
@@ -15138,16 +15338,16 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                     __Pyx_XGOTREF(__pyx_t_16);
                     /*try:*/ {
 
-                      /* "src/llfuse/handlers.pxi":546
+                      /* "src/llfuse/handlers.pxi":558
  *                     if flags & xattr.XATTR_CREATE: # Attribute must not exist
  *                         try:
  *                             operations.getxattr(ino, name)             # <<<<<<<<<<<<<<
  *                         except FUSEError as e:
  *                             if e.errno != errno.ENOATTR:
  */
-                      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_getxattr); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 546; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
+                      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_getxattr); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 558; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
                       __Pyx_GOTREF(__pyx_t_4);
-                      __pyx_t_8 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 546; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
+                      __pyx_t_8 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 558; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
                       __Pyx_GOTREF(__pyx_t_8);
                       __pyx_t_10 = NULL;
                       __pyx_t_17 = 0;
@@ -15161,7 +15361,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                           __pyx_t_17 = 1;
                         }
                       }
-                      __pyx_t_18 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 546; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
+                      __pyx_t_18 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 558; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
                       __Pyx_GOTREF(__pyx_t_18);
                       if (__pyx_t_10) {
                         PyTuple_SET_ITEM(__pyx_t_18, 0, __pyx_t_10); __Pyx_GIVEREF(__pyx_t_10); __pyx_t_10 = NULL;
@@ -15172,7 +15372,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                       PyTuple_SET_ITEM(__pyx_t_18, 1+__pyx_t_17, __pyx_v_name);
                       __Pyx_GIVEREF(__pyx_v_name);
                       __pyx_t_8 = 0;
-                      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_18, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 546; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
+                      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_18, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 558; __pyx_clineno = __LINE__; goto __pyx_L30_error;}
                       __Pyx_GOTREF(__pyx_t_7);
                       __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
                       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -15180,16 +15380,16 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                     }
                     /*else:*/ {
 
-                      /* "src/llfuse/handlers.pxi":551
+                      /* "src/llfuse/handlers.pxi":563
  *                                 raise
  *                         else:
  *                             raise FUSEError(errno.EEXIST)             # <<<<<<<<<<<<<<
  * 
  *                     elif flags & xattr.XATTR_REPLACE: # Attribute must exist
  */
-                      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                       __Pyx_GOTREF(__pyx_t_4);
-                      __pyx_t_18 = __Pyx_PyInt_From_int(EEXIST); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                      __pyx_t_18 = __Pyx_PyInt_From_int(EEXIST); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                       __Pyx_GOTREF(__pyx_t_18);
                       __pyx_t_8 = NULL;
                       if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -15202,24 +15402,24 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                         }
                       }
                       if (!__pyx_t_8) {
-                        __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_18); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                        __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_18); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                         __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
                         __Pyx_GOTREF(__pyx_t_7);
                       } else {
-                        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                         __Pyx_GOTREF(__pyx_t_10);
                         PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                         PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_18);
                         __Pyx_GIVEREF(__pyx_t_18);
                         __pyx_t_18 = 0;
-                        __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_10, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                        __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_10, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                         __Pyx_GOTREF(__pyx_t_7);
                         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
                       }
                       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                       __Pyx_Raise(__pyx_t_7, 0, 0, 0);
                       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-                      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 551; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 563; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                     }
                     __pyx_L30_error:;
                     __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -15228,20 +15428,20 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
                     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-                    /* "src/llfuse/handlers.pxi":547
+                    /* "src/llfuse/handlers.pxi":559
  *                         try:
  *                             operations.getxattr(ino, name)
  *                         except FUSEError as e:             # <<<<<<<<<<<<<<
  *                             if e.errno != errno.ENOATTR:
  *                                 raise
  */
-                    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 547; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                     __Pyx_GOTREF(__pyx_t_7);
                     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_t_7);
                     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                     if (__pyx_t_19) {
                       __Pyx_AddTraceback("llfuse.capi.fuse_setxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                      if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_4, &__pyx_t_10) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 547; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
+                      if (__Pyx_GetException(&__pyx_t_7, &__pyx_t_4, &__pyx_t_10) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L32_except_error;}
                       __Pyx_GOTREF(__pyx_t_7);
                       __Pyx_GOTREF(__pyx_t_4);
                       __Pyx_GOTREF(__pyx_t_10);
@@ -15249,25 +15449,25 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                       __pyx_v_e = __pyx_t_4;
                       /*try:*/ {
 
-                        /* "src/llfuse/handlers.pxi":548
+                        /* "src/llfuse/handlers.pxi":560
  *                             operations.getxattr(ino, name)
  *                         except FUSEError as e:
  *                             if e.errno != errno.ENOATTR:             # <<<<<<<<<<<<<<
  *                                 raise
  *                         else:
  */
-                        __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 548; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+                        __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
                         __Pyx_GOTREF(__pyx_t_18);
-                        __pyx_t_8 = __Pyx_PyInt_From_int(ENOATTR); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 548; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+                        __pyx_t_8 = __Pyx_PyInt_From_int(ENOATTR); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
                         __Pyx_GOTREF(__pyx_t_8);
-                        __pyx_t_20 = PyObject_RichCompare(__pyx_t_18, __pyx_t_8, Py_NE); __Pyx_XGOTREF(__pyx_t_20); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 548; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+                        __pyx_t_20 = PyObject_RichCompare(__pyx_t_18, __pyx_t_8, Py_NE); __Pyx_XGOTREF(__pyx_t_20); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
                         __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
                         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                        __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_20); if (unlikely(__pyx_t_5 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 548; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+                        __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_20); if (unlikely(__pyx_t_5 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
                         __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
                         if (__pyx_t_5) {
 
-                          /* "src/llfuse/handlers.pxi":549
+                          /* "src/llfuse/handlers.pxi":561
  *                         except FUSEError as e:
  *                             if e.errno != errno.ENOATTR:
  *                                 raise             # <<<<<<<<<<<<<<
@@ -15279,11 +15479,11 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                           __Pyx_XGIVEREF(__pyx_t_10);
                           __Pyx_ErrRestore(__pyx_t_7, __pyx_t_4, __pyx_t_10);
                           __pyx_t_7 = 0; __pyx_t_4 = 0; __pyx_t_10 = 0; 
-                          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 549; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
+                          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 561; __pyx_clineno = __LINE__; goto __pyx_L43_error;}
                         }
                       }
 
-                      /* "src/llfuse/handlers.pxi":547
+                      /* "src/llfuse/handlers.pxi":559
  *                         try:
  *                             operations.getxattr(ino, name)
  *                         except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -15352,7 +15552,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                   goto __pyx_L29;
                 }
 
-                /* "src/llfuse/handlers.pxi":553
+                /* "src/llfuse/handlers.pxi":565
  *                             raise FUSEError(errno.EEXIST)
  * 
  *                     elif flags & xattr.XATTR_REPLACE: # Attribute must exist             # <<<<<<<<<<<<<<
@@ -15362,16 +15562,16 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                 __pyx_t_5 = ((__pyx_v_flags & XATTR_REPLACE) != 0);
                 if (__pyx_t_5) {
 
-                  /* "src/llfuse/handlers.pxi":554
+                  /* "src/llfuse/handlers.pxi":566
  * 
  *                     elif flags & xattr.XATTR_REPLACE: # Attribute must exist
  *                         operations.getxattr(ino, name)             # <<<<<<<<<<<<<<
  * 
  *                     operations.setxattr(ino, name, value)
  */
-                  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_getxattr); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_getxattr); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                   __Pyx_GOTREF(__pyx_t_4);
-                  __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                  __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                   __Pyx_GOTREF(__pyx_t_7);
                   __pyx_t_20 = NULL;
                   __pyx_t_17 = 0;
@@ -15385,7 +15585,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                       __pyx_t_17 = 1;
                     }
                   }
-                  __pyx_t_8 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                  __pyx_t_8 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                   __Pyx_GOTREF(__pyx_t_8);
                   if (__pyx_t_20) {
                     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_20); __Pyx_GIVEREF(__pyx_t_20); __pyx_t_20 = NULL;
@@ -15396,7 +15596,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                   PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_17, __pyx_v_name);
                   __Pyx_GIVEREF(__pyx_v_name);
                   __pyx_t_7 = 0;
-                  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 554; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_8, NULL); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 566; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                   __Pyx_GOTREF(__pyx_t_10);
                   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
                   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -15405,16 +15605,16 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                 }
                 __pyx_L29:;
 
-                /* "src/llfuse/handlers.pxi":556
+                /* "src/llfuse/handlers.pxi":568
  *                         operations.getxattr(ino, name)
  * 
  *                     operations.setxattr(ino, name, value)             # <<<<<<<<<<<<<<
  * 
  *         ret = fuse_reply_err(req, 0)
  */
-                __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_setxattr); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 556; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_setxattr); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                 __Pyx_GOTREF(__pyx_t_4);
-                __pyx_t_8 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 556; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                __pyx_t_8 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                 __Pyx_GOTREF(__pyx_t_8);
                 __pyx_t_7 = NULL;
                 __pyx_t_17 = 0;
@@ -15428,7 +15628,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                     __pyx_t_17 = 1;
                   }
                 }
-                __pyx_t_20 = PyTuple_New(3+__pyx_t_17); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 556; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                __pyx_t_20 = PyTuple_New(3+__pyx_t_17); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                 __Pyx_GOTREF(__pyx_t_20);
                 if (__pyx_t_7) {
                   PyTuple_SET_ITEM(__pyx_t_20, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -15442,7 +15642,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                 PyTuple_SET_ITEM(__pyx_t_20, 2+__pyx_t_17, __pyx_v_value);
                 __Pyx_GIVEREF(__pyx_v_value);
                 __pyx_t_8 = 0;
-                __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_20, NULL); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 556; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
+                __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_20, NULL); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 568; __pyx_clineno = __LINE__; goto __pyx_L21_error;}
                 __Pyx_GOTREF(__pyx_t_10);
                 __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
                 __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -15460,7 +15660,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
               __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-              /* "src/llfuse/handlers.pxi":543
+              /* "src/llfuse/handlers.pxi":555
  *                     raise ValueError('unknown flag(s): %o' % flags)
  * 
  *                 with lock:             # <<<<<<<<<<<<<<
@@ -15469,20 +15669,20 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
  */
               /*except:*/ {
                 __Pyx_AddTraceback("llfuse.capi.fuse_setxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-                if (__Pyx_GetException(&__pyx_t_10, &__pyx_t_4, &__pyx_t_20) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
+                if (__Pyx_GetException(&__pyx_t_10, &__pyx_t_4, &__pyx_t_20) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
                 __Pyx_GOTREF(__pyx_t_10);
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_GOTREF(__pyx_t_20);
-                __pyx_t_8 = PyTuple_Pack(3, __pyx_t_10, __pyx_t_4, __pyx_t_20); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
+                __pyx_t_8 = PyTuple_Pack(3, __pyx_t_10, __pyx_t_4, __pyx_t_20); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
                 __Pyx_GOTREF(__pyx_t_8);
                 __pyx_t_16 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, NULL);
                 __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
                 __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-                if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
+                if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
                 __Pyx_GOTREF(__pyx_t_16);
                 __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_16);
                 __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-                if (__pyx_t_5 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
+                if (__pyx_t_5 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
                 __pyx_t_6 = ((!(__pyx_t_5 != 0)) != 0);
                 if (__pyx_t_6) {
                   __Pyx_GIVEREF(__pyx_t_10);
@@ -15490,7 +15690,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
                   __Pyx_XGIVEREF(__pyx_t_20);
                   __Pyx_ErrRestore(__pyx_t_10, __pyx_t_4, __pyx_t_20);
                   __pyx_t_10 = 0; __pyx_t_4 = 0; __pyx_t_20 = 0; 
-                  {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
+                  {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L23_except_error;}
                 }
                 __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
                 __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -15516,7 +15716,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
               if (__pyx_t_9) {
                 __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_tuple__26, NULL);
                 __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-                if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+                if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
                 __Pyx_GOTREF(__pyx_t_13);
                 __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
               }
@@ -15533,7 +15733,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       }
       __pyx_L11:;
 
-      /* "src/llfuse/handlers.pxi":558
+      /* "src/llfuse/handlers.pxi":570
  *                     operations.setxattr(ino, name, value)
  * 
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -15554,20 +15754,20 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
 
-    /* "src/llfuse/handlers.pxi":559
+    /* "src/llfuse/handlers.pxi":571
  * 
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_20 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_20 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_20);
     __pyx_t_21 = PyErr_ExceptionMatches(__pyx_t_20);
     __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
     if (__pyx_t_21) {
       __Pyx_AddTraceback("llfuse.capi.fuse_setxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_20, &__pyx_t_4, &__pyx_t_10) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 559; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_20, &__pyx_t_4, &__pyx_t_10) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 571; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_20);
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_10);
@@ -15575,21 +15775,21 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       __Pyx_XDECREF_SET(__pyx_v_e, __pyx_t_4);
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":560
+        /* "src/llfuse/handlers.pxi":572
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('setxattr', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L59_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L59_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_21 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_21 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 560; __pyx_clineno = __LINE__; goto __pyx_L59_error;}
+        __pyx_t_21 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_21 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 572; __pyx_clineno = __LINE__; goto __pyx_L59_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_21);
       }
 
-      /* "src/llfuse/handlers.pxi":559
+      /* "src/llfuse/handlers.pxi":571
  * 
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -15643,7 +15843,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":561
+    /* "src/llfuse/handlers.pxi":573
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -15653,7 +15853,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_setxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_10, &__pyx_t_4, &__pyx_t_20) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 561; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_10, &__pyx_t_4, &__pyx_t_20) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_20);
@@ -15661,7 +15861,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       __Pyx_XDECREF_SET(__pyx_v_e, __pyx_t_4);
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":562
+        /* "src/llfuse/handlers.pxi":574
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('setxattr', e, req)             # <<<<<<<<<<<<<<
@@ -15671,7 +15871,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_setxattr, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":561
+      /* "src/llfuse/handlers.pxi":573
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -15706,7 +15906,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":564
+  /* "src/llfuse/handlers.pxi":576
  *         ret = handle_exc('setxattr', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -15716,21 +15916,21 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
   __pyx_t_6 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_6) {
 
-    /* "src/llfuse/handlers.pxi":565
+    /* "src/llfuse/handlers.pxi":577
  * 
  *     if ret != 0:
  *         log.error('fuse_setxattr(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * IF TARGET_PLATFORM == 'darwin':
  */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_18 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -15743,17 +15943,17 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
       }
     }
     if (!__pyx_t_18) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_4);
     } else {
-      __pyx_t_30 = PyTuple_New(1+1); if (unlikely(!__pyx_t_30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_30 = PyTuple_New(1+1); if (unlikely(!__pyx_t_30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_30);
       PyTuple_SET_ITEM(__pyx_t_30, 0, __pyx_t_18); __Pyx_GIVEREF(__pyx_t_18); __pyx_t_18 = NULL;
       PyTuple_SET_ITEM(__pyx_t_30, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_30, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_30, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_30); __pyx_t_30 = 0;
     }
@@ -15770,7 +15970,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_t_17 = 1;
       }
     }
-    __pyx_t_30 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_30 = PyTuple_New(2+__pyx_t_17); if (unlikely(!__pyx_t_30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_30);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_30, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -15781,7 +15981,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
     PyTuple_SET_ITEM(__pyx_t_30, 1+__pyx_t_17, __pyx_t_4);
     __Pyx_GIVEREF(__pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_20 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_30, NULL); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 565; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_20 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_30, NULL); if (unlikely(!__pyx_t_20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 577; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_20);
     __Pyx_DECREF(__pyx_t_30); __pyx_t_30 = 0;
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -15790,7 +15990,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
   }
   __pyx_L72:;
 
-  /* "src/llfuse/handlers.pxi":522
+  /* "src/llfuse/handlers.pxi":534
  * 
  * 
  * cdef void fuse_setxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -15819,7 +16019,7 @@ static void __pyx_f_6llfuse_4capi_fuse_setxattr(fuse_req_t __pyx_v_req, fuse_ino
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":568
+/* "src/llfuse/handlers.pxi":580
  * 
  * IF TARGET_PLATFORM == 'darwin':
  *     cdef void fuse_getxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -15847,7 +16047,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
   #endif
   __Pyx_RefNannySetupContext("fuse_getxattr_darwin", 0);
 
-  /* "src/llfuse/handlers.pxi":572
+  /* "src/llfuse/handlers.pxi":584
  *         cdef int ret
  * 
  *         if position != 0:             # <<<<<<<<<<<<<<
@@ -15857,21 +16057,21 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
   __pyx_t_1 = ((__pyx_v_position != 0) != 0);
   if (__pyx_t_1) {
 
-    /* "src/llfuse/handlers.pxi":573
+    /* "src/llfuse/handlers.pxi":585
  * 
  *         if position != 0:
  *             log.error('fuse_getxattr(): non-zero position (%d) not supported' % position)             # <<<<<<<<<<<<<<
  *             ret = fuse_reply_err(req, errno.EIO)
  *             if ret != 0:
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_From_uint32_t(__pyx_v_position); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = __Pyx_PyInt_From_uint32_t(__pyx_v_position); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = PyUnicode_Format(__pyx_kp_u_fuse_getxattr_non_zero_position, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = PyUnicode_Format(__pyx_kp_u_fuse_getxattr_non_zero_position, __pyx_t_3); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_3 = NULL;
@@ -15885,24 +16085,24 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
       }
     }
     if (!__pyx_t_3) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
-      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3); __Pyx_GIVEREF(__pyx_t_3); __pyx_t_3 = NULL;
       PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 573; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 585; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "src/llfuse/handlers.pxi":574
+    /* "src/llfuse/handlers.pxi":586
  *         if position != 0:
  *             log.error('fuse_getxattr(): non-zero position (%d) not supported' % position)
  *             ret = fuse_reply_err(req, errno.EIO)             # <<<<<<<<<<<<<<
@@ -15911,7 +16111,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
  */
     __pyx_v_ret = fuse_reply_err(__pyx_v_req, EIO);
 
-    /* "src/llfuse/handlers.pxi":575
+    /* "src/llfuse/handlers.pxi":587
  *             log.error('fuse_getxattr(): non-zero position (%d) not supported' % position)
  *             ret = fuse_reply_err(req, errno.EIO)
  *             if ret != 0:             # <<<<<<<<<<<<<<
@@ -15921,21 +16121,21 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
     __pyx_t_1 = ((__pyx_v_ret != 0) != 0);
     if (__pyx_t_1) {
 
-      /* "src/llfuse/handlers.pxi":576
+      /* "src/llfuse/handlers.pxi":588
  *             ret = fuse_reply_err(req, errno.EIO)
  *             if ret != 0:
  *                 log.error('fuse_getxattr(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  *         else:
  *             fuse_getxattr(req, ino, cname, size)
  */
-      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_3 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_3 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_7 = NULL;
       if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_5))) {
@@ -15948,17 +16148,17 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
         }
       }
       if (!__pyx_t_7) {
-        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_GOTREF(__pyx_t_4);
       } else {
-        __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_8);
         PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
         PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_3);
         __Pyx_GIVEREF(__pyx_t_3);
         __pyx_t_3 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       }
@@ -15975,7 +16175,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
           __pyx_t_9 = 1;
         }
       }
-      __pyx_t_8 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_8 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_5) {
         PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5); __Pyx_GIVEREF(__pyx_t_5); __pyx_t_5 = NULL;
@@ -15986,7 +16186,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
       PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_9, __pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_4);
       __pyx_t_4 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 576; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -15998,7 +16198,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
   }
   /*else*/ {
 
-    /* "src/llfuse/handlers.pxi":578
+    /* "src/llfuse/handlers.pxi":590
  *                 log.error('fuse_getxattr(): fuse_reply_* failed with %s', strerror(-ret))
  *         else:
  *             fuse_getxattr(req, ino, cname, size)             # <<<<<<<<<<<<<<
@@ -16009,7 +16209,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
   }
   __pyx_L3:;
 
-  /* "src/llfuse/handlers.pxi":568
+  /* "src/llfuse/handlers.pxi":580
  * 
  * IF TARGET_PLATFORM == 'darwin':
  *     cdef void fuse_getxattr_darwin (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -16035,7 +16235,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr_darwin(fuse_req_t __pyx_v_req, f
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":580
+/* "src/llfuse/handlers.pxi":592
  *             fuse_getxattr(req, ino, cname, size)
  * 
  * cdef void fuse_getxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -16081,7 +16281,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
   #endif
   __Pyx_RefNannySetupContext("fuse_getxattr", 0);
 
-  /* "src/llfuse/handlers.pxi":585
+  /* "src/llfuse/handlers.pxi":597
  *     cdef ssize_t len_
  *     cdef char *cbuf
  *     try:             # <<<<<<<<<<<<<<
@@ -16095,19 +16295,19 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":586
+      /* "src/llfuse/handlers.pxi":598
  *     cdef char *cbuf
  *     try:
  *         name = PyBytes_FromString(cname)             # <<<<<<<<<<<<<<
  *         with lock:
  *             buf = operations.getxattr(ino, name)
  */
-      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 586; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 598; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_name = ((PyObject*)__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":587
+      /* "src/llfuse/handlers.pxi":599
  *     try:
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -16115,11 +16315,11 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -16132,10 +16332,10 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -16149,16 +16349,16 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":588
+              /* "src/llfuse/handlers.pxi":600
  *         name = PyBytes_FromString(cname)
  *         with lock:
  *             buf = operations.getxattr(ino, name)             # <<<<<<<<<<<<<<
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  * 
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_getxattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_getxattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 600; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 600; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               __pyx_t_12 = 0;
@@ -16172,7 +16372,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
                   __pyx_t_12 = 1;
                 }
               }
-              __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 600; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_13);
               if (__pyx_t_8) {
                 PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -16183,7 +16383,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
               PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_v_name);
               __Pyx_GIVEREF(__pyx_v_name);
               __pyx_t_7 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 588; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 600; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -16201,7 +16401,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":587
+            /* "src/llfuse/handlers.pxi":599
  *     try:
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -16210,20 +16410,20 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_getxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_13);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_13); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_13); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_14);
               __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_14);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-              if (__pyx_t_15 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_15 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_16 = ((!(__pyx_t_15 != 0)) != 0);
               if (__pyx_t_16) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -16231,7 +16431,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
                 __Pyx_XGIVEREF(__pyx_t_13);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_13);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_13 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -16257,7 +16457,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__27, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -16272,17 +16472,17 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":589
+      /* "src/llfuse/handlers.pxi":601
  *         with lock:
  *             buf = operations.getxattr(ino, name)
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)             # <<<<<<<<<<<<<<
  * 
  *         if size == 0:
  */
-      if (unlikely(!__pyx_v_buf)) { __Pyx_RaiseUnboundLocalError("buf"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 589; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_17 = PyBytes_AsStringAndSize(__pyx_v_buf, (&__pyx_v_cbuf), ((Py_ssize_t *)(&__pyx_v_len_))); if (unlikely(__pyx_t_17 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 589; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_buf)) { __Pyx_RaiseUnboundLocalError("buf"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 601; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_17 = PyBytes_AsStringAndSize(__pyx_v_buf, (&__pyx_v_cbuf), ((Py_ssize_t *)(&__pyx_v_len_))); if (unlikely(__pyx_t_17 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 601; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
 
-      /* "src/llfuse/handlers.pxi":591
+      /* "src/llfuse/handlers.pxi":603
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  * 
  *         if size == 0:             # <<<<<<<<<<<<<<
@@ -16292,7 +16492,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_t_16 = ((__pyx_v_size == 0) != 0);
       if (__pyx_t_16) {
 
-        /* "src/llfuse/handlers.pxi":592
+        /* "src/llfuse/handlers.pxi":604
  * 
  *         if size == 0:
  *             ret = fuse_reply_xattr(req, len_)             # <<<<<<<<<<<<<<
@@ -16303,7 +16503,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
         goto __pyx_L29;
       }
 
-      /* "src/llfuse/handlers.pxi":593
+      /* "src/llfuse/handlers.pxi":605
  *         if size == 0:
  *             ret = fuse_reply_xattr(req, len_)
  *         elif <size_t> len_ <= size:             # <<<<<<<<<<<<<<
@@ -16313,7 +16513,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_t_16 = ((((size_t)__pyx_v_len_) <= __pyx_v_size) != 0);
       if (__pyx_t_16) {
 
-        /* "src/llfuse/handlers.pxi":594
+        /* "src/llfuse/handlers.pxi":606
  *             ret = fuse_reply_xattr(req, len_)
  *         elif <size_t> len_ <= size:
  *             ret = fuse_reply_buf(req, cbuf, len_)             # <<<<<<<<<<<<<<
@@ -16325,7 +16525,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":596
+        /* "src/llfuse/handlers.pxi":608
  *             ret = fuse_reply_buf(req, cbuf, len_)
  *         else:
  *             ret = fuse_reply_err(req, errno.ERANGE)             # <<<<<<<<<<<<<<
@@ -16347,20 +16547,20 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
 
-    /* "src/llfuse/handlers.pxi":597
+    /* "src/llfuse/handlers.pxi":609
  *         else:
  *             ret = fuse_reply_err(req, errno.ERANGE)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 597; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 609; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_13);
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_t_13);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_getxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_13, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 597; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_13, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 609; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_13);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -16368,21 +16568,21 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":598
+        /* "src/llfuse/handlers.pxi":610
  *             ret = fuse_reply_err(req, errno.ERANGE)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('getxattr', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 598; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 598; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_17);
       }
 
-      /* "src/llfuse/handlers.pxi":597
+      /* "src/llfuse/handlers.pxi":609
  *         else:
  *             ret = fuse_reply_err(req, errno.ERANGE)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -16435,7 +16635,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":599
+    /* "src/llfuse/handlers.pxi":611
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -16445,7 +16645,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_getxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_13);
@@ -16453,7 +16653,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":600
+        /* "src/llfuse/handlers.pxi":612
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('getxattr', e, req)             # <<<<<<<<<<<<<<
@@ -16463,7 +16663,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_getxattr, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":599
+      /* "src/llfuse/handlers.pxi":611
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -16498,7 +16698,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":602
+  /* "src/llfuse/handlers.pxi":614
  *         ret = handle_exc('getxattr', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -16508,21 +16708,21 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
   __pyx_t_16 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_16) {
 
-    /* "src/llfuse/handlers.pxi":603
+    /* "src/llfuse/handlers.pxi":615
  * 
  *     if ret != 0:
  *         log.error('fuse_getxattr(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_listxattr (fuse_req_t req, fuse_ino_t ino, size_t size) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_21 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -16535,17 +16735,17 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
       }
     }
     if (!__pyx_t_21) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_21); __Pyx_GIVEREF(__pyx_t_21); __pyx_t_21 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -16562,7 +16762,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
         __pyx_t_12 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -16573,7 +16773,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_12, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 603; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 615; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -16582,7 +16782,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
   }
   __pyx_L48:;
 
-  /* "src/llfuse/handlers.pxi":580
+  /* "src/llfuse/handlers.pxi":592
  *             fuse_getxattr(req, ino, cname, size)
  * 
  * cdef void fuse_getxattr (fuse_req_t req, fuse_ino_t ino, const_char *cname,             # <<<<<<<<<<<<<<
@@ -16611,7 +16811,7 @@ static void __pyx_f_6llfuse_4capi_fuse_getxattr(fuse_req_t __pyx_v_req, fuse_ino
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":605
+/* "src/llfuse/handlers.pxi":617
  *         log.error('fuse_getxattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_listxattr (fuse_req_t req, fuse_ino_t ino, size_t size) with gil:             # <<<<<<<<<<<<<<
@@ -16656,7 +16856,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
   #endif
   __Pyx_RefNannySetupContext("fuse_listxattr", 0);
 
-  /* "src/llfuse/handlers.pxi":609
+  /* "src/llfuse/handlers.pxi":621
  *     cdef ssize_t len_
  *     cdef char *cbuf
  *     try:             # <<<<<<<<<<<<<<
@@ -16670,7 +16870,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":610
+      /* "src/llfuse/handlers.pxi":622
  *     cdef char *cbuf
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -16678,11 +16878,11 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
  * 
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -16695,10 +16895,10 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -16712,16 +16912,16 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":611
+              /* "src/llfuse/handlers.pxi":623
  *     try:
  *         with lock:
  *             buf = b'\0'.join(operations.listxattr(ino)) + b'\0'             # <<<<<<<<<<<<<<
  * 
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_listxattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_listxattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_6))) {
@@ -16734,25 +16934,25 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
                 }
               }
               if (!__pyx_t_8) {
-                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
                 __Pyx_GOTREF(__pyx_t_4);
               } else {
-                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
                 PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_7);
                 __Pyx_GIVEREF(__pyx_t_7);
                 __pyx_t_7 = 0;
-                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_4);
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
               }
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-              __pyx_t_6 = __Pyx_PyBytes_Join(__pyx_kp_b__28, __pyx_t_4); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyBytes_Join(__pyx_kp_b__28, __pyx_t_4); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-              __pyx_t_4 = PyNumber_Add(__pyx_t_6, __pyx_kp_b__28); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 611; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = PyNumber_Add(__pyx_t_6, __pyx_kp_b__28); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 623; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
               __pyx_v_buf = __pyx_t_4;
@@ -16769,7 +16969,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":610
+            /* "src/llfuse/handlers.pxi":622
  *     cdef char *cbuf
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
@@ -16778,20 +16978,20 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_listxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_12);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_12); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_13);
               __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_13);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_14 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_15 = ((!(__pyx_t_14 != 0)) != 0);
               if (__pyx_t_15) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -16799,7 +16999,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
                 __Pyx_XGIVEREF(__pyx_t_12);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_12);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_12 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -16825,7 +17025,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__29, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -16840,17 +17040,17 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":613
+      /* "src/llfuse/handlers.pxi":625
  *             buf = b'\0'.join(operations.listxattr(ino)) + b'\0'
  * 
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)             # <<<<<<<<<<<<<<
  * 
  *         if len_ == 1: # No attributes
  */
-      if (unlikely(!__pyx_v_buf)) { __Pyx_RaiseUnboundLocalError("buf"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 613; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_16 = PyBytes_AsStringAndSize(__pyx_v_buf, (&__pyx_v_cbuf), ((Py_ssize_t *)(&__pyx_v_len_))); if (unlikely(__pyx_t_16 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 613; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_buf)) { __Pyx_RaiseUnboundLocalError("buf"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_16 = PyBytes_AsStringAndSize(__pyx_v_buf, (&__pyx_v_cbuf), ((Py_ssize_t *)(&__pyx_v_len_))); if (unlikely(__pyx_t_16 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
 
-      /* "src/llfuse/handlers.pxi":615
+      /* "src/llfuse/handlers.pxi":627
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  * 
  *         if len_ == 1: # No attributes             # <<<<<<<<<<<<<<
@@ -16860,7 +17060,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       __pyx_t_15 = ((__pyx_v_len_ == 1) != 0);
       if (__pyx_t_15) {
 
-        /* "src/llfuse/handlers.pxi":616
+        /* "src/llfuse/handlers.pxi":628
  * 
  *         if len_ == 1: # No attributes
  *             len_ = 0             # <<<<<<<<<<<<<<
@@ -16872,7 +17072,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       }
       __pyx_L29:;
 
-      /* "src/llfuse/handlers.pxi":618
+      /* "src/llfuse/handlers.pxi":630
  *             len_ = 0
  * 
  *         if size == 0:             # <<<<<<<<<<<<<<
@@ -16882,7 +17082,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       __pyx_t_15 = ((__pyx_v_size == 0) != 0);
       if (__pyx_t_15) {
 
-        /* "src/llfuse/handlers.pxi":619
+        /* "src/llfuse/handlers.pxi":631
  * 
  *         if size == 0:
  *             ret = fuse_reply_xattr(req, len_)             # <<<<<<<<<<<<<<
@@ -16893,7 +17093,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
         goto __pyx_L30;
       }
 
-      /* "src/llfuse/handlers.pxi":620
+      /* "src/llfuse/handlers.pxi":632
  *         if size == 0:
  *             ret = fuse_reply_xattr(req, len_)
  *         elif <size_t> len_ <= size:             # <<<<<<<<<<<<<<
@@ -16903,7 +17103,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       __pyx_t_15 = ((((size_t)__pyx_v_len_) <= __pyx_v_size) != 0);
       if (__pyx_t_15) {
 
-        /* "src/llfuse/handlers.pxi":621
+        /* "src/llfuse/handlers.pxi":633
  *             ret = fuse_reply_xattr(req, len_)
  *         elif <size_t> len_ <= size:
  *             ret = fuse_reply_buf(req, cbuf, len_)             # <<<<<<<<<<<<<<
@@ -16915,7 +17115,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":623
+        /* "src/llfuse/handlers.pxi":635
  *             ret = fuse_reply_buf(req, cbuf, len_)
  *         else:
  *             ret = fuse_reply_err(req, errno.ERANGE)             # <<<<<<<<<<<<<<
@@ -16937,20 +17137,20 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "src/llfuse/handlers.pxi":624
+    /* "src/llfuse/handlers.pxi":636
  *         else:
  *             ret = fuse_reply_err(req, errno.ERANGE)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 624; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __pyx_t_16 = PyErr_ExceptionMatches(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     if (__pyx_t_16) {
       __Pyx_AddTraceback("llfuse.capi.fuse_listxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 624; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -16958,21 +17158,21 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":625
+        /* "src/llfuse/handlers.pxi":637
  *             ret = fuse_reply_err(req, errno.ERANGE)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('listxattr', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 637; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 625; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
+        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 637; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_16);
       }
 
-      /* "src/llfuse/handlers.pxi":624
+      /* "src/llfuse/handlers.pxi":636
  *         else:
  *             ret = fuse_reply_err(req, errno.ERANGE)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -17025,7 +17225,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":626
+    /* "src/llfuse/handlers.pxi":638
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -17035,7 +17235,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_listxattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 626; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_12) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 638; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_12);
@@ -17043,7 +17243,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":627
+        /* "src/llfuse/handlers.pxi":639
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('listxattr', e, req)             # <<<<<<<<<<<<<<
@@ -17053,7 +17253,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_listxattr, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":626
+      /* "src/llfuse/handlers.pxi":638
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -17088,7 +17288,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":629
+  /* "src/llfuse/handlers.pxi":641
  *         ret = handle_exc('listxattr', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -17098,21 +17298,21 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
   __pyx_t_15 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_15) {
 
-    /* "src/llfuse/handlers.pxi":630
+    /* "src/llfuse/handlers.pxi":642
  * 
  *     if ret != 0:
  *         log.error('fuse_listxattr(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_removexattr (fuse_req_t req, fuse_ino_t ino, const_char *cname) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_20 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -17125,17 +17325,17 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
       }
     }
     if (!__pyx_t_20) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_21);
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_20); __Pyx_GIVEREF(__pyx_t_20); __pyx_t_20 = NULL;
       PyTuple_SET_ITEM(__pyx_t_21, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_21, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     }
@@ -17152,7 +17352,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
         __pyx_t_22 = 1;
       }
     }
-    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_21 = PyTuple_New(2+__pyx_t_22); if (unlikely(!__pyx_t_21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_21);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -17163,7 +17363,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
     PyTuple_SET_ITEM(__pyx_t_21, 1+__pyx_t_22, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 630; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_21, NULL); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 642; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -17172,7 +17372,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
   }
   __pyx_L49:;
 
-  /* "src/llfuse/handlers.pxi":605
+  /* "src/llfuse/handlers.pxi":617
  *         log.error('fuse_getxattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_listxattr (fuse_req_t req, fuse_ino_t ino, size_t size) with gil:             # <<<<<<<<<<<<<<
@@ -17200,7 +17400,7 @@ static void __pyx_f_6llfuse_4capi_fuse_listxattr(fuse_req_t __pyx_v_req, fuse_in
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":632
+/* "src/llfuse/handlers.pxi":644
  *         log.error('fuse_listxattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_removexattr (fuse_req_t req, fuse_ino_t ino, const_char *cname) with gil:             # <<<<<<<<<<<<<<
@@ -17243,7 +17443,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
   #endif
   __Pyx_RefNannySetupContext("fuse_removexattr", 0);
 
-  /* "src/llfuse/handlers.pxi":634
+  /* "src/llfuse/handlers.pxi":646
  * cdef void fuse_removexattr (fuse_req_t req, fuse_ino_t ino, const_char *cname) with gil:
  *     cdef int ret
  *     try:             # <<<<<<<<<<<<<<
@@ -17257,19 +17457,19 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":635
+      /* "src/llfuse/handlers.pxi":647
  *     cdef int ret
  *     try:
  *         name = PyBytes_FromString(cname)             # <<<<<<<<<<<<<<
  *         with lock:
  *             operations.removexattr(ino, name)
  */
-      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 635; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 647; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_name = ((PyObject*)__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":636
+      /* "src/llfuse/handlers.pxi":648
  *     try:
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -17277,11 +17477,11 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
  *         ret = fuse_reply_err(req, 0)
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -17294,10 +17494,10 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -17311,16 +17511,16 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":637
+              /* "src/llfuse/handlers.pxi":649
  *         name = PyBytes_FromString(cname)
  *         with lock:
  *             operations.removexattr(ino, name)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_removexattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 637; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_removexattr); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 649; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 637; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 649; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_8 = NULL;
               __pyx_t_12 = 0;
@@ -17334,7 +17534,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
                   __pyx_t_12 = 1;
                 }
               }
-              __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 637; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_13 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 649; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_13);
               if (__pyx_t_8) {
                 PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -17345,7 +17545,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
               PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_12, __pyx_v_name);
               __Pyx_GIVEREF(__pyx_v_name);
               __pyx_t_7 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 637; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_13, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 649; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -17362,7 +17562,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":636
+            /* "src/llfuse/handlers.pxi":648
  *     try:
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -17371,20 +17571,20 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_removexattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_13);
-              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_13); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_7 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_13); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_7);
               __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-              if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_14);
               __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_14);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-              if (__pyx_t_15 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_15 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_16 = ((!(__pyx_t_15 != 0)) != 0);
               if (__pyx_t_16) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -17392,7 +17592,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
                 __Pyx_XGIVEREF(__pyx_t_13);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_13);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_13 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -17418,7 +17618,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__30, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -17433,7 +17633,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":638
+      /* "src/llfuse/handlers.pxi":650
  *         with lock:
  *             operations.removexattr(ino, name)
  *         ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -17453,20 +17653,20 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
 
-    /* "src/llfuse/handlers.pxi":639
+    /* "src/llfuse/handlers.pxi":651
  *             operations.removexattr(ino, name)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 639; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_13 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_13);
     __pyx_t_17 = PyErr_ExceptionMatches(__pyx_t_13);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     if (__pyx_t_17) {
       __Pyx_AddTraceback("llfuse.capi.fuse_removexattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_13, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 639; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_13, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_13);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -17474,21 +17674,21 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":640
+        /* "src/llfuse/handlers.pxi":652
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('removexattr', e, req)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 640; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
+        __pyx_t_17 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_17 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L34_error;}
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_17);
       }
 
-      /* "src/llfuse/handlers.pxi":639
+      /* "src/llfuse/handlers.pxi":651
  *             operations.removexattr(ino, name)
  *         ret = fuse_reply_err(req, 0)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -17541,7 +17741,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":641
+    /* "src/llfuse/handlers.pxi":653
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -17551,7 +17751,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_removexattr", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 641; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_13) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 653; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_13);
@@ -17559,7 +17759,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":642
+        /* "src/llfuse/handlers.pxi":654
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('removexattr', e, req)             # <<<<<<<<<<<<<<
@@ -17569,7 +17769,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_removexattr, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":641
+      /* "src/llfuse/handlers.pxi":653
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -17604,7 +17804,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":644
+  /* "src/llfuse/handlers.pxi":656
  *         ret = handle_exc('removexattr', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -17614,21 +17814,21 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
   __pyx_t_16 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_16) {
 
-    /* "src/llfuse/handlers.pxi":645
+    /* "src/llfuse/handlers.pxi":657
  * 
  *     if ret != 0:
  *         log.error('fuse_removexattr(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * cdef void fuse_access (fuse_req_t req, fuse_ino_t ino, int mask) with gil:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_21 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -17641,17 +17841,17 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
       }
     }
     if (!__pyx_t_21) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_21); __Pyx_GIVEREF(__pyx_t_21); __pyx_t_21 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -17668,7 +17868,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
         __pyx_t_12 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_12); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_7) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
@@ -17679,7 +17879,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_12, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 645; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 657; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -17688,7 +17888,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
   }
   __pyx_L47:;
 
-  /* "src/llfuse/handlers.pxi":632
+  /* "src/llfuse/handlers.pxi":644
  *         log.error('fuse_listxattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_removexattr (fuse_req_t req, fuse_ino_t ino, const_char *cname) with gil:             # <<<<<<<<<<<<<<
@@ -17716,7 +17916,7 @@ static void __pyx_f_6llfuse_4capi_fuse_removexattr(fuse_req_t __pyx_v_req, fuse_
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":647
+/* "src/llfuse/handlers.pxi":659
  *         log.error('fuse_removexattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_access (fuse_req_t req, fuse_ino_t ino, int mask) with gil:             # <<<<<<<<<<<<<<
@@ -17760,7 +17960,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
   __Pyx_RefNannySetupContext("fuse_access", 0);
 
-  /* "src/llfuse/handlers.pxi":650
+  /* "src/llfuse/handlers.pxi":662
  *     cdef int ret
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -17774,19 +17974,19 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":651
+      /* "src/llfuse/handlers.pxi":663
  * 
  *     try:
  *         ctx = get_request_context(req)             # <<<<<<<<<<<<<<
  *         with lock:
  *             allowed = operations.access(ino, mask, ctx)
  */
-      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 651; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 663; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_ctx = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":652
+      /* "src/llfuse/handlers.pxi":664
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -17794,11 +17994,11 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
  *         if allowed:
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -17811,10 +18011,10 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -17828,18 +18028,18 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":653
+              /* "src/llfuse/handlers.pxi":665
  *         ctx = get_request_context(req)
  *         with lock:
  *             allowed = operations.access(ino, mask, ctx)             # <<<<<<<<<<<<<<
  *         if allowed:
  *             ret = fuse_reply_err(req, 0)
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_access); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 653; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_access); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 665; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 653; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_ino); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 665; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_mask); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 653; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_mask); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 665; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_12 = NULL;
               __pyx_t_13 = 0;
@@ -17853,7 +18053,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
                   __pyx_t_13 = 1;
                 }
               }
-              __pyx_t_14 = PyTuple_New(3+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 653; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_14 = PyTuple_New(3+__pyx_t_13); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 665; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_14);
               if (__pyx_t_12) {
                 PyTuple_SET_ITEM(__pyx_t_14, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -17867,7 +18067,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
               __Pyx_GIVEREF(__pyx_v_ctx);
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 653; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_14, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 665; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -17886,7 +18086,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":652
+            /* "src/llfuse/handlers.pxi":664
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -17895,20 +18095,20 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_access", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_6);
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_8 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_6, __pyx_t_14); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_8);
               __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_15);
               __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_15);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_16 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_17 = ((!(__pyx_t_16 != 0)) != 0);
               if (__pyx_t_17) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -17916,7 +18116,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_XGIVEREF(__pyx_t_14);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_6, __pyx_t_14);
                 __pyx_t_4 = 0; __pyx_t_6 = 0; __pyx_t_14 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -17942,7 +18142,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__31, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -17957,18 +18157,18 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_L28:;
       }
 
-      /* "src/llfuse/handlers.pxi":654
+      /* "src/llfuse/handlers.pxi":666
  *         with lock:
  *             allowed = operations.access(ino, mask, ctx)
  *         if allowed:             # <<<<<<<<<<<<<<
  *             ret = fuse_reply_err(req, 0)
  *         else:
  */
-      if (unlikely(!__pyx_v_allowed)) { __Pyx_RaiseUnboundLocalError("allowed"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_v_allowed); if (unlikely(__pyx_t_17 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 654; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_allowed)) { __Pyx_RaiseUnboundLocalError("allowed"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 666; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_v_allowed); if (unlikely(__pyx_t_17 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 666; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       if (__pyx_t_17) {
 
-        /* "src/llfuse/handlers.pxi":655
+        /* "src/llfuse/handlers.pxi":667
  *             allowed = operations.access(ino, mask, ctx)
  *         if allowed:
  *             ret = fuse_reply_err(req, 0)             # <<<<<<<<<<<<<<
@@ -17980,7 +18180,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
       }
       /*else*/ {
 
-        /* "src/llfuse/handlers.pxi":657
+        /* "src/llfuse/handlers.pxi":669
  *             ret = fuse_reply_err(req, 0)
  *         else:
  *             ret = fuse_reply_err(req, EPERM)             # <<<<<<<<<<<<<<
@@ -18003,20 +18203,20 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-    /* "src/llfuse/handlers.pxi":658
+    /* "src/llfuse/handlers.pxi":670
  *         else:
  *             ret = fuse_reply_err(req, EPERM)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 658; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_14 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __pyx_t_18 = PyErr_ExceptionMatches(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
     if (__pyx_t_18) {
       __Pyx_AddTraceback("llfuse.capi.fuse_access", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 658; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_14, &__pyx_t_6, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 670; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_4);
@@ -18024,21 +18224,21 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":659
+        /* "src/llfuse/handlers.pxi":671
  *             ret = fuse_reply_err(req, EPERM)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('access', e, req)
  */
-        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 659; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+        __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 671; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 659; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
+        __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 671; __pyx_clineno = __LINE__; goto __pyx_L35_error;}
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_18);
       }
 
-      /* "src/llfuse/handlers.pxi":658
+      /* "src/llfuse/handlers.pxi":670
  *         else:
  *             ret = fuse_reply_err(req, EPERM)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -18092,7 +18292,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":660
+    /* "src/llfuse/handlers.pxi":672
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -18102,7 +18302,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_t_19 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_19) {
       __Pyx_AddTraceback("llfuse.capi.fuse_access", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 660; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_6, &__pyx_t_14) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 672; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_14);
@@ -18110,7 +18310,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_6;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":661
+        /* "src/llfuse/handlers.pxi":673
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('access', e, req)             # <<<<<<<<<<<<<<
@@ -18120,7 +18320,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_access, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":660
+      /* "src/llfuse/handlers.pxi":672
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -18155,7 +18355,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":663
+  /* "src/llfuse/handlers.pxi":675
  *         ret = handle_exc('access', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -18165,21 +18365,21 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
   __pyx_t_17 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_17) {
 
-    /* "src/llfuse/handlers.pxi":664
+    /* "src/llfuse/handlers.pxi":676
  * 
  *     if ret != 0:
  *         log.error('fuse_access(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_12 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -18192,17 +18392,17 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
       }
     }
     if (!__pyx_t_12) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else {
-      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_22 = PyTuple_New(1+1); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_22);
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
       PyTuple_SET_ITEM(__pyx_t_22, 0+1, __pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_22, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     }
@@ -18219,7 +18419,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_t_13 = 1;
       }
     }
-    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_22 = PyTuple_New(2+__pyx_t_13); if (unlikely(!__pyx_t_22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_22);
     if (__pyx_t_8) {
       PyTuple_SET_ITEM(__pyx_t_22, 0, __pyx_t_8); __Pyx_GIVEREF(__pyx_t_8); __pyx_t_8 = NULL;
@@ -18230,7 +18430,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
     PyTuple_SET_ITEM(__pyx_t_22, 1+__pyx_t_13, __pyx_t_6);
     __Pyx_GIVEREF(__pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_14 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_22, NULL); if (unlikely(!__pyx_t_14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_14);
     __Pyx_DECREF(__pyx_t_22); __pyx_t_22 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -18239,7 +18439,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
   }
   __pyx_L48:;
 
-  /* "src/llfuse/handlers.pxi":647
+  /* "src/llfuse/handlers.pxi":659
  *         log.error('fuse_removexattr(): fuse_reply_* failed with %s', strerror(-ret))
  * 
  * cdef void fuse_access (fuse_req_t req, fuse_ino_t ino, int mask) with gil:             # <<<<<<<<<<<<<<
@@ -18268,7 +18468,7 @@ static void __pyx_f_6llfuse_4capi_fuse_access(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
 }
 
-/* "src/llfuse/handlers.pxi":667
+/* "src/llfuse/handlers.pxi":679
  * 
  * 
  * cdef void fuse_create (fuse_req_t req, fuse_ino_t parent, const_char *cname,             # <<<<<<<<<<<<<<
@@ -18316,7 +18516,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
   #endif
   __Pyx_RefNannySetupContext("fuse_create", 0);
 
-  /* "src/llfuse/handlers.pxi":672
+  /* "src/llfuse/handlers.pxi":684
  *     cdef fuse_entry_param entry
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -18330,31 +18530,31 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "src/llfuse/handlers.pxi":673
+      /* "src/llfuse/handlers.pxi":685
  * 
  *     try:
  *         ctx = get_request_context(req)             # <<<<<<<<<<<<<<
  *         name = PyBytes_FromString(cname)
  *         with lock:
  */
-      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 673; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = __pyx_f_6llfuse_4capi_get_request_context(__pyx_v_req); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 685; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_ctx = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":674
+      /* "src/llfuse/handlers.pxi":686
  *     try:
  *         ctx = get_request_context(req)
  *         name = PyBytes_FromString(cname)             # <<<<<<<<<<<<<<
  *         with lock:
  *             (fi.fh, attr) = operations.create(parent, name, mode, fi.flags, ctx)
  */
-      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 674; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_t_4 = PyBytes_FromString(__pyx_v_cname); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 686; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_v_name = ((PyObject*)__pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "src/llfuse/handlers.pxi":675
+      /* "src/llfuse/handlers.pxi":687
  *         ctx = get_request_context(req)
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -18362,11 +18562,11 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
  * 
  */
       /*with:*/ {
-        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_lock); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        __pyx_t_5 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_exit); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+        __pyx_t_7 = __Pyx_PyObject_LookupSpecial(__pyx_t_4, __pyx_n_s_enter); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_7))) {
@@ -18379,10 +18579,10 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
           }
         }
         if (__pyx_t_8) {
-          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else {
-          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
+          __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L11_error;}
         }
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -18396,20 +18596,20 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XGOTREF(__pyx_t_11);
             /*try:*/ {
 
-              /* "src/llfuse/handlers.pxi":676
+              /* "src/llfuse/handlers.pxi":688
  *         name = PyBytes_FromString(cname)
  *         with lock:
  *             (fi.fh, attr) = operations.create(parent, name, mode, fi.flags, ctx)             # <<<<<<<<<<<<<<
  * 
  *         # Cached file data does not need to be invalidated.
  */
-              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_create); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse_4capi_operations, __pyx_n_s_create); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_7 = __Pyx_PyInt_From_fuse_ino_t(__pyx_v_parent); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_8 = __Pyx_PyInt_From_mode_t(__pyx_v_mode); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_8 = __Pyx_PyInt_From_mode_t(__pyx_v_mode); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_fi->flags); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_fi->flags); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_13 = NULL;
               __pyx_t_14 = 0;
@@ -18423,7 +18623,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
                   __pyx_t_14 = 1;
                 }
               }
-              __pyx_t_15 = PyTuple_New(5+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_15 = PyTuple_New(5+__pyx_t_14); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_15);
               if (__pyx_t_13) {
                 PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_13); __Pyx_GIVEREF(__pyx_t_13); __pyx_t_13 = NULL;
@@ -18443,7 +18643,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
               __pyx_t_7 = 0;
               __pyx_t_8 = 0;
               __pyx_t_12 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_15, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -18457,7 +18657,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
                 if (unlikely(size != 2)) {
                   if (size > 2) __Pyx_RaiseTooManyValuesError(2);
                   else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-                  {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                  {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 }
                 #if CYTHON_COMPILING_IN_CPYTHON
                 if (likely(PyTuple_CheckExact(sequence))) {
@@ -18470,15 +18670,15 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_INCREF(__pyx_t_6);
                 __Pyx_INCREF(__pyx_t_15);
                 #else
-                __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_6 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_6);
-                __pyx_t_15 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_15 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_15);
                 #endif
                 __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               } else {
                 Py_ssize_t index = -1;
-                __pyx_t_12 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                __pyx_t_12 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __Pyx_GOTREF(__pyx_t_12);
                 __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
                 __pyx_t_16 = Py_TYPE(__pyx_t_12)->tp_iternext;
@@ -18486,7 +18686,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_GOTREF(__pyx_t_6);
                 index = 1; __pyx_t_15 = __pyx_t_16(__pyx_t_12); if (unlikely(!__pyx_t_15)) goto __pyx_L25_unpacking_failed;
                 __Pyx_GOTREF(__pyx_t_15);
-                if (__Pyx_IternextUnpackEndCheck(__pyx_t_16(__pyx_t_12), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                if (__Pyx_IternextUnpackEndCheck(__pyx_t_16(__pyx_t_12), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __pyx_t_16 = NULL;
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
                 goto __pyx_L26_unpacking_done;
@@ -18494,10 +18694,10 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
                 __pyx_t_16 = NULL;
                 if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
                 __pyx_L26_unpacking_done:;
               }
-              __pyx_t_17 = __Pyx_PyInt_As_uint64_t(__pyx_t_6); if (unlikely((__pyx_t_17 == (uint64_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 676; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
+              __pyx_t_17 = __Pyx_PyInt_As_uint64_t(__pyx_t_6); if (unlikely((__pyx_t_17 == (uint64_t)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 688; __pyx_clineno = __LINE__; goto __pyx_L17_error;}
               __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
               __pyx_v_fi->fh = __pyx_t_17;
               __pyx_v_attr = __pyx_t_15;
@@ -18516,7 +18716,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
             __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
             __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-            /* "src/llfuse/handlers.pxi":675
+            /* "src/llfuse/handlers.pxi":687
  *         ctx = get_request_context(req)
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
@@ -18525,20 +18725,20 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
  */
             /*except:*/ {
               __Pyx_AddTraceback("llfuse.capi.fuse_create", __pyx_clineno, __pyx_lineno, __pyx_filename);
-              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_15, &__pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_15, &__pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_GOTREF(__pyx_t_15);
               __Pyx_GOTREF(__pyx_t_6);
-              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_15, __pyx_t_6); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              __pyx_t_12 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_15, __pyx_t_6); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_12);
               __pyx_t_18 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-              if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (unlikely(!__pyx_t_18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __Pyx_GOTREF(__pyx_t_18);
               __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_t_18);
               __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-              if (__pyx_t_19 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+              if (__pyx_t_19 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               __pyx_t_20 = ((!(__pyx_t_19 != 0)) != 0);
               if (__pyx_t_20) {
                 __Pyx_GIVEREF(__pyx_t_4);
@@ -18546,7 +18746,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
                 __Pyx_XGIVEREF(__pyx_t_6);
                 __Pyx_ErrRestore(__pyx_t_4, __pyx_t_15, __pyx_t_6);
                 __pyx_t_4 = 0; __pyx_t_15 = 0; __pyx_t_6 = 0; 
-                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
+                {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L19_except_error;}
               }
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -18572,7 +18772,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
             if (__pyx_t_5) {
               __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_tuple__32, NULL);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+              if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -18587,7 +18787,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_L30:;
       }
 
-      /* "src/llfuse/handlers.pxi":680
+      /* "src/llfuse/handlers.pxi":692
  *         # Cached file data does not need to be invalidated.
  *         # http://article.gmane.org/gmane.comp.file-systems.fuse.devel/5325/
  *         fi.keep_cache = 1             # <<<<<<<<<<<<<<
@@ -18596,19 +18796,19 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
  */
       __pyx_v_fi->keep_cache = 1;
 
-      /* "src/llfuse/handlers.pxi":682
+      /* "src/llfuse/handlers.pxi":694
  *         fi.keep_cache = 1
  * 
  *         fill_entry_param(attr, &entry)             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_create(req, &entry, fi)
  *     except FUSEError as e:
  */
-      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 682; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
-      __pyx_t_6 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 682; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      if (unlikely(!__pyx_v_attr)) { __Pyx_RaiseUnboundLocalError("attr"); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 694; __pyx_clineno = __LINE__; goto __pyx_L3_error;} }
+      __pyx_t_6 = __pyx_f_6llfuse_4capi_fill_entry_param(__pyx_v_attr, (&__pyx_v_entry)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 694; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-      /* "src/llfuse/handlers.pxi":683
+      /* "src/llfuse/handlers.pxi":695
  * 
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_create(req, &entry, fi)             # <<<<<<<<<<<<<<
@@ -18630,20 +18830,20 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
     __Pyx_XDECREF(__pyx_t_15); __pyx_t_15 = 0;
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "src/llfuse/handlers.pxi":684
+    /* "src/llfuse/handlers.pxi":696
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_create(req, &entry, fi)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  */
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 684; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_FUSEError); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 696; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_21 = PyErr_ExceptionMatches(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (__pyx_t_21) {
       __Pyx_AddTraceback("llfuse.capi.fuse_create", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_15, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 684; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_15, &__pyx_t_4) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 696; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_4);
@@ -18651,21 +18851,21 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_15;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":685
+        /* "src/llfuse/handlers.pxi":697
  *         ret = fuse_reply_create(req, &entry, fi)
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)             # <<<<<<<<<<<<<<
  *     except BaseException as e:
  *         ret = handle_exc('create', e, req)
  */
-        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 685; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
+        __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_errno); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 697; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
         __Pyx_GOTREF(__pyx_t_12);
-        __pyx_t_21 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_21 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 685; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
+        __pyx_t_21 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_21 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 697; __pyx_clineno = __LINE__; goto __pyx_L36_error;}
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         __pyx_v_ret = fuse_reply_err(__pyx_v_req, __pyx_t_21);
       }
 
-      /* "src/llfuse/handlers.pxi":684
+      /* "src/llfuse/handlers.pxi":696
  *         fill_entry_param(attr, &entry)
  *         ret = fuse_reply_create(req, &entry, fi)
  *     except FUSEError as e:             # <<<<<<<<<<<<<<
@@ -18720,7 +18920,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
       goto __pyx_L4_exception_handled;
     }
 
-    /* "src/llfuse/handlers.pxi":686
+    /* "src/llfuse/handlers.pxi":698
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -18730,7 +18930,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_t_22 = PyErr_ExceptionMatches(__pyx_builtin_BaseException);
     if (__pyx_t_22) {
       __Pyx_AddTraceback("llfuse.capi.fuse_create", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_15, &__pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 686; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
+      if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_15, &__pyx_t_6) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 698; __pyx_clineno = __LINE__; goto __pyx_L5_except_error;}
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GOTREF(__pyx_t_6);
@@ -18738,7 +18938,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
       __pyx_v_e = __pyx_t_15;
       /*try:*/ {
 
-        /* "src/llfuse/handlers.pxi":687
+        /* "src/llfuse/handlers.pxi":699
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:
  *         ret = handle_exc('create', e, req)             # <<<<<<<<<<<<<<
@@ -18748,7 +18948,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_v_ret = __pyx_f_6llfuse_4capi_handle_exc(__pyx_k_create, __pyx_v_e, __pyx_v_req);
       }
 
-      /* "src/llfuse/handlers.pxi":686
+      /* "src/llfuse/handlers.pxi":698
  *     except FUSEError as e:
  *         ret = fuse_reply_err(req, e.errno)
  *     except BaseException as e:             # <<<<<<<<<<<<<<
@@ -18783,7 +18983,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
     __pyx_L10_try_end:;
   }
 
-  /* "src/llfuse/handlers.pxi":689
+  /* "src/llfuse/handlers.pxi":701
  *         ret = handle_exc('create', e, req)
  * 
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -18792,19 +18992,19 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
   __pyx_t_20 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_20) {
 
-    /* "src/llfuse/handlers.pxi":690
+    /* "src/llfuse/handlers.pxi":702
  * 
  *     if ret != 0:
  *         log.error('fuse_create(): fuse_reply_* failed with %s', strerror(-ret))             # <<<<<<<<<<<<<<
  */
-    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_15);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_strerror); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_8 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_7 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_12))) {
@@ -18817,17 +19017,17 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
       }
     }
     if (!__pyx_t_7) {
-      __pyx_t_15 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_15 = __Pyx_PyObject_CallOneArg(__pyx_t_12, __pyx_t_8); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __Pyx_GOTREF(__pyx_t_15);
     } else {
-      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_13 = PyTuple_New(1+1); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_13);
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_7); __Pyx_GIVEREF(__pyx_t_7); __pyx_t_7 = NULL;
       PyTuple_SET_ITEM(__pyx_t_13, 0+1, __pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_13, NULL); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     }
@@ -18844,7 +19044,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
         __pyx_t_14 = 1;
       }
     }
-    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_13 = PyTuple_New(2+__pyx_t_14); if (unlikely(!__pyx_t_13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_13);
     if (__pyx_t_12) {
       PyTuple_SET_ITEM(__pyx_t_13, 0, __pyx_t_12); __Pyx_GIVEREF(__pyx_t_12); __pyx_t_12 = NULL;
@@ -18855,7 +19055,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
     PyTuple_SET_ITEM(__pyx_t_13, 1+__pyx_t_14, __pyx_t_15);
     __Pyx_GIVEREF(__pyx_t_15);
     __pyx_t_15 = 0;
-    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 690; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_13, NULL); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 702; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -18864,7 +19064,7 @@ static void __pyx_f_6llfuse_4capi_fuse_create(fuse_req_t __pyx_v_req, fuse_ino_t
   }
   __pyx_L49:;
 
-  /* "src/llfuse/handlers.pxi":667
+  /* "src/llfuse/handlers.pxi":679
  * 
  * 
  * cdef void fuse_create (fuse_req_t req, fuse_ino_t parent, const_char *cname,             # <<<<<<<<<<<<<<
@@ -26624,6 +26824,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_fuse_session_loop_failed, __pyx_k_fuse_session_loop_failed, sizeof(__pyx_k_fuse_session_loop_failed), 0, 1, 0, 0},
   {&__pyx_kp_u_fuse_session_loop_mt_failed, __pyx_k_fuse_session_loop_mt_failed, sizeof(__pyx_k_fuse_session_loop_mt_failed), 0, 1, 0, 0},
   {&__pyx_kp_u_fuse_set_signal_handlers_failed, __pyx_k_fuse_set_signal_handlers_failed, sizeof(__pyx_k_fuse_set_signal_handlers_failed), 0, 1, 0, 0},
+  {&__pyx_kp_u_fuse_setattr_clock_gettime_CLOCK, __pyx_k_fuse_setattr_clock_gettime_CLOCK, sizeof(__pyx_k_fuse_setattr_clock_gettime_CLOCK), 0, 1, 0, 0},
   {&__pyx_kp_u_fuse_setattr_fuse_reply__failed, __pyx_k_fuse_setattr_fuse_reply__failed, sizeof(__pyx_k_fuse_setattr_fuse_reply__failed), 0, 1, 0, 0},
   {&__pyx_kp_u_fuse_setxattr_fuse_reply__failed, __pyx_k_fuse_setxattr_fuse_reply__failed, sizeof(__pyx_k_fuse_setxattr_fuse_reply__failed), 0, 1, 0, 0},
   {&__pyx_kp_u_fuse_setxattr_fuse_reply_err_fai, __pyx_k_fuse_setxattr_fuse_reply_err_fai, sizeof(__pyx_k_fuse_setxattr_fuse_reply_err_fai), 0, 1, 0, 0},
@@ -26762,7 +26963,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 };
 static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_BaseException = __Pyx_GetBuiltinName(__pyx_n_s_BaseException); if (!__pyx_builtin_BaseException) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 541; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 553; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 152; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 169; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -26832,289 +27033,289 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
-  /* "src/llfuse/handlers.pxi":126
+  /* "src/llfuse/handlers.pxi":138
  *             attr.st_size = None
  * 
  *         with lock:             # <<<<<<<<<<<<<<
  *             attr = operations.setattr(ino, attr)
  * 
  */
-  __pyx_tuple__6 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__6 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "src/llfuse/handlers.pxi":144
+  /* "src/llfuse/handlers.pxi":156
  *     cdef char* name
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             target = operations.readlink(ino)
  *         name = PyBytes_AsString(target)
  */
-  __pyx_tuple__7 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__7 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 156; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "src/llfuse/handlers.pxi":163
+  /* "src/llfuse/handlers.pxi":175
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
  *             attr = operations.mknod(parent, PyBytes_FromString(name), mode,
  *                                     rdev, ctx)
  */
-  __pyx_tuple__8 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__8 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "src/llfuse/handlers.pxi":186
+  /* "src/llfuse/handlers.pxi":198
  *         mode = <mode_t> ((mode & ~S_IFMT) | S_IFDIR)
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
  *             attr = operations.mkdir(parent, PyBytes_FromString(name), mode, ctx)
  *         fill_entry_param(attr, &entry)
  */
-  __pyx_tuple__9 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__9 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "src/llfuse/handlers.pxi":202
+  /* "src/llfuse/handlers.pxi":214
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.unlink(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__10 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__10 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "src/llfuse/handlers.pxi":217
+  /* "src/llfuse/handlers.pxi":229
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.rmdir(parent, PyBytes_FromString(name))
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__11 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__11 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
 
-  /* "src/llfuse/handlers.pxi":235
+  /* "src/llfuse/handlers.pxi":247
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
  *             attr = operations.symlink(parent, PyBytes_FromString(name),
  *                                       PyBytes_FromString(link), ctx)
  */
-  __pyx_tuple__12 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 235; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__12 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 247; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "src/llfuse/handlers.pxi":253
+  /* "src/llfuse/handlers.pxi":265
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.rename(parent, PyBytes_FromString(name),
  *                               newparent, PyBytes_FromString(newname))
  */
-  __pyx_tuple__13 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 253; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__13 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__13)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "src/llfuse/handlers.pxi":271
+  /* "src/llfuse/handlers.pxi":283
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             attr = operations.link(ino, newparent, PyBytes_FromString(newname))
  *         fill_entry_param(attr, &entry)
  */
-  __pyx_tuple__14 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__14 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
 
-  /* "src/llfuse/handlers.pxi":288
+  /* "src/llfuse/handlers.pxi":300
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             fi.fh = operations.open(ino, fi.flags)
  * 
  */
-  __pyx_tuple__15 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__15 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 300; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "src/llfuse/handlers.pxi":311
+  /* "src/llfuse/handlers.pxi":323
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             buf = operations.read(fi.fh, off, size)
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  */
-  __pyx_tuple__16 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__16 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
 
-  /* "src/llfuse/handlers.pxi":333
+  /* "src/llfuse/handlers.pxi":345
  *     try:
  *         pbuf = PyBytes_FromStringAndSize(buf, size)
  *         with lock:             # <<<<<<<<<<<<<<
  *             len_ = operations.write(fi.fh, off, pbuf)
  *         ret = fuse_reply_write(req, len_)
  */
-  __pyx_tuple__17 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__17 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 345; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
 
-  /* "src/llfuse/handlers.pxi":352
+  /* "src/llfuse/handlers.pxi":364
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.flush(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__18 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 352; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__18 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__18)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 364; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
 
-  /* "src/llfuse/handlers.pxi":367
+  /* "src/llfuse/handlers.pxi":379
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.release(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__19 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 367; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__19 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 379; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__19);
   __Pyx_GIVEREF(__pyx_tuple__19);
 
-  /* "src/llfuse/handlers.pxi":383
+  /* "src/llfuse/handlers.pxi":395
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.fsync(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__20 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 383; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__20 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__20)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 395; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
 
-  /* "src/llfuse/handlers.pxi":398
+  /* "src/llfuse/handlers.pxi":410
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             fi.fh = operations.opendir(ino)
  * 
  */
-  __pyx_tuple__21 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 398; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__21 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__21)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 410; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
 
-  /* "src/llfuse/handlers.pxi":424
+  /* "src/llfuse/handlers.pxi":436
  *         acc_size = 0
  *         buf = NULL
  *         with lock:             # <<<<<<<<<<<<<<
  *             for (name, attr, next_) in operations.readdir(fi.fh, off):
  *                 if buf == NULL:
  */
-  __pyx_tuple__22 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 424; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__22 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__22)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 436; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
 
-  /* "src/llfuse/handlers.pxi":451
+  /* "src/llfuse/handlers.pxi":463
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.releasedir(fi.fh)
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__23 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 451; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__23 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__23)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 463; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__23);
   __Pyx_GIVEREF(__pyx_tuple__23);
 
-  /* "src/llfuse/handlers.pxi":468
+  /* "src/llfuse/handlers.pxi":480
  * 
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.fsyncdir(fi.fh, datasync != 0)
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__24 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 468; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__24 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 480; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__24);
   __Pyx_GIVEREF(__pyx_tuple__24);
 
-  /* "src/llfuse/handlers.pxi":487
+  /* "src/llfuse/handlers.pxi":499
  *     string.memset(&cstats, 0, sizeof(cstats))
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             stats = operations.statfs()
  * 
  */
-  __pyx_tuple__25 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__25)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 487; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__25 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__25)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 499; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__25);
   __Pyx_GIVEREF(__pyx_tuple__25);
 
-  /* "src/llfuse/handlers.pxi":543
+  /* "src/llfuse/handlers.pxi":555
  *                     raise ValueError('unknown flag(s): %o' % flags)
  * 
  *                 with lock:             # <<<<<<<<<<<<<<
  *                     if flags & xattr.XATTR_CREATE: # Attribute must not exist
  *                         try:
  */
-  __pyx_tuple__26 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 543; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__26 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 555; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__26);
   __Pyx_GIVEREF(__pyx_tuple__26);
 
-  /* "src/llfuse/handlers.pxi":587
+  /* "src/llfuse/handlers.pxi":599
  *     try:
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
  *             buf = operations.getxattr(ino, name)
  *         PyBytes_AsStringAndSize(buf, &cbuf, &len_)
  */
-  __pyx_tuple__27 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 587; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__27 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 599; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__27);
   __Pyx_GIVEREF(__pyx_tuple__27);
 
-  /* "src/llfuse/handlers.pxi":610
+  /* "src/llfuse/handlers.pxi":622
  *     cdef char *cbuf
  *     try:
  *         with lock:             # <<<<<<<<<<<<<<
  *             buf = b'\0'.join(operations.listxattr(ino)) + b'\0'
  * 
  */
-  __pyx_tuple__29 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__29)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 610; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__29 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__29)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 622; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__29);
   __Pyx_GIVEREF(__pyx_tuple__29);
 
-  /* "src/llfuse/handlers.pxi":636
+  /* "src/llfuse/handlers.pxi":648
  *     try:
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
  *             operations.removexattr(ino, name)
  *         ret = fuse_reply_err(req, 0)
  */
-  __pyx_tuple__30 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 636; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__30 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__30)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 648; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__30);
   __Pyx_GIVEREF(__pyx_tuple__30);
 
-  /* "src/llfuse/handlers.pxi":652
+  /* "src/llfuse/handlers.pxi":664
  *     try:
  *         ctx = get_request_context(req)
  *         with lock:             # <<<<<<<<<<<<<<
  *             allowed = operations.access(ino, mask, ctx)
  *         if allowed:
  */
-  __pyx_tuple__31 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__31)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 652; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__31 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__31)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 664; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__31);
   __Pyx_GIVEREF(__pyx_tuple__31);
 
-  /* "src/llfuse/handlers.pxi":675
+  /* "src/llfuse/handlers.pxi":687
  *         ctx = get_request_context(req)
  *         name = PyBytes_FromString(cname)
  *         with lock:             # <<<<<<<<<<<<<<
  *             (fi.fh, attr) = operations.create(parent, name, mode, fi.flags, ctx)
  * 
  */
-  __pyx_tuple__32 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__32)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 675; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__32 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__32)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 687; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__32);
   __Pyx_GIVEREF(__pyx_tuple__32);
 
@@ -27569,14 +27770,14 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__75);
   __Pyx_GIVEREF(__pyx_tuple__75);
 
-  /* "llfuse/capi.pyx":92
+  /* "llfuse/capi.pyx":93
  * ##################
  * 
  * log = logging.getLogger("llfuse")             # <<<<<<<<<<<<<<
  * fse = sys.getfilesystemencoding()
  * 
  */
-  __pyx_tuple__76 = PyTuple_Pack(1, __pyx_n_u_llfuse); if (unlikely(!__pyx_tuple__76)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__76 = PyTuple_Pack(1, __pyx_n_u_llfuse); if (unlikely(!__pyx_tuple__76)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__76);
   __Pyx_GIVEREF(__pyx_tuple__76);
 
@@ -27839,74 +28040,74 @@ PyMODINIT_FUNC PyInit_capi(void)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_version, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 13; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":73
+  /* "llfuse/capi.pyx":74
  * ################
  * 
  * import os             # <<<<<<<<<<<<<<
  * import logging
  * import sys
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_os, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_os, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_os, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_os, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":74
+  /* "llfuse/capi.pyx":75
  * 
  * import os
  * import logging             # <<<<<<<<<<<<<<
  * import sys
  * import os.path
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_logging, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_logging, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logging, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logging, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":75
+  /* "llfuse/capi.pyx":76
  * import os
  * import logging
  * import sys             # <<<<<<<<<<<<<<
  * import os.path
  * import threading
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_sys, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_sys, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_sys, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 75; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_sys, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":76
+  /* "llfuse/capi.pyx":77
  * import logging
  * import sys
  * import os.path             # <<<<<<<<<<<<<<
  * import threading
  * from llfuse.pyapi import FUSEError, strerror, Operations, RequestContext, EntryAttributes
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_os_path, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_os_path, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_os, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_os, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":77
+  /* "llfuse/capi.pyx":78
  * import sys
  * import os.path
  * import threading             # <<<<<<<<<<<<<<
  * from llfuse.pyapi import FUSEError, strerror, Operations, RequestContext, EntryAttributes
  * from collections import namedtuple
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_threading, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_threading, 0, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_threading, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_threading, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":78
+  /* "llfuse/capi.pyx":79
  * import os.path
  * import threading
  * from llfuse.pyapi import FUSEError, strerror, Operations, RequestContext, EntryAttributes             # <<<<<<<<<<<<<<
  * from collections import namedtuple
  * 
  */
-  __pyx_t_1 = PyList_New(5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_FUSEError);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_FUSEError);
@@ -27923,53 +28124,53 @@ PyMODINIT_FUNC PyInit_capi(void)
   __Pyx_INCREF(__pyx_n_s_EntryAttributes);
   PyList_SET_ITEM(__pyx_t_1, 4, __pyx_n_s_EntryAttributes);
   __Pyx_GIVEREF(__pyx_n_s_EntryAttributes);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_llfuse_pyapi, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_llfuse_pyapi, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_FUSEError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_FUSEError); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_FUSEError, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_FUSEError, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_strerror); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_strerror); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_strerror, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_strerror, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Operations); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Operations); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Operations, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Operations, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RequestContext); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_RequestContext); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_RequestContext, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_RequestContext, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_EntryAttributes); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_EntryAttributes); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EntryAttributes, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EntryAttributes, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "llfuse/capi.pyx":79
+  /* "llfuse/capi.pyx":80
  * import threading
  * from llfuse.pyapi import FUSEError, strerror, Operations, RequestContext, EntryAttributes
  * from collections import namedtuple             # <<<<<<<<<<<<<<
  * 
  * if PY_MAJOR_VERSION < 3:
  */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_namedtuple);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_namedtuple);
   __Pyx_GIVEREF(__pyx_n_s_namedtuple);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_collections, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_collections, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_namedtuple); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_namedtuple); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_namedtuple, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_namedtuple, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":81
+  /* "llfuse/capi.pyx":82
  * from collections import namedtuple
  * 
  * if PY_MAJOR_VERSION < 3:             # <<<<<<<<<<<<<<
@@ -27979,99 +28180,99 @@ PyMODINIT_FUNC PyInit_capi(void)
   __pyx_t_3 = ((PY_MAJOR_VERSION < 3) != 0);
   if (__pyx_t_3) {
 
-    /* "llfuse/capi.pyx":82
+    /* "llfuse/capi.pyx":83
  * 
  * if PY_MAJOR_VERSION < 3:
  *     from Queue import Queue             # <<<<<<<<<<<<<<
  *     str_t = bytes
  * else:
  */
-    __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_n_s_Queue);
     PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Queue);
     __Pyx_GIVEREF(__pyx_n_s_Queue);
-    __pyx_t_2 = __Pyx_Import(__pyx_n_s_Queue, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_Import(__pyx_n_s_Queue, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Queue); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Queue); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    if (PyDict_SetItem(__pyx_d, __pyx_n_s_Queue, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 82; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_Queue, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "llfuse/capi.pyx":83
+    /* "llfuse/capi.pyx":84
  * if PY_MAJOR_VERSION < 3:
  *     from Queue import Queue
  *     str_t = bytes             # <<<<<<<<<<<<<<
  * else:
  *     from queue import Queue
  */
-    if (PyDict_SetItem(__pyx_d, __pyx_n_s_str_t, ((PyObject *)((PyObject*)(&PyBytes_Type)))) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_str_t, ((PyObject *)((PyObject*)(&PyBytes_Type)))) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 84; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     goto __pyx_L2;
   }
   /*else*/ {
 
-    /* "llfuse/capi.pyx":85
+    /* "llfuse/capi.pyx":86
  *     str_t = bytes
  * else:
  *     from queue import Queue             # <<<<<<<<<<<<<<
  *     str_t = str
  * 
  */
-    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 85; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_n_s_Queue);
     PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Queue);
     __Pyx_GIVEREF(__pyx_n_s_Queue);
-    __pyx_t_1 = __Pyx_Import(__pyx_n_s_queue, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 85; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_Import(__pyx_n_s_queue, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Queue); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 85; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Queue); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    if (PyDict_SetItem(__pyx_d, __pyx_n_s_Queue, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 85; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_Queue, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "llfuse/capi.pyx":86
+    /* "llfuse/capi.pyx":87
  * else:
  *     from queue import Queue
  *     str_t = str             # <<<<<<<<<<<<<<
  * 
  * ##################
  */
-    if (PyDict_SetItem(__pyx_d, __pyx_n_s_str_t, ((PyObject *)((PyObject*)(&PyUnicode_Type)))) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 86; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_str_t, ((PyObject *)((PyObject*)(&PyUnicode_Type)))) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_L2:;
 
-  /* "llfuse/capi.pyx":92
+  /* "llfuse/capi.pyx":93
  * ##################
  * 
  * log = logging.getLogger("llfuse")             # <<<<<<<<<<<<<<
  * fse = sys.getfilesystemencoding()
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_logging); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_logging); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_getLogger); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_getLogger); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__76, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__76, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_log, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_log, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":93
+  /* "llfuse/capi.pyx":94
  * 
  * log = logging.getLogger("llfuse")
  * fse = sys.getfilesystemencoding()             # <<<<<<<<<<<<<<
  * 
  * cdef object operations
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_sys); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_sys); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getfilesystemencoding); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getfilesystemencoding); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -28085,17 +28286,17 @@ PyMODINIT_FUNC PyInit_capi(void)
     }
   }
   if (__pyx_t_2) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_fse, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 93; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_fse, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 94; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":97
+  /* "llfuse/capi.pyx":98
  * cdef object operations
  * cdef object mountpoint_b
  * cdef fuse_session* session = NULL             # <<<<<<<<<<<<<<
@@ -28104,7 +28305,7 @@ PyMODINIT_FUNC PyInit_capi(void)
  */
   __pyx_v_6llfuse_4capi_session = NULL;
 
-  /* "llfuse/capi.pyx":98
+  /* "llfuse/capi.pyx":99
  * cdef object mountpoint_b
  * cdef fuse_session* session = NULL
  * cdef fuse_chan* channel = NULL             # <<<<<<<<<<<<<<
@@ -28113,7 +28314,7 @@ PyMODINIT_FUNC PyInit_capi(void)
  */
   __pyx_v_6llfuse_4capi_channel = NULL;
 
-  /* "llfuse/capi.pyx":102
+  /* "llfuse/capi.pyx":103
  * cdef object exc_info
  * 
  * init_lock()             # <<<<<<<<<<<<<<
@@ -28122,59 +28323,59 @@ PyMODINIT_FUNC PyInit_capi(void)
  */
   init_lock();
 
-  /* "llfuse/capi.pyx":103
+  /* "llfuse/capi.pyx":104
  * 
  * init_lock()
  * lock = Lock.__new__(Lock)             # <<<<<<<<<<<<<<
  * lock_released = NoLockManager.__new__(NoLockManager)
  * 
  */
-  __pyx_t_1 = __pyx_tp_new_6llfuse_4capi_Lock(((PyTypeObject *)((PyObject*)__pyx_ptype_6llfuse_4capi_Lock)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_tp_new_6llfuse_4capi_Lock(((PyTypeObject *)((PyObject*)__pyx_ptype_6llfuse_4capi_Lock)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_lock, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_lock, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":104
+  /* "llfuse/capi.pyx":105
  * init_lock()
  * lock = Lock.__new__(Lock)
  * lock_released = NoLockManager.__new__(NoLockManager)             # <<<<<<<<<<<<<<
  * 
  * _notify_queue = Queue(maxsize=1000)
  */
-  __pyx_t_1 = __pyx_tp_new_6llfuse_4capi_NoLockManager(((PyTypeObject *)((PyObject*)__pyx_ptype_6llfuse_4capi_NoLockManager)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_tp_new_6llfuse_4capi_NoLockManager(((PyTypeObject *)((PyObject*)__pyx_ptype_6llfuse_4capi_NoLockManager)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_lock_released, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_lock_released, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "llfuse/capi.pyx":106
+  /* "llfuse/capi.pyx":107
  * lock_released = NoLockManager.__new__(NoLockManager)
  * 
  * _notify_queue = Queue(maxsize=1000)             # <<<<<<<<<<<<<<
  * inval_inode_req = namedtuple('inval_inode_req', [ 'inode', 'attr_only' ])
  * inval_entry_req = namedtuple('inval_entry_req', [ 'inode_p', 'name' ])
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_Queue); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_Queue); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_maxsize, __pyx_int_1000) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_4); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_maxsize, __pyx_int_1000) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_4); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_notify_queue, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_notify_queue, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "llfuse/capi.pyx":107
+  /* "llfuse/capi.pyx":108
  * 
  * _notify_queue = Queue(maxsize=1000)
  * inval_inode_req = namedtuple('inval_inode_req', [ 'inode', 'attr_only' ])             # <<<<<<<<<<<<<<
  * inval_entry_req = namedtuple('inval_entry_req', [ 'inode_p', 'name' ])
  * 
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_namedtuple); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_namedtuple); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_u_inode);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_u_inode);
@@ -28194,7 +28395,7 @@ PyMODINIT_FUNC PyInit_capi(void)
       __pyx_t_6 = 1;
     }
   }
-  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   if (__pyx_t_5) {
     PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __Pyx_GIVEREF(__pyx_t_5); __pyx_t_5 = NULL;
@@ -28205,23 +28406,23 @@ PyMODINIT_FUNC PyInit_capi(void)
   PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_inval_inode_req, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_inval_inode_req, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "llfuse/capi.pyx":108
+  /* "llfuse/capi.pyx":109
  * _notify_queue = Queue(maxsize=1000)
  * inval_inode_req = namedtuple('inval_inode_req', [ 'inode', 'attr_only' ])
  * inval_entry_req = namedtuple('inval_entry_req', [ 'inode_p', 'name' ])             # <<<<<<<<<<<<<<
  * 
  * # Exported for access from Python code
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_namedtuple); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_namedtuple); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = PyList_New(2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = PyList_New(2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_n_u_inode_p);
   PyList_SET_ITEM(__pyx_t_7, 0, __pyx_n_u_inode_p);
@@ -28241,7 +28442,7 @@ PyMODINIT_FUNC PyInit_capi(void)
       __pyx_t_6 = 1;
     }
   }
-  __pyx_t_5 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   if (__pyx_t_1) {
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1); __Pyx_GIVEREF(__pyx_t_1); __pyx_t_1 = NULL;
@@ -28252,35 +28453,35 @@ PyMODINIT_FUNC PyInit_capi(void)
   PyTuple_SET_ITEM(__pyx_t_5, 1+__pyx_t_6, __pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_inval_entry_req, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 108; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_inval_entry_req, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 109; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "llfuse/capi.pyx":111
+  /* "llfuse/capi.pyx":112
  * 
  * # Exported for access from Python code
  * ROOT_INODE = FUSE_ROOT_ID             # <<<<<<<<<<<<<<
  * ENOATTR = errno.ENOATTR
  * 
  */
-  __pyx_t_2 = __Pyx_PyInt_From_int(FUSE_ROOT_ID); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_int(FUSE_ROOT_ID); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ROOT_INODE, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 111; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ROOT_INODE, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "llfuse/capi.pyx":112
+  /* "llfuse/capi.pyx":113
  * # Exported for access from Python code
  * ROOT_INODE = FUSE_ROOT_ID
  * ENOATTR = errno.ENOATTR             # <<<<<<<<<<<<<<
  * 
  * #######################
  */
-  __pyx_t_2 = __Pyx_PyInt_From_int(ENOATTR); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_int(ENOATTR); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ENOATTR, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ENOATTR, __pyx_t_2) < 0) {__pyx_filename = __pyx_f[3]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "src/llfuse/misc.pxi":291
@@ -29866,6 +30067,32 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(long),
+                                     little, !is_unsigned);
+    }
+}
+
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value) {
+    const time_t neg_one = (time_t) -1, const_zero = 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(time_t) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(time_t) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+        } else if (sizeof(time_t) <= sizeof(unsigned long long)) {
+            return PyLong_FromUnsignedLongLong((unsigned long long) value);
+        }
+    } else {
+        if (sizeof(time_t) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(time_t) <= sizeof(long long)) {
+            return PyLong_FromLongLong((long long) value);
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(time_t),
                                      little, !is_unsigned);
     }
 }
@@ -31475,32 +31702,6 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to long");
     return (long) -1;
-}
-
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_time_t(time_t value) {
-    const time_t neg_one = (time_t) -1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(time_t) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(time_t) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-        } else if (sizeof(time_t) <= sizeof(unsigned long long)) {
-            return PyLong_FromUnsignedLongLong((unsigned long long) value);
-        }
-    } else {
-        if (sizeof(time_t) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(time_t) <= sizeof(long long)) {
-            return PyLong_FromLongLong((long long) value);
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(time_t),
-                                     little, !is_unsigned);
-    }
 }
 
 static CYTHON_INLINE fsblkcnt_t __Pyx_PyInt_As_fsblkcnt_t(PyObject *x) {

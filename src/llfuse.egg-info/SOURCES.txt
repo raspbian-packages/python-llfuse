@@ -88,5 +88,7 @@ src/llfuse.egg-info/SOURCES.txt
 src/llfuse.egg-info/dependency_links.txt
 src/llfuse.egg-info/top_level.txt
 src/llfuse.egg-info/zip-safe
+test/conftest.py
+test/pytest.ini
 test/test_examples.py
 util/sphinx_cython.py
