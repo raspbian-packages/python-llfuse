@@ -1,4 +1,4 @@
-python-llfuse (0.41.1+dfsg-3) UNRELEASED; urgency=medium
+python-llfuse (0.41.1+dfsg-3) unstable; urgency=medium
 
   * Bumped Cython dependency to >= 0.21.1. Older versions don't have
     posix/time.pxi.
