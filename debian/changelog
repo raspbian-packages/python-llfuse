@@ -1,9 +1,12 @@
-python-llfuse (0.41.1+dfsg-2) UNRELEASED; urgency=medium
+python-llfuse (0.41.1+dfsg-3) UNRELEASED; urgency=medium
 
   * Bumped Cython dependency to >= 0.21.1. Older versions don't have
     posix/time.pxi.
+  * Added patches/setattr_compat.diff to restore full backwards
+    compatibility with version 0.40 (some applications were relying
+    on undocumented behavior were broken by the update to 0.41.1).
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 24 Aug 2015 09:12:49 -0700
+ -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 10 Sep 2015 14:09:16 -0700
 
 python-llfuse (0.41.1+dfsg-1) unstable; urgency=medium
 

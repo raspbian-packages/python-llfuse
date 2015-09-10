@@ -1,0 +1,28 @@
+Description: Restore backwards compatibility of setattr() handler
+Forwarded: yes
+Last-Update: 2015-09-10
+Author: Nikolaus Rath <Nikolaus@rath.org>
+
+The 0.41.1 accidentally broke backwards compatibility by introducing
+default values other than None for the EntryAttributes class. 
+Some file systems were relying on every attribute of the EntryAttributes
+instance passed to setattr() to be None if the attribute was not
+supposed to be updated (as opposed to only looking at those attributes
+that are actual candidates for an update).
+
+This patch restores backwards compatibility.
+
+--- a/src/llfuse/handlers.pxi
++++ b/src/llfuse/handlers.pxi
+@@ -89,6 +89,11 @@
+ 
+     try:
+         attr = EntryAttributes()
++
++        # For backwards compatibility
++        for name in attr.__slots__:
++            setattr(attr, name, None)
++
+         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):
+             ret = clock_gettime(CLOCK_REALTIME, &now)
+             if ret != 0:
