@@ -8,23 +8,37 @@ have type dev_t. This breaks POSIX compatibility, but is difficult to fix
 (cf. https://sourceware.org/bugzilla/show_bug.cgi?id=17786).
 
 To work around the issue, we change the definition of struct stat that
-is used by Cython. Upstream is not interested in this change.
+is used by Cython when we are compiling under mips. Note that this
+requires the Cython compilation to run under mips, and that the
+resulting C file will be mips specific (without the patch, the
+generated C file is suitable for any architecture). 
+
+Upstream is not interested in this change for obvious reasons.
 
 --- a/Include/libc/sys/stat.pxd
 +++ b/Include/libc/sys/stat.pxd
-@@ -17,13 +17,13 @@
+@@ -16,7 +16,23 @@
+         S_IFMT
          S_IFDIR
  
-     struct stat:
--        dev_t     st_dev
+-    struct stat:
++IF UNAME_MACHINE.startswith('mips64'):
++    cdef struct stat:
 +        int       st_dev
++        ino_t     st_ino
++        mode_t    st_mode
++        nlink_t   st_nlink
++        uid_t     st_uid
++        gid_t     st_gid
++        int       st_rdev
++        off_t     st_size
++        blksize_t st_blksize
++        blkcnt_t  st_blocks
++        time_t    st_atime
++        time_t    st_mtime
++        time_t    st_ctime
++ELSE:
++    cdef struct stat:
+         dev_t     st_dev
          ino_t     st_ino
          mode_t    st_mode
-         nlink_t   st_nlink
-         uid_t     st_uid
-         gid_t     st_gid
--        dev_t     st_rdev
-+        int       st_rdev
-         off_t     st_size
-         blksize_t st_blksize
-         blkcnt_t  st_blocks
