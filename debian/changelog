@@ -1,3 +1,11 @@
+python-llfuse (0.41.1+dfsg-4) unstable; urgency=medium
+
+  * Added patches/mips_dev_t.diff to work around bug in mips/mipsel libc
+    (cf. https://sourceware.org/bugzilla/show_bug.cgi?id=17786).
+    Closes: #635197.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 16 Sep 2015 13:59:11 -0700
+
 python-llfuse (0.41.1+dfsg-3) unstable; urgency=medium
 
   * Bumped Cython dependency to >= 0.21.1. Older versions don't have
