@@ -1,4 +1,4 @@
-python-llfuse (0.41.1+dfsg-4) UNRELEASED; urgency=medium
+python-llfuse (0.41.1+dfsg-4) unstable; urgency=medium
 
   * Added patches/mips_dev_t.diff to work around bug in mips/mipsel libc
     (cf. https://sourceware.org/bugzilla/show_bug.cgi?id=17786).
