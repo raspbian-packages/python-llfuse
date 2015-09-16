@@ -1,0 +1,30 @@
+Forwarded: no
+Last-Update: 2015-09-16
+Author: Nikolaus Rath <Nikolaus@rath.org>
+Description: Work around bug in mips+mipsel libc
+
+On mips and mipsel, the st_dev and st_rdev members of struct stat do not
+have type dev_t. This breaks POSIX compatibility, but is difficult to fix
+(cf. https://sourceware.org/bugzilla/show_bug.cgi?id=17786).
+
+To work around the issue, we change the definition of struct stat that
+is used by Cython. Upstream is not interested in this change.
+
+--- a/Include/libc/sys/stat.pxd
++++ b/Include/libc/sys/stat.pxd
+@@ -17,13 +17,13 @@
+         S_IFDIR
+ 
+     struct stat:
+-        dev_t     st_dev
++        int       st_dev
+         ino_t     st_ino
+         mode_t    st_mode
+         nlink_t   st_nlink
+         uid_t     st_uid
+         gid_t     st_gid
+-        dev_t     st_rdev
++        int       st_rdev
+         off_t     st_size
+         blksize_t st_blksize
+         blkcnt_t  st_blocks
