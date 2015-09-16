@@ -17,13 +17,14 @@ Upstream is not interested in this change for obvious reasons.
 
 --- a/Include/libc/sys/stat.pxd
 +++ b/Include/libc/sys/stat.pxd
-@@ -16,7 +16,23 @@
+@@ -16,7 +16,25 @@
          S_IFMT
          S_IFDIR
  
 -    struct stat:
 +IF UNAME_MACHINE.startswith('mips64'):
-+    cdef struct stat:
++    cdef extern from "sys/stat.h" nogil:
++      struct stat:
 +        int       st_dev
 +        ino_t     st_ino
 +        mode_t    st_mode
@@ -38,7 +39,8 @@ Upstream is not interested in this change for obvious reasons.
 +        time_t    st_mtime
 +        time_t    st_ctime
 +ELSE:
-+    cdef struct stat:
++    cdef extern from "sys/stat.h" nogil:
++      struct stat:
          dev_t     st_dev
          ino_t     st_ino
          mode_t    st_mode
