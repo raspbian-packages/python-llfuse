@@ -23,8 +23,8 @@ Build-Depends: debhelper (>= 9),
                cython3 (>= 0.21.1)
 Standards-Version: 3.9.6
 Homepage: https://bitbucket.org/nikratio/python-llfuse/
-Vcs-Svn: svn://anonscm.debian.org/python-modules/packages/python-llfuse/trunk/
-Vcs-Browser: http://anonscm.debian.org/viewvc/python-modules/packages/python-llfuse/trunk/
+Vcs-Git: git://anonscm.debian.org/python-modules/packages/python-llfuse.git
+Vcs-Browser: https://anonscm.debian.org/cgit/python-modules/packages/python-llfuse.git
 
 Package: python-llfuse
 Architecture: any
