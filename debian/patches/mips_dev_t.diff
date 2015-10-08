@@ -1,7 +1,10 @@
+From 0a7ff2ca42cfe2e939248b0dc1fdfc756c0b4133 Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Thu, 8 Oct 2015 12:24:37 -0700
+Subject: Work around bug in mips+mipsel libc
+
 Forwarded: no
 Last-Update: 2015-09-16
-Author: Nikolaus Rath <Nikolaus@rath.org>
-Description: Work around bug in mips+mipsel libc
 
 On mips and mipsel, the st_dev and st_rdev members of struct stat do not
 have type dev_t. This breaks POSIX compatibility, but is difficult to fix
@@ -11,13 +14,20 @@ To work around the issue, we change the definition of struct stat that
 is used by Cython when we are compiling under mips. Note that this
 requires the Cython compilation to run under mips, and that the
 resulting C file will be mips specific (without the patch, the
-generated C file is suitable for any architecture). 
+generated C file is suitable for any architecture).
 
 Upstream is not interested in this change for obvious reasons.
 
+Patch-Name: mips_dev_t.diff
+---
+ Include/libc/sys/stat.pxd | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/Include/libc/sys/stat.pxd b/Include/libc/sys/stat.pxd
+index 2df8173..7506d78 100644
 --- a/Include/libc/sys/stat.pxd
 +++ b/Include/libc/sys/stat.pxd
-@@ -16,7 +16,25 @@
+@@ -16,7 +16,25 @@ cdef extern from "sys/stat.h" nogil:
          S_IFMT
          S_IFDIR
  

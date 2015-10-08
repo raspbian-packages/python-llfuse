@@ -1,12 +1,22 @@
-Author: Nikolaus Rath <Nikolaus@rath.org>
+From 860dbfb8afcd44583c5cdc8410bdb9e5e718d8e9 Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Thu, 8 Oct 2015 12:24:34 -0700
+Subject: Use local intersphinx inventory
+
 Forwarded: not-needed
 Last-Update: 2011-07-06
-Description: Use local intersphinx inventory
  Instead of downloading the Python intersphinx directory
  at build time, use the cached copy shipped in debian/.
+Patch-Name: use-local-intersphinx-inventory.patch
+---
+ rst/conf.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/rst/conf.py b/rst/conf.py
+index 3bd0c4f..1fb9248 100644
 --- a/rst/conf.py
 +++ b/rst/conf.py
-@@ -27,7 +27,8 @@
+@@ -27,7 +27,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx',
                'sphinx_cython' ]
  
  # Link to Python standard library
