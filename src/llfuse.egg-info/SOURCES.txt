@@ -56,6 +56,7 @@ doc/html/_static/up-pressed.png
 doc/html/_static/up.png
 doc/html/_static/websupport.js
 rst/about.rst
+rst/about.rst.orig
 rst/conf.py
 rst/data.rst
 rst/example.rst

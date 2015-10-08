@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Example File System &mdash; LLFUSE v0.36 documentation</title>
+    <title>Example File System &mdash; LLFUSE v0.37.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.36',
+        VERSION:     '0.37.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
     <link rel="prev" title="Request Handlers" href="operations.html" /> 
   </head>
   <body>
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="operations.html" title="Request Handlers"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -450,11 +450,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
 399
 400
 401
-402
-403
-404
-405
-406</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+402</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -739,7 +735,6 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">(</span><span class="n">inode_p</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">rdev</span><span class="o">=</span><span class="n">rdev</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inode_p</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">RuntimError</span><span class="p">(</span><span class="s">&quot;Ouch&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">(</span><span class="n">inode_p</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">statfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -852,11 +847,8 @@ LLFUSE (this example is also included in the LLFUSE tarball as
     <span class="k">try</span><span class="p">:</span>
         <span class="n">llfuse</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">single</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="c"># WHY DOES THIS CRASH?</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Here I go&quot;</span><span class="p">)</span>
         <span class="n">llfuse</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">unmount</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="kn">import</span> <span class="nn">time</span>
-        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">raise</span>
 
     <span class="n">llfuse</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     
@@ -886,7 +878,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -909,12 +901,12 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <li class="right" >
           <a href="operations.html" title="Request Handlers"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>

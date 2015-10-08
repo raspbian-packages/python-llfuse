@@ -33,20 +33,22 @@ cimport cpython.exc
 # EXTERNAL DEFINITIONS
 ######################
 
-cdef extern from "sched.h":
-    int sched_yield() nogil
-
 cdef extern from "signal.h" nogil:
     int kill(pid_t pid, int sig)
     enum: SIGTERM
 
 # Include components written in plain C
 cdef extern from "lock.c" nogil:
-    int acquire() nogil
+    int acquire(double timeout) nogil
     int release() nogil
+    int c_yield(int count) nogil
+    int init_lock() nogil
     int EINVAL
     int EDEADLK
     int EPERM
+    int EPROTO
+    int ETIMEDOUT
+    int ENOMSG
 
 cdef extern from "time.c" nogil:
     long GET_ATIME_NS(c_stat* buf)
@@ -70,6 +72,10 @@ cdef extern from "version.c":
 import os
 import logging
 import sys
+import os.path
+from Queue import Queue
+import threading
+from collections import namedtuple
 
 ##################
 # GLOBAL VARIABLES
@@ -78,14 +84,19 @@ import sys
 log = logging.getLogger("fuse")
 
 cdef object operations
-cdef char* mountpoint = NULL
+cdef object mountpoint
 cdef fuse_session* session = NULL
 cdef fuse_chan* channel = NULL
 cdef fuse_lowlevel_ops fuse_ops
 cdef object exc_info
 
+init_lock()
 lock = Lock.__new__(Lock)
 lock_released = NoLockManager.__new__(NoLockManager)
+
+_notify_queue = Queue(maxsize=1000)
+inval_inode_req = namedtuple('inval_inode_req', [ 'inode', 'attr_only' ])
+inval_entry_req = namedtuple('inval_entry_req', [ 'inode_p', 'name' ])
 
 # Exported for access from Python code
 ROOT_INODE = FUSE_ROOT_ID

@@ -53,7 +53,7 @@ cdef void fuse_forget (fuse_req_t req, fuse_ino_t ino,
                        ulong_t nlookup) with gil:
     try:
         with lock:
-            operations.forget(ino, nlookup)
+            operations.forget([(ino, nlookup)])
     except BaseException as e:
         handle_exc('forget', e, NULL)
     fuse_reply_none(req)
@@ -615,7 +615,7 @@ cdef void fuse_create (fuse_req_t req, fuse_ino_t parent, const_char *cname,
         ctx = get_request_context(req)
         name = PyBytes_FromString(cname)
         with lock:
-            (fi.fh, attr) = operations.create(parent, name, mode, ctx)
+            (fi.fh, attr) = operations.create(parent, name, mode, fi.flags, ctx)
 
         # Cached file data does not need to be invalidated.
         # http://article.gmane.org/gmane.comp.file-systems.fuse.devel/5325/

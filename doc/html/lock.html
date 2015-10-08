@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The global lock &mdash; LLFUSE v0.36 documentation</title>
+    <title>The global lock &mdash; LLFUSE v0.37.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.36',
+        VERSION:     '0.37.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
     <link rel="next" title="Request Handlers" href="operations.html" />
     <link rel="prev" title="Data Structures" href="data.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="data.html" title="Data Structures"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -96,8 +96,12 @@ is an instance of the <a class="reference internal" href="#llfuse.llfuse.Lock" t
 <dd><dl class="method">
 <dt id="llfuse.llfuse.Lock.Lock.acquire">
 <tt class="descclassname">Lock.</tt><tt class="descname">acquire</tt><big>(</big><big>)</big><a class="headerlink" href="#llfuse.llfuse.Lock.Lock.acquire" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lock.acquire(self)
+<dd><p>Lock.acquire(self, timeout=None)
 Acquire global lock</p>
+<blockquote>
+<div>If <em>timeout</em> is not None, and the lock could not be acquired
+after waiting for <em>timeout</em> seconds, return False. Otherwise
+return True.</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -108,8 +112,11 @@ Acquire global lock</p>
 
 <dl class="method">
 <dt id="llfuse.llfuse.Lock.Lock.yield_">
-<tt class="descclassname">Lock.</tt><tt class="descname">yield_</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#llfuse.llfuse.Lock.Lock.yield_" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">Lock.</tt><tt class="descname">yield_</tt><big>(</big><em>self</em>, <em>count=1</em><big>)</big><a class="headerlink" href="#llfuse.llfuse.Lock.Lock.yield_" title="Permalink to this definition">¶</a></dt>
 <dd><p>Yield global lock to a different thread</p>
+<p>The <em>count</em> argument may be used to yield the lock up to
+<em>count</em> times if there are still other threads waiting for the
+lock.</p>
 </dd></dl>
 
 </dd></dl>
@@ -141,7 +148,7 @@ Acquire global lock</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -167,12 +174,12 @@ Acquire global lock</p>
         <li class="right" >
           <a href="data.html" title="Data Structures"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
     </div>
   </body>
 </html>
