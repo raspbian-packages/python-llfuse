@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Example File System &mdash; LLFUSE v0.33 documentation</title>
+    <title>Example File System &mdash; LLFUSE v0.36 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.33',
+        VERSION:     '0.36',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.33 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE v0.36 documentation" href="index.html" />
     <link rel="prev" title="Request Handlers" href="operations.html" /> 
   </head>
   <body>
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="operations.html" title="Request Handlers"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.33 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -445,7 +445,16 @@ LLFUSE (this example is also included in the LLFUSE tarball as
 394
 395
 396
-397</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -730,6 +739,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">(</span><span class="n">inode_p</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">rdev</span><span class="o">=</span><span class="n">rdev</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inode_p</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RuntimError</span><span class="p">(</span><span class="s">&quot;Ouch&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">(</span><span class="n">inode_p</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">statfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -839,7 +849,15 @@ LLFUSE (this example is also included in the LLFUSE tarball as
                 <span class="p">[</span>  <span class="n">b</span><span class="s">&#39;fsname=llfuse_xmp&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&quot;nonempty&quot;</span> <span class="p">])</span>
     
     <span class="c"># sqlite3 does not support multithreading</span>
-    <span class="n">llfuse</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">single</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">llfuse</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">single</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c"># WHY DOES THIS CRASH?</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Here I go&quot;</span><span class="p">)</span>
+        <span class="n">llfuse</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">unmount</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="kn">import</span> <span class="nn">time</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
     <span class="n">llfuse</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     
 </pre></div>
@@ -891,7 +909,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <li class="right" >
           <a href="operations.html" title="Request Handlers"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.33 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE v0.36 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
