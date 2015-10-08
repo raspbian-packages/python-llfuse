@@ -34,13 +34,12 @@ the terms of the GNU LGPL.
 import os
 import sys
 
-# We are running from the llfuse source directory, make sure
-# that we use modules from this directory
+# We are running from the Python-LLFUSE source directory, put it
+# into the Python path.
 basedir = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 if (os.path.exists(os.path.join(basedir, 'setup.py')) and
-    os.path.exists(os.path.join(basedir, 'src', 'llfuse.pyx'))):
-    sys.path = [os.path.join(basedir, 'src')] + sys.path
-
+    os.path.exists(os.path.join(basedir, 'src', 'llfuse'))):
+    sys.path.append(os.path.join(basedir, 'src'))
 
 import llfuse
 from argparse import ArgumentParser
@@ -261,9 +260,6 @@ class Operations(llfuse.Operations):
             assert (attr.st_uid is None) == (attr.st_gid is None)
             if attr.st_uid is not None:
                 os.chown(path, attr.st_uid, attr.st_gid, follow_symlinks=False)
-
-            assert attr.st_rdev is None
-            assert attr.st_ctime_ns is None
 
             assert (attr.st_atime is None) == (attr.st_mtime is None)
             if attr.st_atime is not None:
