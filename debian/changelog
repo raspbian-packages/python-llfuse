@@ -1,3 +1,9 @@
+python-llfuse (0.41.1+dfsg-5) UNRELEASED; urgency=medium
+
+  * Updated URL in copyright file.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 25 Sep 2015 14:14:54 -0700
+
 python-llfuse (0.41.1+dfsg-4) unstable; urgency=medium
 
   * Added patches/mips_dev_t.diff to work around bug in mips/mipsel libc
