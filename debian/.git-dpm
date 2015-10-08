@@ -6,3 +6,6 @@
 python-llfuse_0.41.1+dfsg.orig.tar.gz
 58529c898e0f26bb24dbeb9b2802f1eaa5d6b36c
 417489
+debianTag="debian/%e%v"
+patchedTag="patched/%e%v"
+upstreamTag="upstream/%e%u"
