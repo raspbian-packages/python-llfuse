@@ -1,0 +1,23 @@
+2011-06-04, llfuse 0.32
+
+   * Fixed unlink() bug in contrib/example.py
+
+   * Include src/*.pxi files in release tarball. Were 
+     accidentally omitted in previous version.
+
+   * Moved debian/ directory into separate repository.
+
+2011-05-12, llfuse 0.31
+
+  * Use long for storing nanoseconds in file [amc]times, not int.
+
+2011-03-08, llfuse 0.30
+
+  * Fixed compile errors with Python 3.0 and 3.1.
+  * Fixed error handling, errno is now read correctly.
+  * Documentation is now shipped in tarball rather than generated
+    during installation.
+
+2010-12-30, llfuse 0.29
+
+  * Initial release
