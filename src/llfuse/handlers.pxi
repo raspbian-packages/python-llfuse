@@ -89,6 +89,11 @@ cdef void fuse_setattr (fuse_req_t req, fuse_ino_t ino, c_stat *stat,
 
     try:
         attr = EntryAttributes()
+
+        # For backwards compatibility
+        for name in attr.__slots__:
+            setattr(attr, name, None)
+
         if to_set & (FUSE_SET_ATTR_ATIME_NOW | FUSE_SET_ATTR_MTIME_NOW):
             ret = clock_gettime(CLOCK_REALTIME, &now)
             if ret != 0:
