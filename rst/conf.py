@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# llfuse documentation build configuration file, created by
+# Python-LLFUSE documentation build configuration file, created by
 # sphinx-quickstart on Sat Oct 16 14:14:40 2010.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -47,8 +47,8 @@ master_doc = 'index'
 nitpicky = True
 
 # General information about the project.
-project = u'LLFUSE'
-copyright = u'2010-2013, Nikolaus Rath'
+project = u'Python-LLFUSE'
+copyright = u'2010-2015, Nikolaus Rath'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -185,7 +185,7 @@ htmlhelp_basename = 'llfusedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'llfuse.tex', u'llfuse Documentation',
+  ('index', 'llfuse.tex', u'Python-LLFUSE Documentation',
    u'Nikolaus Rath', 'manual'),
 ]
 
@@ -205,4 +205,3 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
-

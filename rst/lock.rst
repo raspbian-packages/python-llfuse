@@ -4,7 +4,7 @@
 
 .. currentmodule:: llfuse
 
-LLFUSE uses a global lock to synchronize concurrent requests. Since
+Python-LLFUSE uses a global lock to synchronize concurrent requests. Since
 the GIL already enforces that Python threads do not run concurrently,
 this does not result in any additional performance penalties. However,
 the use of an explicit lock allows direct control over which Python
@@ -41,7 +41,7 @@ attributes of the `llfuse` module:
    Controls the global lock. This object can be used as a context
    manager for the ``with`` statement to execute a block of code
    with the global lock acquired.
-   
+
    Note that this object resembles a ``threading.Lock`` instance but
    is an instance of the `llfuse.Lock` class which is quite different from
    ``threading.Lock``.

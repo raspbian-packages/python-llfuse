@@ -3,10 +3,10 @@ fuse_common.pxd
 
 This file contains Cython definitions for fuse_common.h
 
-Copyright (C) Nikolaus Rath <Nikolaus@rath.org>
+Copyright © 2010 Nikolaus Rath <Nikolaus.org>
 
-This file is part of python-llfuse (http://python-llfuse.googlecode.com).
-python-llfuse can be distributed under the terms of the GNU LGPL.
+This file is part of Python-LLFUSE. This work may be distributed under
+the terms of the GNU LGPL.
 '''
 
 from fuse_opt cimport *
@@ -17,7 +17,7 @@ cdef extern from * nogil: # fuse_common.h should not be included
 
     struct fuse_file_info:
         int flags
-        unsigned int direct_io 
+        unsigned int direct_io
         unsigned int keep_cache
         unsigned int nonseekable
         uint64_t fh
