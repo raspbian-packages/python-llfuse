@@ -62,11 +62,19 @@ def listdir(path):
     return names
 
 
-def setxattr(path, name, bytes value):
+def setxattr(path, name, bytes value, namespace='user'):
     '''Set extended attribute
 
     *path* and *name* have to be of type `str`. In Python 3.x, they may
     contain surrogates. *value* has to be of type `bytes`.
+
+    Under FreeBSD, the *namespace* parameter may be set to *system* or *user* to
+    select the namespace for the extended attribute. For other platforms, this
+    parameter is ignored.
+    
+    In contrast the `os.setxattr` function from the standard library,
+    the method provided by llfuse is also available for non-Linux
+    systems.
     '''
 
     if not isinstance(path, str_t):
@@ -75,24 +83,40 @@ def setxattr(path, name, bytes value):
     if not isinstance(name, str_t):
         raise TypeError('*name* argument must be of type str')
 
+    if namespace not in ('system', 'user'):
+        raise ValueError('*namespace* parameter must be "system" or "user", not %s'
+                         % namespace)
+    
     cdef int ret
     cdef Py_ssize_t len_
     cdef char *cvalue, *cpath, *cname
+    
+    IF TARGET_PLATFORM == 'freebsd':
+        cdef int cnamespace
+        if namespace == 'system':
+            cnamespace = xattr.EXTATTR_NAMESPACE_SYSTEM
+        else:
+            cnamespace = xattr.EXTATTR_NAMESPACE_USER
 
     path_b = str2bytes(path)
     name_b = str2bytes(name)
     PyBytes_AsStringAndSize(value, &cvalue, &len_)
     cpath = <char*> path_b
     cname = <char*> name_b
+
     
     with nogil:
-        ret = xattr.setxattr(cpath, cname, cvalue, len_, 0)
+        IF TARGET_PLATFORM == 'freebsd':
+            ret = xattr.extattr_set_file(cpath, cnamespace, cname,
+                                         cvalue, len_)
+        ELSE:
+            ret = xattr.setxattr(cpath, cname, cvalue, len_, 0)
 
     if ret != 0:
         raise OSError(errno.errno, strerror(errno.errno), path)
 
 
-def getxattr(path, name, int size_guess=128):
+def getxattr(path, name, int size_guess=128, namespace='user'):
     '''Get extended attribute
 
     *path* and *name* have to be of type `str`. In Python 3.x, they may
@@ -103,6 +127,14 @@ def getxattr(path, name, int size_guess=128):
     to be wrong, the system call has to be carried out three times
     (the first call will fail, the second determines the size and
     the third finally gets the value).
+
+    Under FreeBSD, the *namespace* parameter may be set to *system* or *user* to
+    select the namespace for the extended attribute. For other platforms, this
+    parameter is ignored.
+
+    In contrast the `os.setxattr` function from the standard library,
+    the method provided by llfuse is also available for non-Linux
+    systems.
     '''
 
     if not isinstance(path, str_t):
@@ -111,10 +143,21 @@ def getxattr(path, name, int size_guess=128):
     if not isinstance(name, str_t):
         raise TypeError('*name* argument must be of type str')
 
+    if namespace not in ('system', 'user'):
+        raise ValueError('*namespace* parameter must be "system" or "user", not %s'
+                         % namespace)
+    
     cdef ssize_t ret
     cdef char *buf, *cpath, *cname
     cdef size_t bufsize
 
+    IF TARGET_PLATFORM == 'freebsd':
+        cdef int cnamespace
+        if namespace == 'system':
+            cnamespace = xattr.EXTATTR_NAMESPACE_SYSTEM
+        else:
+            cnamespace = xattr.EXTATTR_NAMESPACE_USER
+    
     path_b = str2bytes(path)
     name_b = str2bytes(name)
     cpath = <char*> path_b
@@ -128,11 +171,22 @@ def getxattr(path, name, int size_guess=128):
 
     try:
         with nogil:
-            ret = xattr.getxattr(cpath, cname, buf, bufsize)
+            IF TARGET_PLATFORM == 'freebsd':
+                ret = xattr.extattr_get_file(cpath, cnamespace, cname,
+                                             buf, bufsize)
+                if ret == bufsize:
+                    ret = -1
+                    errno.errno = errno.ERANGE
+            ELSE:
+                ret = xattr.getxattr(cpath, cname, buf, bufsize)
 
         if ret < 0 and errno.errno == errno.ERANGE:
             with nogil:
-                ret = xattr.getxattr(cpath, cname, NULL, 0)
+                IF TARGET_PLATFORM == 'freebsd':
+                    ret = xattr.extattr_get_file(cpath, cnamespace, cname,
+                                                 NULL, 0)
+                ELSE:
+                    ret = xattr.getxattr(cpath, cname, NULL, 0)
             if ret < 0:
                 raise OSError(errno.errno, strerror(errno.errno), path)
             bufsize = <size_t> ret
@@ -142,7 +196,11 @@ def getxattr(path, name, int size_guess=128):
                 cpython.exc.PyErr_NoMemory()
 
             with nogil:
-                ret = xattr.getxattr(cpath, cname, buf, bufsize)
+                IF TARGET_PLATFORM == 'freebsd':
+                    ret = xattr.extattr_get_file(cpath, cnamespace, cname,
+                                                 buf, bufsize)
+                ELSE:
+                    ret = xattr.getxattr(cpath, cname, buf, bufsize)
 
         if ret < 0:
             raise OSError(errno.errno, strerror(errno.errno), path)
@@ -167,9 +225,6 @@ def init(ops, mountpoint, list args):
 
     log.debug('Initializing llfuse')
     cdef fuse_args f_args
-
-    if not isinstance(ops, Operations):
-        raise TypeError("first parameter must be Operations instance!")
 
     if not isinstance(mountpoint, str_t):
         raise TypeError('*mountpoint_* argument must be of type str')
@@ -249,7 +304,14 @@ def main(single=False):
         log.debug('Terminated main loop because request handler raised exception, re-raising..')
         tmp = exc_info
         exc_info = None
-        raise tmp[0], tmp[1], tmp[2]
+
+        # The explicit version check works around a Cython bug with
+        # the 3-parameter version of the raise statement, c.f.
+        # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
+        if PY_MAJOR_VERSION < 3:
+            raise tmp[0], tmp[1], tmp[2]
+        else:
+            raise tmp[1].with_traceback(tmp[2])
 
 def close(unmount=True):
     '''Unmount file system and clean up
@@ -286,7 +348,14 @@ def close(unmount=True):
     if exc_info:
         tmp = exc_info
         exc_info = None
-        raise tmp[0], tmp[1], tmp[2]
+        
+        # The explicit version check works around a Cython bug with
+        # the 3-parameter version of the raise statement, c.f.
+        # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
+        if PY_MAJOR_VERSION < 3:
+            raise tmp[0], tmp[1], tmp[2]
+        else:
+            raise tmp[1].with_traceback(tmp[2])
 
 def invalidate_inode(int inode, attr_only=False):
     '''Invalidate cache for *inode*
@@ -309,84 +378,6 @@ def invalidate_entry(int inode_p, bytes name):
     '''
 
     _notify_queue.put(inval_entry_req(inode_p, name))
-
-class RequestContext:
-    '''
-    Instances of this class are passed to some `Operations` methods to
-    provide information about the caller of the syscall that initiated
-    the request.
-    '''
-
-    __slots__ = [ 'uid', 'pid', 'gid', 'umask' ]
-
-    def __init__(self):
-        for name in self.__slots__:
-            setattr(self, name, None)
-
-class EntryAttributes:
-    '''
-    Instances of this class store attributes of directory entries.
-    Most of the attributes correspond to the elements of the ``stat``
-    C struct as returned by e.g. ``fstat`` and should be
-    self-explanatory.
-    
-    Note that the  *st_Xtime* attributes support floating point numbers to
-    allow for nanosecond resolution.
-
-    Request handlers do not need to return objects that inherit from 
-    `EntryAttributes` directly as long as they provide the required
-    attributes.
-    '''
-
-    # Attributes are documented in rst/operations.rst
-    
-    __slots__ = [ 'st_ino', 'generation', 'entry_timeout',
-                  'attr_timeout', 'st_mode', 'st_nlink', 'st_uid', 'st_gid',
-                  'st_rdev', 'st_size', 'st_blksize', 'st_blocks',
-                  'st_atime', 'st_mtime', 'st_ctime' ]
-
-
-    def __init__(self):
-        for name in self.__slots__:
-            setattr(self, name, None)
-      
-class StatvfsData:
-    '''
-    Instances of this class store information about the file system.
-    The attributes correspond to the elements of the ``statvfs``
-    struct, see :manpage:`statvfs(2)` for details.
-    
-    Request handlers do not need to return objects that inherit from
-    `StatvfsData` directly as long as they provide the required
-    attributes.
-    '''
-
-    # Attributes are documented in rst/operations.rst
-    
-    __slots__ = [ 'f_bsize', 'f_frsize', 'f_blocks', 'f_bfree',
-                  'f_bavail', 'f_files', 'f_ffree', 'f_favail' ]
-
-    def __init__(self):
-        for name in self.__slots__:
-            setattr(self, name, None)
-        
-class FUSEError(Exception):
-    '''
-    This exception may be raised by request handlers to indicate that
-    the requested operation could not be carried out. The system call
-    that resulted in the request (if any) will then fail with error
-    code *errno_*.
-    '''
-
-    __slots__ = [ 'errno' ]
-
-    def __init__(self, errno_):
-        super(FUSEError, self).__init__()
-        self.errno = errno_
-
-    def __str__(self):
-        return strerror(self.errno)
-    
 
 def get_ino_t_bits():
     '''Return number of bits available for inode numbers

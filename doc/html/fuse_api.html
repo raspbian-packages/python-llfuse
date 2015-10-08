@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FUSE API Functions &mdash; LLFUSE 0.39 documentation</title>
+    <title>FUSE API Functions &mdash; LLFUSE 0.40 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.39',
+        VERSION:     '0.40',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE 0.39 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE 0.40 documentation" href="index.html" />
     <link rel="next" title="Data Structures" href="data.html" />
     <link rel="prev" title="Getting started" href="getting_started.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.40 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -87,15 +87,21 @@ has terminated, these (and all future) requests fail with ESHUTDOWN.</p>
 
 <dl class="function">
 <dt id="llfuse.setxattr">
-<tt class="descclassname">llfuse.</tt><tt class="descname">setxattr</tt><big>(</big><em>path</em>, <em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#llfuse.setxattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">llfuse.</tt><tt class="descname">setxattr</tt><big>(</big><em>path</em>, <em>name</em>, <em>value</em>, <em>namespace=u'user'</em><big>)</big><a class="headerlink" href="#llfuse.setxattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set extended attribute</p>
 <p><em>path</em> and <em>name</em> have to be of type <a class="reference external" href="http://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">str</span></tt></a>. In Python 3.x, they may
 contain surrogates. <em>value</em> has to be of type <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a>.</p>
+<p>Under FreeBSD, the <em>namespace</em> parameter may be set to <em>system</em> or <em>user</em> to
+select the namespace for the extended attribute. For other platforms, this
+parameter is ignored.</p>
+<p>In contrast the <a class="reference external" href="http://docs.python.org/3/library/os.html#os.setxattr" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">os.setxattr</span></tt></a> function from the standard library,
+the method provided by llfuse is also available for non-Linux
+systems.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="llfuse.getxattr">
-<tt class="descclassname">llfuse.</tt><tt class="descname">getxattr</tt><big>(</big><em>path</em>, <em>name</em>, <em>size_guess=128</em><big>)</big><a class="headerlink" href="#llfuse.getxattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">llfuse.</tt><tt class="descname">getxattr</tt><big>(</big><em>path</em>, <em>name</em>, <em>size_guess=128</em>, <em>namespace=u'user'</em><big>)</big><a class="headerlink" href="#llfuse.getxattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get extended attribute</p>
 <p><em>path</em> and <em>name</em> have to be of type <a class="reference external" href="http://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">str</span></tt></a>. In Python 3.x, they may
 contain surrogates. Returns a value of type <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a>.</p>
@@ -104,6 +110,12 @@ it should be supplied in <em>size_guess</em>. If the guess turns out
 to be wrong, the system call has to be carried out three times
 (the first call will fail, the second determines the size and
 the third finally gets the value).</p>
+<p>Under FreeBSD, the <em>namespace</em> parameter may be set to <em>system</em> or <em>user</em> to
+select the namespace for the extended attribute. For other platforms, this
+parameter is ignored.</p>
+<p>In contrast the <a class="reference external" href="http://docs.python.org/3/library/os.html#os.setxattr" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">os.setxattr</span></tt></a> function from the standard library,
+the method provided by llfuse is also available for non-Linux
+systems.</p>
 </dd></dl>
 
 <dl class="function">
@@ -207,7 +219,7 @@ result in <a class="reference external" href="http://docs.python.org/3/library/e
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.40 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

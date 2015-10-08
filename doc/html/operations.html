@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Request Handlers &mdash; LLFUSE 0.39 documentation</title>
+    <title>Request Handlers &mdash; LLFUSE 0.40 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.39',
+        VERSION:     '0.40',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE 0.39 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE 0.40 documentation" href="index.html" />
     <link rel="next" title="Example File System" href="example.html" />
     <link rel="prev" title="The global lock" href="lock.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="lock.html" title="The global lock"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.40 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -74,7 +74,7 @@ as <a class="reference external" href="http://docs.python.org/3/library/function
 running under Python 2.x and 3.x</p>
 <dl class="method">
 <dt id="llfuse.Operations.access">
-<tt class="descname">access</tt><big>(</big><em>self</em>, <em>inode</em>, <em>mode</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.access" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">access</tt><big>(</big><em>inode</em>, <em>mode</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.access" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if requesting process has <em>mode</em> rights on <em>inode</em>.</p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method
 must return a boolean value.</p>
@@ -84,7 +84,7 @@ called.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.create">
-<tt class="descname">create</tt><big>(</big><em>self</em>, <em>inode_parent</em>, <em>name</em>, <em>mode</em>, <em>flags</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.create" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create</tt><big>(</big><em>inode_parent</em>, <em>name</em>, <em>mode</em>, <em>flags</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a file with permissions <em>mode</em> and open it with <em>flags</em></p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance.</p>
 <p>The method must return a tuple of the form <em>(fh, attr)</em>,
@@ -102,7 +102,7 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 
 <dl class="method">
 <dt id="llfuse.Operations.destroy">
-<tt class="descname">destroy</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#llfuse.Operations.destroy" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#llfuse.Operations.destroy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clean up operations.</p>
 <p>This method will be called when <a class="reference internal" href="fuse_api.html#llfuse.close" title="llfuse.close"><tt class="xref py py-obj docutils literal"><span class="pre">llfuse.close</span></tt></a> has been called
 and the file system is about to be unmounted.</p>
@@ -116,7 +116,7 @@ syscall).</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.flush">
-<tt class="descname">flush</tt><big>(</big><em>self</em>, <em>fh</em><big>)</big><a class="headerlink" href="#llfuse.Operations.flush" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">flush</tt><big>(</big><em>fh</em><big>)</big><a class="headerlink" href="#llfuse.Operations.flush" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle close() syscall.</p>
 <p>This method is called whenever a file descriptor is closed. It
 may be called multiple times for the same open file (e.g. if
@@ -127,7 +127,7 @@ all locks belonging to the file handle&#8217;s owner.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.forget">
-<tt class="descname">forget</tt><big>(</big><em>self</em>, <em>inode_list</em><big>)</big><a class="headerlink" href="#llfuse.Operations.forget" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">forget</tt><big>(</big><em>inode_list</em><big>)</big><a class="headerlink" href="#llfuse.Operations.forget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Notify about inodes being removed from the kernel cache</p>
 <p><em>inode_list</em> is a list of <tt class="docutils literal"><span class="pre">(inode,</span> <span class="pre">nlookup)</span></tt> tuples. This
 method is called when the kernel removes the listed inodes
@@ -151,7 +151,7 @@ no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.
 
 <dl class="method">
 <dt id="llfuse.Operations.fsync">
-<tt class="descname">fsync</tt><big>(</big><em>self</em>, <em>fh</em>, <em>datasync</em><big>)</big><a class="headerlink" href="#llfuse.Operations.fsync" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fsync</tt><big>(</big><em>fh</em>, <em>datasync</em><big>)</big><a class="headerlink" href="#llfuse.Operations.fsync" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flush buffers for open file <em>fh</em></p>
 <p>If <em>datasync</em> is true, only the file contents should be
 flushed (in contrast to the metadata about the file).</p>
@@ -159,7 +159,7 @@ flushed (in contrast to the metadata about the file).</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.fsyncdir">
-<tt class="descname">fsyncdir</tt><big>(</big><em>self</em>, <em>fh</em>, <em>datasync</em><big>)</big><a class="headerlink" href="#llfuse.Operations.fsyncdir" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fsyncdir</tt><big>(</big><em>fh</em>, <em>datasync</em><big>)</big><a class="headerlink" href="#llfuse.Operations.fsyncdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flush buffers for open directory <em>fh</em></p>
 <p>If <em>datasync</em> is true, only the directory contents should be
 flushed (in contrast to metadata about the directory itself).</p>
@@ -167,7 +167,7 @@ flushed (in contrast to metadata about the directory itself).</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.getattr">
-<tt class="descname">getattr</tt><big>(</big><em>self</em>, <em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.getattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getattr</tt><big>(</big><em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.getattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get attributes for <em>inode</em></p>
 <p>This method should return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with
 the attributes of <em>inode</em>. The
@@ -177,7 +177,7 @@ context.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.getxattr">
-<tt class="descname">getxattr</tt><big>(</big><em>self</em>, <em>inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.getxattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getxattr</tt><big>(</big><em>inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.getxattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return extended attribute value</p>
 <p>If the attribute does not exist, the method must raise
 <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an error code of <a class="reference internal" href="data.html#llfuse.ENOATTR" title="llfuse.ENOATTR"><tt class="xref py py-obj docutils literal"><span class="pre">ENOATTR</span></tt></a>.</p>
@@ -185,7 +185,7 @@ context.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.init">
-<tt class="descname">init</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#llfuse.Operations.init" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">init</tt><big>(</big><big>)</big><a class="headerlink" href="#llfuse.Operations.init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize operations</p>
 <p>This function will be called just before the file system
 starts handling requests. It must not raise any exceptions
@@ -195,7 +195,7 @@ particular syscall).</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.link">
-<tt class="descname">link</tt><big>(</big><em>self</em>, <em>inode</em>, <em>new_parent_inode</em>, <em>new_name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.link" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">link</tt><big>(</big><em>inode</em>, <em>new_parent_inode</em>, <em>new_name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.link" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a hard link.</p>
 <p>The method must return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the
 attributes of the newly created directory entry.</p>
@@ -210,13 +210,13 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 
 <dl class="method">
 <dt id="llfuse.Operations.listxattr">
-<tt class="descname">listxattr</tt><big>(</big><em>self</em>, <em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.listxattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">listxattr</tt><big>(</big><em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.listxattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get list of extended attribute names</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="llfuse.Operations.lookup">
-<tt class="descname">lookup</tt><big>(</big><em>self</em>, <em>parent_inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.lookup" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lookup</tt><big>(</big><em>parent_inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Look up a directory entry by name and get its attributes.</p>
 <p>If the entry <em>name</em> does not exist in the directory with inode
 <em>parent_inode</em>, this method must raise <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an
@@ -236,7 +236,7 @@ and <tt class="file docutils literal"><span class="pre">..</span></tt>, no matte
 
 <dl class="method">
 <dt id="llfuse.Operations.mkdir">
-<tt class="descname">mkdir</tt><big>(</big><em>self</em>, <em>parent_inode</em>, <em>name</em>, <em>mode</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.mkdir" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">mkdir</tt><big>(</big><em>parent_inode</em>, <em>name</em>, <em>mode</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.mkdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a directory</p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the attributes of
@@ -252,7 +252,7 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 
 <dl class="method">
 <dt id="llfuse.Operations.mknod">
-<tt class="descname">mknod</tt><big>(</big><em>self</em>, <em>parent_inode</em>, <em>name</em>, <em>mode</em>, <em>rdev</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.mknod" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">mknod</tt><big>(</big><em>parent_inode</em>, <em>name</em>, <em>mode</em>, <em>rdev</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.mknod" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create (possibly special) file</p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the attributes of
@@ -268,7 +268,7 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 
 <dl class="method">
 <dt id="llfuse.Operations.open">
-<tt class="descname">open</tt><big>(</big><em>self</em>, <em>inode</em>, <em>flags</em><big>)</big><a class="headerlink" href="#llfuse.Operations.open" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">open</tt><big>(</big><em>inode</em>, <em>flags</em><big>)</big><a class="headerlink" href="#llfuse.Operations.open" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open a file.</p>
 <p><em>flags</em> will be a bitwise or of the open flags described in
 the <em class="manpage">open(2)</em> manpage and defined in the <a class="reference external" href="http://docs.python.org/3/library/os.html#os" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">os</span></tt></a> module
@@ -281,7 +281,7 @@ and <a class="reference internal" href="#llfuse.Operations.release" title="llfus
 
 <dl class="method">
 <dt id="llfuse.Operations.opendir">
-<tt class="descname">opendir</tt><big>(</big><em>self</em>, <em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.opendir" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">opendir</tt><big>(</big><em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.opendir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open a directory.</p>
 <p>This method should return an integer file handle. The file
 handle will be passed to the <a class="reference internal" href="#llfuse.Operations.readdir" title="llfuse.Operations.readdir"><tt class="xref py py-obj docutils literal"><span class="pre">readdir</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.fsyncdir" title="llfuse.Operations.fsyncdir"><tt class="xref py py-obj docutils literal"><span class="pre">fsyncdir</span></tt></a>
@@ -290,7 +290,7 @@ and <a class="reference internal" href="#llfuse.Operations.releasedir" title="ll
 
 <dl class="method">
 <dt id="llfuse.Operations.read">
-<tt class="descname">read</tt><big>(</big><em>self</em>, <em>fh</em>, <em>off</em>, <em>size</em><big>)</big><a class="headerlink" href="#llfuse.Operations.read" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">read</tt><big>(</big><em>fh</em>, <em>off</em>, <em>size</em><big>)</big><a class="headerlink" href="#llfuse.Operations.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read <em>size</em> bytes from <em>fh</em> at position <em>off</em></p>
 <p>This function should return exactly the number of bytes
 requested except on EOF or error, otherwise the rest of the
@@ -299,7 +299,7 @@ data will be substituted with zeroes.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.readdir">
-<tt class="descname">readdir</tt><big>(</big><em>self</em>, <em>fh</em>, <em>off</em><big>)</big><a class="headerlink" href="#llfuse.Operations.readdir" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">readdir</tt><big>(</big><em>fh</em>, <em>off</em><big>)</big><a class="headerlink" href="#llfuse.Operations.readdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read directory entries</p>
 <p>This method should return an iterator over the contents of
 directory <em>fh</em>, starting at the entry identified by <em>off</em>.
@@ -319,14 +319,14 @@ required.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.readlink">
-<tt class="descname">readlink</tt><big>(</big><em>self</em>, <em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.readlink" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">readlink</tt><big>(</big><em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.readlink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return target of symbolic link</p>
 <p>The return value must have type <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="llfuse.Operations.release">
-<tt class="descname">release</tt><big>(</big><em>self</em>, <em>fh</em><big>)</big><a class="headerlink" href="#llfuse.Operations.release" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">release</tt><big>(</big><em>fh</em><big>)</big><a class="headerlink" href="#llfuse.Operations.release" title="Permalink to this definition">¶</a></dt>
 <dd><p>Release open file</p>
 <p>This method will be called when the last file descriptor of
 <em>fh</em> has been closed. Therefore it will be called exactly once
@@ -335,14 +335,14 @@ for each <a class="reference internal" href="#llfuse.Operations.open" title="llf
 
 <dl class="method">
 <dt id="llfuse.Operations.releasedir">
-<tt class="descname">releasedir</tt><big>(</big><em>self</em>, <em>fh</em><big>)</big><a class="headerlink" href="#llfuse.Operations.releasedir" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">releasedir</tt><big>(</big><em>fh</em><big>)</big><a class="headerlink" href="#llfuse.Operations.releasedir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Release open directory</p>
 <p>This method must be called exactly once for each <a class="reference internal" href="#llfuse.Operations.opendir" title="llfuse.Operations.opendir"><tt class="xref py py-obj docutils literal"><span class="pre">opendir</span></tt></a> call.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="llfuse.Operations.removexattr">
-<tt class="descname">removexattr</tt><big>(</big><em>self</em>, <em>inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.removexattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">removexattr</tt><big>(</big><em>inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.removexattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove extended attribute</p>
 <p>If the attribute does not exist, the method must raise
 <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an error code of <a class="reference internal" href="data.html#llfuse.ENOATTR" title="llfuse.ENOATTR"><tt class="xref py py-obj docutils literal"><span class="pre">ENOATTR</span></tt></a>.</p>
@@ -350,7 +350,7 @@ for each <a class="reference internal" href="#llfuse.Operations.open" title="llf
 
 <dl class="method">
 <dt id="llfuse.Operations.rename">
-<tt class="descname">rename</tt><big>(</big><em>self</em>, <em>inode_parent_old</em>, <em>name_old</em>, <em>inode_parent_new</em>, <em>name_new</em><big>)</big><a class="headerlink" href="#llfuse.Operations.rename" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">rename</tt><big>(</big><em>inode_parent_old</em>, <em>name_old</em>, <em>inode_parent_new</em>, <em>name_new</em><big>)</big><a class="headerlink" href="#llfuse.Operations.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rename a directory entry</p>
 <p>If <em>name_new</em> already exists, it should be overwritten.</p>
 <p>If the file system has received a <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, but no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>
@@ -362,7 +362,7 @@ until the <a class="reference internal" href="#llfuse.Operations.forget" title="
 
 <dl class="method">
 <dt id="llfuse.Operations.rmdir">
-<tt class="descname">rmdir</tt><big>(</big><em>self</em>, <em>inode_parent</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.rmdir" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">rmdir</tt><big>(</big><em>inode_parent</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.rmdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a directory</p>
 <p>If the file system has received a <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, but no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>
 call for this file yet, <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> is expected to remove only
@@ -373,7 +373,7 @@ received.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.setattr">
-<tt class="descname">setattr</tt><big>(</big><em>self</em>, <em>inode</em>, <em>attr</em><big>)</big><a class="headerlink" href="#llfuse.Operations.setattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setattr</tt><big>(</big><em>inode</em>, <em>attr</em><big>)</big><a class="headerlink" href="#llfuse.Operations.setattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change attributes of <em>inode</em></p>
 <p><em>attr</em> is an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the new
 attributes. Only the attributes <a class="reference internal" href="data.html#llfuse.EntryAttributes.st_size" title="llfuse.EntryAttributes.st_size"><tt class="xref py py-obj docutils literal"><span class="pre">st_size</span></tt></a>,
@@ -388,14 +388,14 @@ with the updated attributes (i.e., all attributes except for
 
 <dl class="method">
 <dt id="llfuse.Operations.setxattr">
-<tt class="descname">setxattr</tt><big>(</big><em>self</em>, <em>inode</em>, <em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#llfuse.Operations.setxattr" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setxattr</tt><big>(</big><em>inode</em>, <em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#llfuse.Operations.setxattr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set an extended attribute.</p>
 <p>The attribute may or may not exist already.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="llfuse.Operations.stacktrace">
-<tt class="descname">stacktrace</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#llfuse.Operations.stacktrace" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">stacktrace</tt><big>(</big><big>)</big><a class="headerlink" href="#llfuse.Operations.stacktrace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Asynchronous debugging</p>
 <p>This method will be called when the <tt class="docutils literal"><span class="pre">fuse_stacktrace</span></tt> extended
 attribute is set on the mountpoint. It will be called without
@@ -406,7 +406,7 @@ quite useful to debug file system deadlocks.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.statfs">
-<tt class="descname">statfs</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#llfuse.Operations.statfs" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">statfs</tt><big>(</big><big>)</big><a class="headerlink" href="#llfuse.Operations.statfs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get file system statistics</p>
 <p>The method is expected to return an appropriately filled
 <a class="reference internal" href="data.html#llfuse.StatvfsData" title="llfuse.StatvfsData"><tt class="xref py py-obj docutils literal"><span class="pre">StatvfsData</span></tt></a> instance.</p>
@@ -414,7 +414,7 @@ quite useful to debug file system deadlocks.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.symlink">
-<tt class="descname">symlink</tt><big>(</big><em>self</em>, <em>inode_parent</em>, <em>name</em>, <em>target</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.symlink" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">symlink</tt><big>(</big><em>inode_parent</em>, <em>name</em>, <em>target</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.symlink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a symbolic link</p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance. The method must
 return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance with the attributes of
@@ -430,7 +430,7 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 
 <dl class="method">
 <dt id="llfuse.Operations.unlink">
-<tt class="descname">unlink</tt><big>(</big><em>self</em>, <em>parent_inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.unlink" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">unlink</tt><big>(</big><em>parent_inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.unlink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove a (possibly special) file</p>
 <p>If the file system has received a <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, but no <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a>
 call for this file yet, <a class="reference internal" href="#llfuse.Operations.unlink" title="llfuse.Operations.unlink"><tt class="xref py py-obj docutils literal"><span class="pre">unlink</span></tt></a> is expected to remove only
@@ -443,7 +443,7 @@ new directory entry by the <a class="reference internal" href="#llfuse.Operation
 
 <dl class="method">
 <dt id="llfuse.Operations.write">
-<tt class="descname">write</tt><big>(</big><em>self</em>, <em>fh</em>, <em>off</em>, <em>buf</em><big>)</big><a class="headerlink" href="#llfuse.Operations.write" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">write</tt><big>(</big><em>fh</em>, <em>off</em>, <em>buf</em><big>)</big><a class="headerlink" href="#llfuse.Operations.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write <em>buf</em> into <em>fh</em> at <em>off</em></p>
 <p>This method should return the number of bytes written. If no
 error occured, this should be exactly <tt class="samp docutils literal"><span class="pre">len(buf)</span></tt>.</p>
@@ -504,7 +504,7 @@ error occured, this should be exactly <tt class="samp docutils literal"><span cl
         <li class="right" >
           <a href="lock.html" title="The global lock"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.40 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

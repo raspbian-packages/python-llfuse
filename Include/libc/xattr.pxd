@@ -9,7 +9,7 @@ This file is part of python-llfuse (http://python-llfuse.googlecode.com).
 python-llfuse can be distributed under the terms of the GNU LGPL.
 '''
 
-IF UNAME_SYSNAME == "Darwin":
+IF TARGET_PLATFORM == 'darwin':        
     cdef extern from "sys/xattr.h" nogil:
         int c_setxattr "setxattr" (char *path, char *name,
                                    void *value, int size,
@@ -32,6 +32,20 @@ IF UNAME_SYSNAME == "Darwin":
     cdef inline int getxattr (char *path, char *name,
                               void *value, int size) nogil:
         return c_getxattr(path, name, value, size, 0, 0)
+
+ELIF TARGET_PLATFORM == 'freebsd':
+    cdef extern from "sys/types.h":
+        pass
+    
+    cdef extern from "sys/extattr.h" nogil:
+
+        int extattr_set_file(char *path, int attrnamespace,
+                             char *attrname, void *data, int nbytes)
+        int extattr_get_file(char *path, int attrnamespace,
+                             char *attrname, void *data, int nbytes)
+
+        int EXTATTR_NAMESPACE_USER
+        int EXTATTR_NAMESPACE_SYSTEM
 
 ELSE:
     cdef extern from "attr/xattr.h" nogil:
