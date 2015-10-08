@@ -21,12 +21,14 @@ __version__ = LLFUSE_VERSION
 from fuse_lowlevel cimport *
 from libc.sys.stat cimport stat as c_stat, S_IFMT, S_IFDIR
 from libc.sys.types cimport mode_t, dev_t, off_t
+from libc.stdint cimport uint32_t
 from libc.stdlib cimport const_char
 from libc cimport stdlib, string, errno, dirent, xattr
 from posix.unistd cimport getpid
 from cpython.bytes cimport (PyBytes_AsStringAndSize, PyBytes_FromStringAndSize,
                             PyBytes_AsString, PyBytes_FromString)
 cimport cpython.exc
+from cpython.version cimport PY_MAJOR_VERSION
 
 
 ######################
@@ -73,18 +75,25 @@ import os
 import logging
 import sys
 import os.path
-from Queue import Queue
 import threading
 from collections import namedtuple
+
+if PY_MAJOR_VERSION < 3:
+    from Queue import Queue
+    str_t = bytes
+else:
+    from queue import Queue
+    str_t = str
 
 ##################
 # GLOBAL VARIABLES
 ##################
 
 log = logging.getLogger("fuse")
+fse = sys.getfilesystemencoding()
 
 cdef object operations
-cdef object mountpoint
+cdef object mountpoint_b
 cdef fuse_session* session = NULL
 cdef fuse_chan* channel = NULL
 cdef fuse_lowlevel_ops fuse_ops

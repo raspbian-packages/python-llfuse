@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Example File System &mdash; LLFUSE v0.37.1 documentation</title>
+    <title>Example File System &mdash; LLFUSE 0.39 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.37.1',
+        VERSION:     '0.39',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE 0.39 documentation" href="index.html" />
     <link rel="prev" title="Request Handlers" href="operations.html" /> 
   </head>
   <body>
@@ -35,7 +38,7 @@
         <li class="right" >
           <a href="operations.html" title="Request Handlers"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -46,9 +49,9 @@
             
   <div class="section" id="example-file-system">
 <span id="id1"></span><h1>Example File System<a class="headerlink" href="#example-file-system" title="Permalink to this headline">¶</a></h1>
-<p>The following is an example of a very simple file system that uses
-LLFUSE (this example is also included in the LLFUSE tarball as
-<tt class="file docutils literal"><span class="pre">contrib/example.py</span></tt>).</p>
+<p>The following is an example of a very simple in-memry file system
+based on LLFUSE (this example is also included in the LLFUSE tarball as
+<tt class="file docutils literal"><span class="pre">examples/tmpfs.py</span></tt>).</p>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
   2
   3
@@ -450,7 +453,8 @@ LLFUSE (this example is also included in the LLFUSE tarball as
 399
 400
 401
-402</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+402
+403</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -459,7 +463,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
 <span class="c"># that we use modules from this directory</span>
 <span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s">&#39;..&#39;</span><span class="p">))</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="s">&#39;setup.py&#39;</span><span class="p">))</span> <span class="ow">and</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="s">&#39;llfuse.so&#39;</span><span class="p">))):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="s">&#39;src&#39;</span><span class="p">,</span> <span class="s">&#39;llfuse.pyx&#39;</span><span class="p">))):</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="s">&#39;src&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
     
     
@@ -477,10 +481,10 @@ LLFUSE (this example is also included in the LLFUSE tarball as
 <span class="k">class</span> <span class="nc">Operations</span><span class="p">(</span><span class="n">llfuse</span><span class="o">.</span><span class="n">Operations</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;An example filesystem that stores all data in memory</span>
 <span class="sd">    </span>
-<span class="sd">    This is a very simple implementation with terrible</span>
-<span class="sd">    performance. Don&#39;t try to store significant amounts of</span>
-<span class="sd">    data. Also, there are some other flaws that have not been</span>
-<span class="sd">    fixed to keep the code easier to understand:</span>
+<span class="sd">    This is a very simple implementation with terrible performance.</span>
+<span class="sd">    Don&#39;t try to store significant amounts of data. Also, there are</span>
+<span class="sd">    some other flaws that have not been fixed to keep the code easier</span>
+<span class="sd">    to understand:</span>
 <span class="sd">    </span>
 <span class="sd">    * atime, mtime and ctime are not updated</span>
 <span class="sd">    * generation numbers are not supported</span>
@@ -746,7 +750,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_row</span><span class="p">(</span><span class="s">&#39;SELECT SUM(size) FROM inodes&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">stat_</span><span class="o">.</span><span class="n">f_blocks</span> <span class="o">=</span> <span class="n">size</span> <span class="o">//</span> <span class="n">stat_</span><span class="o">.</span><span class="n">f_frsize</span>
         <span class="n">stat_</span><span class="o">.</span><span class="n">f_bfree</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">size</span> <span class="o">//</span> <span class="n">stat_</span><span class="o">.</span><span class="n">f_frsize</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
-        <span class="n">stat_</span><span class="o">.</span><span class="n">f_bavail</span> <span class="o">=</span> <span class="n">stat_</span><span class="p">[</span><span class="s">&quot;f_bfree&quot;</span><span class="p">]</span>
+        <span class="n">stat_</span><span class="o">.</span><span class="n">f_bavail</span> <span class="o">=</span> <span class="n">stat_</span><span class="o">.</span><span class="n">f_bfree</span>
 
         <span class="n">inodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_row</span><span class="p">(</span><span class="s">&#39;SELECT COUNT(id) FROM inodes&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">stat_</span><span class="o">.</span><span class="n">f_files</span> <span class="o">=</span> <span class="n">inodes</span>
@@ -768,7 +772,8 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <span class="c">#pylint: disable=R0201,W0613</span>
         <span class="k">return</span> <span class="bp">True</span>
 
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inode_parent</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inode_parent</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+        <span class="c">#pylint: disable=W0612 </span>
         <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">(</span><span class="n">inode_parent</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inode_open_count</span><span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">st_ino</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">st_ino</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
@@ -841,7 +846,7 @@ LLFUSE (this example is also included in the LLFUSE tarball as
     <span class="n">operations</span> <span class="o">=</span> <span class="n">Operations</span><span class="p">()</span>
     
     <span class="n">llfuse</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">operations</span><span class="p">,</span> <span class="n">mountpoint</span><span class="p">,</span> 
-                <span class="p">[</span>  <span class="n">b</span><span class="s">&#39;fsname=llfuse_xmp&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&quot;nonempty&quot;</span> <span class="p">])</span>
+                <span class="p">[</span>  <span class="n">b</span><span class="s">&#39;fsname=tmpfs&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&quot;nonempty&quot;</span> <span class="p">])</span>
     
     <span class="c"># sqlite3 does not support multithreading</span>
     <span class="k">try</span><span class="p">:</span>
@@ -901,12 +906,12 @@ LLFUSE (this example is also included in the LLFUSE tarball as
         <li class="right" >
           <a href="operations.html" title="Request Handlers"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+        &copy; Copyright 2010-2013, Nikolaus Rath.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

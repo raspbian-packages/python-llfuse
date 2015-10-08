@@ -19,6 +19,13 @@ cdef object fill_entry_param(object attr, fuse_entry_param* entry):
     fill_c_stat(attr, &entry.attr)
 
 cdef object fill_c_stat(object attr, c_stat* stat):
+
+    # Under OS-X, c_stat has an additional st_flags field. The memset
+    # below sets this to zero without the need for an explicit
+    # platform check (although, admittedly, this explanatory comment
+    # make take even more space than the check would have taken).
+    string.memset(stat, 0, sizeof(c_stat))
+
     stat.st_ino = attr.st_ino
     stat.st_mode = attr.st_mode
     stat.st_nlink = attr.st_nlink
@@ -79,6 +86,7 @@ cdef object get_request_context(fuse_req_t req):
     ctx.pid = context.pid
     ctx.uid = context.uid
     ctx.gid = context.gid
+    ctx.umask = context.umask
 
     return ctx
 
@@ -112,8 +120,12 @@ cdef void init_fuse_ops():
     fuse_ops.releasedir = fuse_releasedir
     fuse_ops.fsyncdir = fuse_fsyncdir
     fuse_ops.statfs = fuse_statfs
-    fuse_ops.setxattr = fuse_setxattr
-    fuse_ops.getxattr = fuse_getxattr
+    IF UNAME_SYSNAME == "Darwin":
+        fuse_ops.setxattr = fuse_setxattr_darwin
+        fuse_ops.getxattr = fuse_getxattr_darwin
+    ELSE:
+        fuse_ops.setxattr = fuse_setxattr
+        fuse_ops.getxattr = fuse_getxattr
     fuse_ops.listxattr = fuse_listxattr
     fuse_ops.removexattr = fuse_removexattr
     fuse_ops.access = fuse_access
@@ -126,8 +138,10 @@ cdef make_fuse_args(list args, fuse_args* f_args):
 
     args_new = [ b'python-llfuse' ]
     for el in args:
-        args_new.append('-o')
-        args_new.append(el)
+        if not isinstance(el, str_t):
+            raise TypeError('fuse options must be of type str')
+        args_new.append(b'-o')
+        args_new.append(el.encode('us-ascii'))
     args = args_new
     
     f_args.argc = <int> len(args)
@@ -200,7 +214,7 @@ cdef class Lock:
         else:
             raise RuntimeError(strerror(ret))
 
-    def release(self, *a):
+    def release(self):
         '''Release global lock'''
         
         cdef int ret
@@ -244,9 +258,12 @@ cdef class Lock:
         else:
             raise RuntimeError(strerror(ret))
 
-    __enter__ = acquire
-    __exit__ = release
+    def __enter__(self):
+        self.acquire()
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.release()
+        
 
 cdef class NoLockManager:
     '''Context manager to execute code while the global lock is released'''
@@ -288,3 +305,27 @@ def _notify_loop():
                 fuse_lowlevel_notify_inval_entry(channel, ino, cname, len_)
         else:
             raise RuntimeError("Weird request received: %r", req)
+
+cdef str2bytes(s):
+    '''Convert *s* to bytes
+
+    Under Python 2.x, just returns *s*. Under Python 3.x, converts
+    to file system encoding using surrogateescape.
+    '''
+    
+    if PY_MAJOR_VERSION < 3:
+        return s
+    else:
+        return s.encode(fse, 'surrogateescape')
+
+cdef bytes2str(s):
+    '''Convert *s* to str
+
+    Under Python 2.x, just returns *s*. Under Python 3.x, converts
+    from file system encoding using surrogateescape.
+    '''
+    
+    if PY_MAJOR_VERSION < 3:
+        return s
+    else:
+        return s.decode(fse, 'surrogateescape')

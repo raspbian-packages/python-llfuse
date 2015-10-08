@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Data Structures &mdash; LLFUSE v0.37.1 documentation</title>
+    <title>Data Structures &mdash; LLFUSE 0.39 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.37.1',
+        VERSION:     '0.39',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE 0.39 documentation" href="index.html" />
     <link rel="next" title="The global lock" href="lock.html" />
     <link rel="prev" title="FUSE API Functions" href="fuse_api.html" /> 
   </head>
@@ -39,7 +42,7 @@
         <li class="right" >
           <a href="fuse_api.html" title="FUSE API Functions"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,7 +56,7 @@
 <dl class="data">
 <dt id="llfuse.ENOATTR">
 <tt class="descclassname">llfuse.</tt><tt class="descname">ENOATTR</tt><a class="headerlink" href="#llfuse.ENOATTR" title="Permalink to this definition">¶</a></dt>
-<dd><p>This errorcode is unfortunately missing in the <a class="reference external" href="http://docs.python.org/library/errno.html#module-errno" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">errno</span></tt></a> module,
+<dd><p>This errorcode is unfortunately missing in the <a class="reference external" href="http://docs.python.org/3/library/errno.html#errno" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">errno</span></tt></a> module,
 so it is provided by llfuse instead.</p>
 </dd></dl>
 
@@ -67,17 +70,18 @@ system.</p>
 <dl class="exception">
 <dt id="llfuse.FUSEError">
 <em class="property">exception </em><tt class="descclassname">llfuse.</tt><tt class="descname">FUSEError</tt><a class="headerlink" href="#llfuse.FUSEError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapped errno value to be returned to the fuse kernel module</p>
-<p>This exception can store only an errno. Request handlers should raise
-it to return a specific errno to the fuse kernel module.</p>
+<dd><p>This exception may be raised by request handlers to indicate that
+the requested operation could not be carried out. The system call
+that resulted in the request (if any) will then fail with error
+code <em>errno_</em>.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="llfuse.RequestContext">
 <em class="property">class </em><tt class="descclassname">llfuse.</tt><tt class="descname">RequestContext</tt><a class="headerlink" href="#llfuse.RequestContext" title="Permalink to this definition">¶</a></dt>
-<dd><p>Instances of this class provide information about the caller
-of the syscall that triggered a request. The attributes should be
-self-explanatory.</p>
+<dd><p>Instances of this class are passed to some <a class="reference internal" href="operations.html#llfuse.Operations" title="llfuse.Operations"><tt class="xref py py-obj docutils literal"><span class="pre">Operations</span></tt></a> methods to
+provide information about the caller of the syscall that initiated
+the request.</p>
 <dl class="attribute">
 <dt id="llfuse.RequestContext.pid">
 <tt class="descname">pid</tt><a class="headerlink" href="#llfuse.RequestContext.pid" title="Permalink to this definition">¶</a></dt>
@@ -296,12 +300,12 @@ attributes.</p>
         <li class="right" >
           <a href="fuse_api.html" title="FUSE API Functions"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+        &copy; Copyright 2010-2013, Nikolaus Rath.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

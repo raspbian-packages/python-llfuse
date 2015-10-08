@@ -30,44 +30,60 @@ use_setuptools(version='0.6.12', download_delay=5)
 import setuptools
 from setuptools import Extension
 
-
-LLFUSE_VERSION = '0.37.1'
+LLFUSE_VERSION = '0.39'
 
 def main():
+
+    try:
+        from sphinx.application import Sphinx #pylint: disable-msg=W0612
+    except ImportError:
+        pass
+    else:
+        fix_docutils()
     
     with open(os.path.join(basedir, 'rst', 'about.rst'), 'r') as fh:
         long_desc = fh.read()
 
     compile_args = pkg_config('fuse', cflags=True, ldflags=False, min_ver='2.8.0')
-    compile_args.extend(['-DFUSE_USE_VERSION=28',
-                         '-DLLFUSE_VERSION="%s"' % LLFUSE_VERSION,
-                         '-Werror', '-Wall', '-Wextra', '-Wconversion',
-                         '-Wno-unused-parameter', '-Wno-sign-conversion'])
+    compile_args += ['-DFUSE_USE_VERSION=28', '-Wall',
+                     '-DLLFUSE_VERSION="%s"' % LLFUSE_VERSION]
     
-    # http://trac.cython.org/cython_trac/ticket/704
-    compile_args.append('-Wno-unused-but-set-variable')
-    
+    # Enable fatal warnings only when compiling from Mercurial tip.
+    # Otherwise, this breaks both forward and backward compatibility
+    # (because compilation with newer compiler may fail if additional
+    # warnings are added, and compilation with older compiler may fail
+    # if it doesn't know about a newer -Wno-* option).
+    if os.path.exists(os.path.join(basedir, 'MANIFEST.in')):
+        print('MANIFEST.in exists, compiling with developer options')
+        compile_args += [ '-Werror', '-Wextra', '-Wconversion',
+                          '-Wno-sign-conversion' ]
+        
     # http://bugs.python.org/issue969718
-    if sys.version_info[0] == 2: 
+    if sys.version_info[0] == 2:
         compile_args.append('-fno-strict-aliasing')
 
     # http://bugs.python.org/issue7576
     if sys.version_info[0] == 3 and sys.version_info[1] < 2:
         compile_args.append('-Wno-missing-field-initializers')
-        
+            
+    # http://trac.cython.org/cython_trac/ticket/811
+    compile_args.append('-Wno-unused-but-set-variable')
+    
+    # http://trac.cython.org/cython_trac/ticket/813
+    compile_args.append('-Wno-maybe-uninitialized')
+            
     link_args = pkg_config('fuse', cflags=False, ldflags=True, min_ver='2.8.0')
     link_args.append('-lpthread')
-    link_args.append('-lrt')
 
-    uname = subprocess.Popen(["uname", "-s"], stdout=subprocess.PIPE).communicate()[0].strip()
-    uname = uname.decode('utf-8')
-    if uname == 'Linux':
+    if os.uname()[0] == 'Linux':
+        link_args.append('-lrt')
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
-    elif uname == 'FreeBSD':
+
+    elif os.uname()[0] in ('Darwin', 'FreeBSD'):
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
     else:
-        print("NOTE: unknown system (%s), " % uname +
-              "nanosecond resolution file times will not be available")
+        print("NOTE: unknown system (%s), nanosecond resolution file times "
+              "will not be available" % os.uname()[0])
 
     setuptools.setup(
           name='llfuse',
@@ -86,8 +102,10 @@ def main():
                        'Topic :: Software Development :: Libraries :: Python Modules',
                        'Topic :: System :: Filesystems',
                        'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-                       'Operating System :: POSIX' ],
-          platforms=[ 'POSIX', 'UNIX', 'Linux' ],
+                       'Operating System :: POSIX :: Linux',
+                       'Operating System :: MacOS :: MacOS X',
+                       'Operating System :: POSIX :: BSD :: FreeBSD'],
+          platforms=[ 'Linux', 'FreeBSD', 'OS X' ],
           keywords=['FUSE', 'python' ],
           package_dir={'': 'src'},
           packages=setuptools.find_packages('src'),
@@ -154,14 +172,20 @@ class build_cython(setuptools.Command):
     def run(self):
         try:
             from Cython.Compiler.Main import compile as cython_compile
+            from Cython.Compiler.Options import extra_warnings
         except ImportError:
             raise SystemExit('Cython needs to be installed for this command')
-
-        options = { 'include_path': [ os.path.join(basedir, 'Include') ],
-                    'recursive': False, 'verbose': True,
-                    'timestamps': False,
-                    'compiler_directives': { 'embedsignature': True }
-                     }
+        
+        directives = dict(extra_warnings)
+        directives['embedsignature'] = True
+        directives['language_level'] = 3
+        
+        # http://trac.cython.org/cython_trac/ticket/714
+        directives['warn.maybe_uninitialized'] = False
+        
+        options = {'include_path': [ os.path.join(basedir, 'Include') ],
+                   'recursive': False, 'verbose': True, 'timestamps': False,
+                   'compiler_directives': directives, 'warning_errors': True }
         
         for extension in self.extensions:
             for file_ in extension.sources:
@@ -195,6 +219,30 @@ class upload_docs(setuptools.Command):
         subprocess.check_call(['rsync', '-aHv', '--del', os.path.join(basedir, 'doc', 'html') + '/',
                                'ebox.rath.org:/var/www/llfuse-docs/'])
 
-
+def fix_docutils():
+    '''Work around https://bitbucket.org/birkenfeld/sphinx/issue/1154/'''
+    
+    import docutils.parsers 
+    from docutils.parsers import rst
+    old_getclass = docutils.parsers.get_parser_class
+    
+    # Check if bug is there
+    try:
+        old_getclass('rst')
+    except AttributeError:
+        pass
+    else:
+        return
+     
+    def get_parser_class(parser_name):
+        """Return the Parser class from the `parser_name` module."""
+        if parser_name in ('rst', 'restructuredtext'):
+            return rst.Parser
+        else:
+            return old_getclass(parser_name)
+    docutils.parsers.get_parser_class = get_parser_class
+    
+    assert docutils.parsers.get_parser_class('rst') is rst.Parser
+    
 if __name__ == '__main__':
     main()

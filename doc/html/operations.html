@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Request Handlers &mdash; LLFUSE v0.37.1 documentation</title>
+    <title>Request Handlers &mdash; LLFUSE 0.39 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.37.1',
+        VERSION:     '0.39',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="LLFUSE v0.37.1 documentation" href="index.html" />
+    <link rel="top" title="LLFUSE 0.39 documentation" href="index.html" />
     <link rel="next" title="Example File System" href="example.html" />
     <link rel="prev" title="The global lock" href="lock.html" /> 
   </head>
@@ -39,7 +42,7 @@
         <li class="right" >
           <a href="lock.html" title="The global lock"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,14 +60,18 @@
 <dd><p>This class defines the general and request handler methods that an
 LLFUSE file system may implement. If a particular request handler
 has not been implemented, it must raise <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an errorcode of
-<a class="reference external" href="http://docs.python.org/library/errno.html#errno.ENOSYS" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">errno.ENOSYS</span></tt></a>.</p>
-<p>It has recommended that file systems are derived from this class
+<a class="reference external" href="http://docs.python.org/3/library/errno.html#errno.ENOSYS" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">errno.ENOSYS</span></tt></a>.</p>
+<p>It is recommended that file systems are derived from this class
 and only overwrite the handlers that they actually implement. (The
 default implementations defined in this class all just raise the
 not-implemented exception).</p>
 <p>The only exception that request handlers are allowed to raise is
 <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a>. This will cause the specified errno to be
 returned by the syscall that is being handled.</p>
+<p>Note that all character data (directory entry names, extended
+attribute names and values, symbolic link targets etc) are passed
+as <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a> and must be returned as <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a>. This applies to both
+running under Python 2.x and 3.x</p>
 <dl class="method">
 <dt id="llfuse.Operations.access">
 <tt class="descname">access</tt><big>(</big><em>self</em>, <em>inode</em>, <em>mode</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.access" title="Permalink to this definition">¶</a></dt>
@@ -77,8 +84,8 @@ called.</p>
 
 <dl class="method">
 <dt id="llfuse.Operations.create">
-<tt class="descname">create</tt><big>(</big><em>self</em>, <em>inode_parent</em>, <em>name</em>, <em>mode</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a file with permissions <em>mode</em> and open it</p>
+<tt class="descname">create</tt><big>(</big><em>self</em>, <em>inode_parent</em>, <em>name</em>, <em>mode</em>, <em>flags</em>, <em>ctx</em><big>)</big><a class="headerlink" href="#llfuse.Operations.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a file with permissions <em>mode</em> and open it with <em>flags</em></p>
 <p><em>ctx</em> will be a <a class="reference internal" href="data.html#llfuse.RequestContext" title="llfuse.RequestContext"><tt class="xref py py-obj docutils literal"><span class="pre">RequestContext</span></tt></a> instance.</p>
 <p>The method must return a tuple of the form <em>(fh, attr)</em>,
 where <em>fh</em> is a file handle like the one returned by <a class="reference internal" href="#llfuse.Operations.open" title="llfuse.Operations.open"><tt class="xref py py-obj docutils literal"><span class="pre">open</span></tt></a>
@@ -211,9 +218,10 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 <dt id="llfuse.Operations.lookup">
 <tt class="descname">lookup</tt><big>(</big><em>self</em>, <em>parent_inode</em>, <em>name</em><big>)</big><a class="headerlink" href="#llfuse.Operations.lookup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Look up a directory entry by name and get its attributes.</p>
-<p>If the entry does not exist, this method must raise
-<a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an errno of <a class="reference external" href="http://docs.python.org/library/errno.html#errno.ENOENT" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">errno.ENOENT</span></tt></a>. Otherwise it must
-return an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance.</p>
+<p>If the entry <em>name</em> does not exist in the directory with inode
+<em>parent_inode</em>, this method must raise <a class="reference internal" href="data.html#llfuse.FUSEError" title="llfuse.FUSEError"><tt class="xref py py-obj docutils literal"><span class="pre">FUSEError</span></tt></a> with an
+errno of <a class="reference external" href="http://docs.python.org/3/library/errno.html#errno.ENOENT" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">errno.ENOENT</span></tt></a>. Otherwise it must return an
+<a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance.</p>
 <p>Once an inode has been returned by <a class="reference internal" href="#llfuse.Operations.lookup" title="llfuse.Operations.lookup"><tt class="xref py py-obj docutils literal"><span class="pre">lookup</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.create" title="llfuse.Operations.create"><tt class="xref py py-obj docutils literal"><span class="pre">create</span></tt></a>,
 <a class="reference internal" href="#llfuse.Operations.symlink" title="llfuse.Operations.symlink"><tt class="xref py py-obj docutils literal"><span class="pre">symlink</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.link" title="llfuse.Operations.link"><tt class="xref py py-obj docutils literal"><span class="pre">link</span></tt></a>, <a class="reference internal" href="#llfuse.Operations.mknod" title="llfuse.Operations.mknod"><tt class="xref py py-obj docutils literal"><span class="pre">mknod</span></tt></a> or <a class="reference internal" href="#llfuse.Operations.mkdir" title="llfuse.Operations.mkdir"><tt class="xref py py-obj docutils literal"><span class="pre">mkdir</span></tt></a>, it must be kept by the
 file system until it receives a <a class="reference internal" href="#llfuse.Operations.forget" title="llfuse.Operations.forget"><tt class="xref py py-obj docutils literal"><span class="pre">forget</span></tt></a> request for the
@@ -263,7 +271,7 @@ itself until the <a class="reference internal" href="#llfuse.Operations.forget" 
 <tt class="descname">open</tt><big>(</big><em>self</em>, <em>inode</em>, <em>flags</em><big>)</big><a class="headerlink" href="#llfuse.Operations.open" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open a file.</p>
 <p><em>flags</em> will be a bitwise or of the open flags described in
-the <em class="manpage">open(2)</em> manpage and defined in the <a class="reference external" href="http://docs.python.org/library/os.html#module-os" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">os</span></tt></a> module
+the <em class="manpage">open(2)</em> manpage and defined in the <a class="reference external" href="http://docs.python.org/3/library/os.html#os" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">os</span></tt></a> module
 (with the exception of <tt class="docutils literal"><span class="pre">O_CREAT</span></tt>, <tt class="docutils literal"><span class="pre">O_EXCL</span></tt>, <tt class="docutils literal"><span class="pre">O_NOCTTY</span></tt>
 and <tt class="docutils literal"><span class="pre">O_TRUNC</span></tt>)</p>
 <p>This method should return an integer file handle. The file
@@ -294,7 +302,8 @@ data will be substituted with zeroes.</p>
 <tt class="descname">readdir</tt><big>(</big><em>self</em>, <em>fh</em>, <em>off</em><big>)</big><a class="headerlink" href="#llfuse.Operations.readdir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read directory entries</p>
 <p>This method should return an iterator over the contents of
-directory <em>fh</em>, starting at the entry identified by <em>off</em>.</p>
+directory <em>fh</em>, starting at the entry identified by <em>off</em>.
+Directory entries must be of type <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a>.</p>
 <p>The iterator must yield tuples of the form <tt class="samp docutils literal"><span class="pre">(</span><em><span class="pre">name</span></em><span class="pre">,</span> <em><span class="pre">attr</span></em><span class="pre">,</span>
 <em><span class="pre">next_</span></em><span class="pre">)</span></tt>, where <em>attr</em> is an <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance and
 <em>next_</em> gives an offset that can be passed as <em>off</em> to start
@@ -312,6 +321,7 @@ required.</p>
 <dt id="llfuse.Operations.readlink">
 <tt class="descname">readlink</tt><big>(</big><em>self</em>, <em>inode</em><big>)</big><a class="headerlink" href="#llfuse.Operations.readlink" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return target of symbolic link</p>
+<p>The return value must have type <a class="reference external" href="http://docs.python.org/3/library/functions.html#bytes" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">bytes</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -370,7 +380,7 @@ attributes. Only the attributes <a class="reference internal" href="data.html#ll
 <a class="reference internal" href="data.html#llfuse.EntryAttributes.st_mode" title="llfuse.EntryAttributes.st_mode"><tt class="xref py py-obj docutils literal"><span class="pre">st_mode</span></tt></a>, <a class="reference internal" href="data.html#llfuse.EntryAttributes.st_uid" title="llfuse.EntryAttributes.st_uid"><tt class="xref py py-obj docutils literal"><span class="pre">st_uid</span></tt></a>,
 <a class="reference internal" href="data.html#llfuse.EntryAttributes.st_gid" title="llfuse.EntryAttributes.st_gid"><tt class="xref py py-obj docutils literal"><span class="pre">st_gid</span></tt></a>, <a class="reference internal" href="data.html#llfuse.EntryAttributes.st_atime" title="llfuse.EntryAttributes.st_atime"><tt class="xref py py-obj docutils literal"><span class="pre">st_atime</span></tt></a> and
 <a class="reference internal" href="data.html#llfuse.EntryAttributes.st_mtime" title="llfuse.EntryAttributes.st_mtime"><tt class="xref py py-obj docutils literal"><span class="pre">st_mtime</span></tt></a> are relevant. Unchanged attributes
-will have a value <a class="reference external" href="http://docs.python.org/library/constants.html#None" title="(in Python v2.7)"><tt class="xref py py-obj xref docutils literal"><span class="pre">None</span></tt></a>.</p>
+will have a value <a class="reference external" href="http://docs.python.org/3/library/constants.html#None" title="(in Python v3.3)"><tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt></a>.</p>
 <p>The method should return a new <a class="reference internal" href="data.html#llfuse.EntryAttributes" title="llfuse.EntryAttributes"><tt class="xref py py-obj docutils literal"><span class="pre">EntryAttributes</span></tt></a> instance
 with the updated attributes (i.e., all attributes except for
 <a class="reference internal" href="data.html#llfuse.EntryAttributes.entry_timeout" title="llfuse.EntryAttributes.entry_timeout"><tt class="xref py py-obj docutils literal"><span class="pre">entry_timeout</span></tt></a> should be set).</p>
@@ -494,12 +504,12 @@ error occured, this should be exactly <tt class="samp docutils literal"><span cl
         <li class="right" >
           <a href="lock.html" title="The global lock"
              >previous</a> |</li>
-        <li><a href="index.html">LLFUSE v0.37.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLFUSE 0.39 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Nikolaus Rath.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+        &copy; Copyright 2010-2013, Nikolaus Rath.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

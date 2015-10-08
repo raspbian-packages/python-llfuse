@@ -13,7 +13,6 @@ Include/libc/sys/__init__.py
 Include/libc/sys/stat.pxd
 Include/libc/sys/statvfs.pxd
 Include/libc/sys/types.pxd
-contrib/example.py
 doc/html/.buildinfo
 doc/html/data.html
 doc/html/example.html
@@ -55,8 +54,9 @@ doc/html/_static/underscore.js
 doc/html/_static/up-pressed.png
 doc/html/_static/up.png
 doc/html/_static/websupport.js
+examples/passthroughfs.py
+examples/tmpfs.py
 rst/about.rst
-rst/about.rst.orig
 rst/conf.py
 rst/data.rst
 rst/example.rst
