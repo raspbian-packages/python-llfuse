@@ -20,7 +20,7 @@ Build-Depends: debhelper (>= 9),
                fuse,
                python-distribute,
                python3-setuptools,
-               cython3 (>= 0.21.1)
+               cython3 (>= 0.24)
 Standards-Version: 3.9.6
 Homepage: https://bitbucket.org/nikratio/python-llfuse/
 Vcs-Git: git://anonscm.debian.org/python-modules/packages/python-llfuse.git
