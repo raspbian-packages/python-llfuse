@@ -1,0 +1,53 @@
+From 8d0b3c6a5ec067e7ca8852ab8e38aab63d3218fc Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Mon, 1 Feb 2016 09:40:04 -0800
+Subject: Work around bug in mips+mipsel libc
+
+Forwarded: no
+Patch-Name: mips_dev_t.diff
+
+On mips and mipsel, the st_dev and st_rdev members of struct stat do not
+have type dev_t. This breaks POSIX compatibility, but is difficult to fix
+(cf. https://sourceware.org/bugzilla/show_bug.cgi?id=17786).
+
+To work around the issue, we change the definition of struct stat that
+is used by Cython when we are compiling under mips. Note that this
+requires the Cython compilation to run under mips, and that the
+resulting C file will be mips specific (without the patch, the
+generated C file is suitable for any architecture).
+
+Upstream is not interested in this change for obvious reasons.
+---
+ src/llfuse.pyx | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/src/llfuse.pyx b/src/llfuse.pyx
+index 53a6..8754 100644
+--- a/src/llfuse.pyx
++++ b/src/llfuse.pyx
+@@ -20,7 +20,24 @@ cdef extern from "llfuse.h":
+ 
+ from fuse_lowlevel cimport *
+ from pthread cimport *
+-from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
++IF UNAME_MACHINE.startswith('mips64'):
++    cdef extern from "sys/stat.h" nogil:
++      struct stat:
++        int       st_dev
++       ino_t     st_ino
++        mode_t    st_mode
++        nlink_t   st_nlink
++        uid_t     st_uid
++        gid_t     st_gid
++        int       st_rdev
++        off_t     st_size
++        blksize_t st_blksize
++        blkcnt_t  st_blocks
++        time_t    st_atime
++        time_t    st_mtime
++        time_t    st_ctime
++ELSE:
++    from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
+ from posix.types cimport mode_t, dev_t, off_t
+ from libc.stdint cimport uint32_t
+ from libc.stdlib cimport const_char
