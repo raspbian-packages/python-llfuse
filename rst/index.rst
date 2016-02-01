@@ -2,9 +2,6 @@
  Python-LLFUSE Documentation
 =============================
 
-.. include:: about.rst
-
-
 Table of Contents
 -----------------
 
@@ -13,14 +10,17 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
+   about.rst
    install.rst
-   getting_started.rst
+   general.rst
    fuse_api.rst
    data.rst
    lock.rst
    operations.rst
+   util.rst
+   gotchas.rst
    example.rst
-
+   changes.rst
 
 Indices and tables
 ------------------

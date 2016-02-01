@@ -2,6 +2,7 @@ import sys
 import os.path
 import logging
 import pytest
+import gc
 
 # Converted to autouse fixture below if capture is activated
 def check_test_output(request, capfd):
@@ -40,19 +41,26 @@ def pytest_configure(config):
     if not config.getoption('installed'):
         llfuse_path = os.path.join(basedir, 'src')
         if (os.path.exists(os.path.join(basedir, 'setup.py')) and
-            os.path.exists(os.path.join(basedir, 'src', 'llfuse'))):
+            os.path.exists(os.path.join(basedir, 'src', 'llfuse.pyx'))):
             sys.path.insert(0, llfuse_path)
 
         # Make sure that called processes use the same path
         pp = os.environ.get('PYTHONPATH', None)
         if pp:
-            pp = '%s:%s' (llfuse_path, pp)
+            pp = '%s:%s' % (llfuse_path, pp)
         else:
             pp = llfuse_path
         os.environ['PYTHONPATH'] = pp
 
-    # When running from HG repo, enable all warnings
-    if os.path.exists(os.path.join(basedir, '.hg')):
+    try:
+        import faulthandler
+    except ImportError:
+        pass
+    else:
+        faulthandler.enable()
+
+    # When running from VCS repo, enable all warnings
+    if os.path.exists(os.path.join(basedir, 'MANIFEST.in')):
         import warnings
         warnings.resetwarnings()
         warnings.simplefilter('error')
@@ -68,3 +76,8 @@ def pytest_configure(config):
         handler.setFormatter(formatter)
         root_logger.addHandler(handler)
         root_logger.setLevel(logging.DEBUG)
+
+# Run gc.collect() at the end of every test, so that we get ResourceWarnings
+# as early as possible.
+def pytest_runtest_teardown(item, nextitem):
+    gc.collect()

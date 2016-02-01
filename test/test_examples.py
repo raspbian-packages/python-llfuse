@@ -9,6 +9,8 @@ This file is part of Python-LLFUSE. This work may be distributed under
 the terms of the GNU LGPL.
 '''
 
+from __future__ import division, print_function, absolute_import
+
 if __name__ == '__main__':
     import pytest
     import sys
@@ -17,96 +19,21 @@ if __name__ == '__main__':
 import subprocess
 import os
 import sys
-import time
 import pytest
 import stat
 import shutil
-import platform
 import filecmp
 import errno
+from tempfile import NamedTemporaryFile
+from util import skip_if_no_fuse, wait_for_mount, umount, cleanup
 
 basename = os.path.join(os.path.dirname(__file__), '..')
 TEST_FILE = __file__
 
-# For Python 2 + 3 compatibility
-if sys.version_info[0] == 2:
-    subprocess.DEVNULL = open('/dev/null', 'w')
-
-def skip_if_no_fuse():
-    '''Skip test if system/user/environment does not support FUSE'''
-
-    if platform.system() == 'Darwin':
-        # No working autodetection, just assume it will work.
-        return
-
-    # Python 2.x: Popen is not a context manager...
-    which = subprocess.Popen(['which', 'fusermount'], stdout=subprocess.PIPE,
-                             universal_newlines=True)
-    try:
-        fusermount_path = which.communicate()[0].strip()
-    finally:
-        which.wait()
-
-    if not fusermount_path or which.returncode != 0:
-        pytest.skip("Can't find fusermount executable")
-
-    if not os.path.exists('/dev/fuse'):
-        pytest.skip("FUSE kernel module does not seem to be loaded")
-
-    if os.getuid() == 0:
-        return
-
-    mode = os.stat(fusermount_path).st_mode
-    if mode & stat.S_ISUID == 0:
-        pytest.skip('fusermount executable not setuid, and we are not root.')
-
-    try:
-        fd = os.open('/dev/fuse', os.O_RDWR)
-    except OSError as exc:
-        pytest.skip('Unable to open /dev/fuse: %s' % exc.strerror)
-    else:
-        os.close(fd)
 skip_if_no_fuse()
 
-
-def wait_for_mount(mount_process, mnt_dir):
-    elapsed = 0
-    while elapsed < 30:
-        if os.path.ismount(mnt_dir):
-            return True
-        if mount_process.poll() is not None:
-            pytest.fail('file system process terminated prematurely')
-        time.sleep(0.1)
-        elapsed += 0.1
-    pytest.fail("mountpoint failed to come up")
-
-def cleanup(mnt_dir):
-    if platform.system() == 'Darwin':
-        subprocess.call(['umount', '-l', mnt_dir], stdout=subprocess.DEVNULL,
-                        stderr=subprocess.STDOUT)
-    else:
-        subprocess.call(['fusermount', '-z', '-u', mnt_dir], stdout=subprocess.DEVNULL,
-                        stderr=subprocess.STDOUT)
-
-def umount(mount_process, mnt_dir):
-    if platform.system() == 'Darwin':
-        subprocess.check_call(['umount', '-l', mnt_dir])
-    else:
-        subprocess.check_call(['fusermount', '-z', '-u', mnt_dir])
-    assert not os.path.ismount(mnt_dir)
-
-    # Give mount process a little while to terminate. Popen.wait(timeout)
-    # was only added in 3.3...
-    elapsed = 0
-    while elapsed < 30:
-        if mount_process.poll() is not None:
-            if mount_process.returncode == 0:
-                return
-            pytest.fail('file system process terminated with code %d' %
-                        mount_process.exitcode)
-        time.sleep(0.1)
-        elapsed += 0.1
-    pytest.fail('mount process did not terminate')
+with open(TEST_FILE, 'rb') as fh:
+    TEST_DATA = fh.read()
 
 def name_generator(__ctr=[0]):
     __ctr[0] += 1
@@ -155,7 +82,9 @@ def test_tmpfs(tmpdir):
         tst_link(mnt_dir)
         tst_readdir(mnt_dir)
         tst_statvfs(mnt_dir)
-        tst_truncate(mnt_dir)
+        tst_truncate_path(mnt_dir)
+        tst_truncate_fd(mnt_dir)
+        tst_unlink(mnt_dir)
     except:
         cleanup(mnt_dir)
         raise
@@ -185,7 +114,9 @@ def test_passthroughfs(tmpdir):
         tst_link(mnt_dir)
         tst_readdir(mnt_dir)
         tst_statvfs(mnt_dir)
-        tst_truncate(mnt_dir)
+        tst_truncate_path(mnt_dir)
+        tst_truncate_fd(mnt_dir)
+        tst_unlink(mnt_dir)
         tst_passthrough(src_dir, mnt_dir)
     except:
         cleanup(mnt_dir)
@@ -263,6 +194,18 @@ def tst_write(mnt_dir):
     assert filecmp.cmp(name, TEST_FILE, False)
     checked_unlink(name, mnt_dir)
 
+def tst_unlink(mnt_dir):
+    name = os.path.join(mnt_dir, name_generator())
+    data1 = b'foo'
+    data2 = b'bar'
+
+    with open(os.path.join(mnt_dir, name), 'wb+', buffering=0) as fh:
+        fh.write(data1)
+        checked_unlink(name, mnt_dir)
+        fh.write(data2)
+        fh.seek(0)
+        assert fh.read() == data1+data2
+
 def tst_statvfs(mnt_dir):
     os.statvfs(mnt_dir)
 
@@ -308,22 +251,57 @@ def tst_readdir(mnt_dir):
     os.rmdir(subdir)
     os.rmdir(dir_)
 
-def tst_truncate(mnt_dir):
+def tst_truncate_path(mnt_dir):
+    if sys.version_info < (3,0):
+        # 2.x has no os.truncate
+        return
+
+    assert len(TEST_DATA) > 1024
+
     filename = os.path.join(mnt_dir, name_generator())
-    shutil.copyfile(TEST_FILE, filename)
-    assert filecmp.cmp(filename, TEST_FILE, False)
+    with open(filename, 'wb') as fh:
+        fh.write(TEST_DATA)
+
     fstat = os.stat(filename)
     size = fstat.st_size
-    fd = os.open(filename, os.O_RDWR)
+    assert size == len(TEST_DATA)
 
-    os.ftruncate(fd, size + 1024) # add > 1 block
+    # Add zeros at the end
+    os.truncate(filename, size + 1024)
     assert os.stat(filename).st_size == size + 1024
+    with open(filename, 'rb') as fh:
+        assert fh.read(size) == TEST_DATA
+        assert fh.read(1025) == b'\0' * 1024
 
-    os.ftruncate(fd, size - 1024) # Truncate > 1 block
+    # Truncate data
+    os.truncate(filename, size - 1024)
     assert os.stat(filename).st_size == size - 1024
+    with open(filename, 'rb') as fh:
+        assert fh.read(size) == TEST_DATA[:size-1024]
 
-    os.close(fd)
     os.unlink(filename)
+
+def tst_truncate_fd(mnt_dir):
+    assert len(TEST_DATA) > 1024
+    with NamedTemporaryFile('w+b', 0, dir=mnt_dir) as fh:
+        fd = fh.fileno()
+        fh.write(TEST_DATA)
+        fstat = os.fstat(fd)
+        size = fstat.st_size
+        assert size == len(TEST_DATA)
+
+        # Add zeros at the end
+        os.ftruncate(fd, size + 1024)
+        assert os.fstat(fd).st_size == size + 1024
+        fh.seek(0)
+        assert fh.read(size) == TEST_DATA
+        assert fh.read(1025) == b'\0' * 1024
+
+        # Truncate data
+        os.ftruncate(fd, size - 1024)
+        assert os.fstat(fd).st_size == size - 1024
+        fh.seek(0)
+        assert fh.read(size) == TEST_DATA[:size-1024]
 
 def tst_utimens(mnt_dir, ns_tol=0):
     filename = os.path.join(mnt_dir, name_generator())

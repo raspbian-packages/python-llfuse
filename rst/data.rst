@@ -14,6 +14,17 @@
    The inode of the root directory, i.e. the mount point of the file
    system.
 
+.. py:data:: default_options
+
+   This is a recommended set of options that should be passed to
+   `llfuse.init` to get reasonable behavior and
+   performance. Python-LLFUSE is compatible with any other combination
+   of options as well, but you should only deviate from the defaults
+   with good reason.
+
+   (The :samp:`fsname=<foo>` option is guaranteed never to be included in the
+   default options, so you can always safely add it to the set).
+
 .. autoexception:: FUSEError
 
 .. autoclass:: RequestContext
@@ -47,60 +58,71 @@
 
 .. autoclass:: EntryAttributes
 
-   .. attribute:: st_ino
+   .. autoattribute:: st_ino
 
-   .. attribute:: generation
+   .. autoattribute:: generation
 
-      The inode generation number.
+   .. autoattribute:: entry_timeout
 
-   .. attribute:: entry_timeout
+   .. autoattribute:: attr_timeout
 
-      Validity timeout (in seconds) for the name of the directory entry
+   .. autoattribute:: st_mode
 
-   .. attribute:: attr_timeout
+   .. autoattribute:: st_nlink
 
-      Validity timeout (in seconds) for the attributes
+   .. autoattribute:: st_uid
 
-   .. attribute:: st_mode
+   .. autoattribute:: st_gid
 
-   .. attribute:: st_nlink
+   .. autoattribute:: st_rdev
 
-   .. attribute:: st_uid
+   .. autoattribute:: st_size
 
-   .. attribute:: st_gid
+   .. autoattribute:: st_blksize
 
-   .. attribute:: st_rdev
+   .. autoattribute:: st_blocks
 
-   .. attribute:: st_size
+   .. autoattribute:: st_atime_ns
 
-   .. attribute:: st_blksize
+   .. autoattribute:: st_ctime_ns
 
-   .. attribute:: st_blocks
+   .. autoattribute:: st_mtime_ns
 
-   .. attribute:: st_atime
 
-      Time of access time in seconds. Floating point numbers may be used.
+.. autoclass:: SetattrFields
 
-   .. attribute:: st_ctime
+   .. attribute:: update_atime
 
-      Time of last status change in seconds. Floating point numbers may be used.
+      If this attribute is true, it signals the `Operations.setattr`
+      method that the `~EntryAttributes.st_atime_ns` field contains an
+      updated value.
 
-   .. attribute:: st_mtime
+   .. attribute:: update_mtime
 
-      Time of last modification in seconds. Floating point numbers may be used.
+      If this attribute is true, it signals the `Operations.setattr`
+      method that the `~EntryAttributes.st_mtime_ns` field contains an
+      updated value.
 
-   .. attribute:: st_atime_ns
+   .. attribute:: update_mode
 
-      Time of last access in nanoseconds. Only integer values
-      may be used. If specified, takes precedence over `st_atime`.
+      If this attribute is true, it signals the `Operations.setattr`
+      method that the `~EntryAttributes.st_mode` field contains an
+      updated value.
 
-   .. attribute:: st_ctime_ns
+   .. attribute:: update_uid
 
-      Time of last status change in nanoseconds. Only integer values
-      may be used. If specified, takes precedence over `st_ctime`.
+      If this attribute is true, it signals the `Operations.setattr`
+      method that the `~EntryAttributes.st_uid` field contains an
+      updated value.
 
-   .. attribute:: st_mtime_ns
+   .. attribute:: update_gid
 
-      Time of last modification in nanoseconds. Only integer values
-      may be used. If specified, takes precedence over `st_mtime`.
+      If this attribute is true, it signals the `Operations.setattr`
+      method that the `~EntryAttributes.st_gid` field contains an
+      updated value.
 
+   .. attribute:: update_size
+
+      If this attribute is true, it signals the `Operations.setattr`
+      method that the `~EntryAttributes.st_size` field contains an
+      updated value.
