@@ -1,4 +1,4 @@
-From 9c1ab2d3c7c9f0b255a77e61185552ff61202260 Mon Sep 17 00:00:00 2001
+From 20cd7de7f3346459b3bd5a9af32d498546610562 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 08:40:44 -0800
 Subject: Force use of libattr1-dev API

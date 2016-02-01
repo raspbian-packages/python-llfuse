@@ -1,4 +1,4 @@
-From 8d0b3c6a5ec067e7ca8852ab8e38aab63d3218fc Mon Sep 17 00:00:00 2001
+From 72287b8c48be269af7338bf1c876212332edbd98 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 09:40:04 -0800
 Subject: Work around bug in mips+mipsel libc
@@ -22,7 +22,7 @@ Upstream is not interested in this change for obvious reasons.
  1 file changed, 18 insertions(+), 1 deletion(-)
 
 diff --git a/src/llfuse.pyx b/src/llfuse.pyx
-index 53a6..8754 100644
+index 53a6..10c6 100644
 --- a/src/llfuse.pyx
 +++ b/src/llfuse.pyx
 @@ -20,7 +20,24 @@ cdef extern from "llfuse.h":
@@ -34,7 +34,7 @@ index 53a6..8754 100644
 +    cdef extern from "sys/stat.h" nogil:
 +      struct stat:
 +        int       st_dev
-+       ino_t     st_ino
++        ino_t     st_ino
 +        mode_t    st_mode
 +        nlink_t   st_nlink
 +        uid_t     st_uid

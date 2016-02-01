@@ -24,7 +24,7 @@ IF UNAME_MACHINE.startswith('mips64'):
     cdef extern from "sys/stat.h" nogil:
       struct stat:
         int       st_dev
-       ino_t     st_ino
+        ino_t     st_ino
         mode_t    st_mode
         nlink_t   st_nlink
         uid_t     st_uid

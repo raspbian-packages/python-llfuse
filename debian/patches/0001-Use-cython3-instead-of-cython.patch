@@ -1,4 +1,4 @@
-From 60a9beccd0b6b77f7019e034b003495c7cfdb792 Mon Sep 17 00:00:00 2001
+From 5a7fcc2d5d160bc6ef6880dde4e58749b9ae65ef Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 10:15:47 -0800
 Subject: Use 'cython3' instead of 'cython'
