@@ -1,4 +1,4 @@
-python-llfuse (0.42.1-1) UNRELEASED; urgency=medium
+python-llfuse (0.42.1+dfsg-1) UNRELEASED; urgency=medium
 
   * Updated URL in copyright file.
   * New upstream release.
