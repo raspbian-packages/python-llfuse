@@ -1,8 +1,9 @@
-python-llfuse (0.41.1+dfsg-5) UNRELEASED; urgency=medium
+python-llfuse (0.42.1-1) UNRELEASED; urgency=medium
 
   * Updated URL in copyright file.
+  * New upstream release.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 25 Sep 2015 14:14:54 -0700
+ -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 01 Feb 2016 08:47:31 -0800
 
 python-llfuse (0.41.1+dfsg-4) unstable; urgency=medium
 

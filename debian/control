@@ -7,7 +7,7 @@ Uploaders: Debian Python Modules Team <python-modules-team@lists.alioth.debian.o
 Maintainer: Nikolaus Rath <Nikolaus@rath.org>
 Build-Depends: debhelper (>= 9),
                dh-python,
-               libfuse-dev (>= 2.8.0),
+               libfuse-dev (>= 2.9.0),
                libattr1-dev,
                python-all-dev (>= 2.6.6-3~),
                python-all-dbg,
