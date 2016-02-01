@@ -17,6 +17,7 @@ import sys
 import os
 import subprocess
 import warnings
+import re
 
 # Disable Cython support in setuptools. It fails under some conditions
 # (http://trac.cython.org/ticket/859), and we have our own build_cython command
@@ -39,23 +40,26 @@ except ImportError:
     raise SystemExit('Setuptools package not found. Please install from '
                      'https://pypi.python.org/pypi/setuptools')
 from setuptools import Extension
+from distutils.version import LooseVersion
 
 # Add util to load path
 basedir = os.path.abspath(os.path.dirname(sys.argv[0]))
 sys.path.insert(0, os.path.join(basedir, 'util'))
 
 # When running from HG repo, enable all warnings
-DEVELOPER_MODE = (os.path.exists(os.path.join(basedir, '.hg')) or
-                  os.path.exists(os.path.join(basedir, '.git')))
+DEVELOPER_MODE = os.path.exists(os.path.join(basedir, 'MANIFEST.in'))
 if DEVELOPER_MODE:
-    print('found hg or git repository, running in developer mode')
+    print('found MANIFEST.in, running in developer mode')
+    warnings.resetwarnings()
+    # We can't use `error`, because e.g. Sphinx triggers a
+    # DeprecationWarning.
     warnings.simplefilter('default')
 
 # Add src to load path, important for Sphinx autodoc
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-LLFUSE_VERSION = '0.41.1'
+LLFUSE_VERSION = '0.42.1'
 
 def main():
 
@@ -70,25 +74,34 @@ def main():
         long_desc = fh.read()
 
     compile_args = pkg_config('fuse', cflags=True, ldflags=False, min_ver='2.8.0')
-    compile_args += ['-DFUSE_USE_VERSION=28', '-Wall', '-Wextra', '-Wconversion',
-                     '-Wno-sign-conversion',
-                     '-DLLFUSE_VERSION="%s"' % LLFUSE_VERSION]
+    compile_args += ['-DFUSE_USE_VERSION=29', '-Wall', '-Wextra', '-Wconversion',
+                     '-Wsign-compare', '-DLLFUSE_VERSION="%s"' % LLFUSE_VERSION]
 
-    # Enable fatal warnings only when compiling from Mercurial tip.  (otherwise
-    # we break forward compatibility because compilation with newer compiler may
-    # fail if additional warnings are added)
+    # We may have unused functions if we compile for older FUSE versions
+    compile_args.append('-Wno-unused-function')
+
+    # Value-changing conversions should always be explicit.
+    compile_args.append('-Werror=conversion')
+
+    # Note that (i > -1) is false if i is unsigned (-1 will be converted to
+    # a large positive value). We certainly don't want to do this by
+    # accident.
+    compile_args.append('-Werror=sign-compare')
+
+    # Enable all fatal warnings only when compiling from Mercurial tip.
+    # (otherwise we break forward compatibility because compilation with newer
+    # compiler may fail if additional warnings are added)
     if DEVELOPER_MODE:
         compile_args.append('-Werror')
+        compile_args.append('-Wfatal-errors')
+
+        # Unreachable code is expected because we need to support multiple
+        # platforms and architectures.
+        compile_args.append('-Wno-error=unreachable-code')
 
     # http://bugs.python.org/issue7576
     if sys.version_info[0] == 3 and sys.version_info[1] < 2:
-        compile_args.append('-Wno-missing-field-initializers')
-
-    # http://trac.cython.org/cython_trac/ticket/811
-    compile_args.append('-Wno-unused-but-set-variable')
-
-    # http://trac.cython.org/cython_trac/ticket/813
-    compile_args.append('-Wno-maybe-uninitialized')
+        compile_args.append('-Wno-error=missing-field-initializers')
 
     # http://bugs.python.org/issue969718
     if sys.version_info[0] == 2:
@@ -96,16 +109,25 @@ def main():
 
     link_args = pkg_config('fuse', cflags=False, ldflags=True, min_ver='2.8.0')
     link_args.append('-lpthread')
+    c_sources = ['src/llfuse.c', 'src/lock.c']
 
     if os.uname()[0] == 'Linux':
         link_args.append('-lrt')
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
 
-    elif os.uname()[0] in ('Darwin', 'FreeBSD', 'NetBSD'):
+    elif os.uname()[0] == 'Darwin':
+        compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
+        c_sources.append('src/darwin_compat.c')
+    elif os.uname()[0] in ('FreeBSD', 'NetBSD'):
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
     else:
         print("NOTE: unknown system (%s), nanosecond resolution file times "
               "will not be available" % os.uname()[0])
+
+
+    install_requires = []
+    if sys.version_info[0] == 2:
+        install_requires.append('contextlib2')
 
     setuptools.setup(
           name='llfuse',
@@ -132,7 +154,7 @@ def main():
           package_dir={'': 'src'},
           packages=setuptools.find_packages('src'),
           provides=['llfuse'],
-          ext_modules=[Extension('llfuse.capi', ['src/llfuse/capi.c'],
+          ext_modules=[Extension('llfuse', c_sources,
                                   extra_compile_args=compile_args,
                                   extra_link_args=link_args)],
           cmdclass={'build_cython': build_cython },
@@ -140,7 +162,8 @@ def main():
             'build_sphinx': {
                 'version': ('setup.py', LLFUSE_VERSION),
                 'release': ('setup.py', LLFUSE_VERSION),
-            }}
+            }},
+          install_requires=install_requires,
           )
 
 
@@ -184,46 +207,38 @@ class build_cython(setuptools.Command):
         pass
 
     def finalize_options(self):
-        pass
+        self.extensions = self.distribution.ext_modules
 
     def run(self):
         try:
-            from Cython.Compiler.Main import compile as cython_compile
-            from Cython.Compiler import Options as DefaultOptions
-        except ImportError:
+            version = subprocess.check_output(['cython', '--version'],
+                                              universal_newlines=True,
+                                              stderr=subprocess.STDOUT)
+        except OSError:
             raise SystemExit('Cython needs to be installed for this command')
 
-        # Cannot be passed directly to cython_compile()
-        DefaultOptions.warning_errors = True
-        DefaultOptions.fast_fail = True
+        hit = re.match('^Cython version (.+)$', version)
+        if not hit or LooseVersion(hit.group(1)) < "0.24":
+            raise SystemExit('Need Cython 0.24 or newer, found ' + version)
 
-        directives = dict()
-        directives.update(DefaultOptions.extra_warnings)
-        directives['embedsignature'] = True
-        directives['language_level'] = 3
+        cmd = ['cython', '-Wextra', '--force', '-3', '--fast-fail',
+               '--directive', 'embedsignature=True', '--include-dir',
+               os.path.join(basedir, 'Include'), '--verbose' ]
+        if DEVELOPER_MODE:
+            cmd.append('-Werror')
 
-        # http://trac.cython.org/cython_trac/ticket/714
-        directives['warn.maybe_uninitialized'] = False
+        # Work around http://trac.cython.org/cython_trac/ticket/714
+        cmd += ['-X', 'warn.maybe_uninitialized=False' ]
 
-        options = {'include_path': [ os.path.join(basedir, 'Include') ],
-                   'verbose': True, 'timestamps': False, 'compile_time_env': {},
-                   'compiler_directives': directives }
-
-        for sysname in ('linux', 'freebsd', 'darwin'):
-            print('compiling capi.pyx to capi_%s.c...' % (sysname,))
-            options['compile_time_env']['TARGET_PLATFORM'] = sysname
-            options['output_file'] = os.path.join(basedir, 'src', 'llfuse',
-                                                  'capi_%s.c' % (sysname,))
-            res = cython_compile(os.path.join(basedir, 'src', 'llfuse', 'capi.pyx'),
-                                 full_module_name='llfuse.capi', **options)
-            if res.num_errors != 0:
-                raise SystemExit('Cython encountered errors.')
-
-
-        # distutils doesn't know that capi.c #includes other files
-        # and thus does not recompile unless we change the modification
-        # date.
-        os.utime(os.path.join(basedir, 'src', 'llfuse', 'capi.c'), None)
+        for extension in self.extensions:
+            for file_ in extension.sources:
+                (file_, ext) = os.path.splitext(file_)
+                path = os.path.join(basedir, file_)
+                if ext != '.c':
+                    continue
+                if os.path.exists(path + '.pyx'):
+                    if subprocess.call(cmd + [path + '.pyx']) != 0:
+                        raise SystemExit('Cython compilation failed')
 
 def fix_docutils():
     '''Work around https://bitbucket.org/birkenfeld/sphinx/issue/1154/'''

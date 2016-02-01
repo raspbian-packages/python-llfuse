@@ -9,8 +9,18 @@ compatible with both Python 2.x and 3.x. Based on an example from Gerion Entrup.
 Copyright © 2015 Nikolaus Rath <Nikolaus.org>
 Copyright © 2015 Gerion Entrup.
 
-This file is part of Python-LLFUSE. This work may be distributed under
-the terms of the GNU LGPL.
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 
 from __future__ import division, print_function, absolute_import
@@ -31,6 +41,13 @@ import logging
 import errno
 import llfuse
 
+try:
+    import faulthandler
+except ImportError:
+    pass
+else:
+    faulthandler.enable()
+
 log = logging.getLogger(__name__)
 
 class TestFs(llfuse.Operations):
@@ -40,7 +57,7 @@ class TestFs(llfuse.Operations):
         self.hello_inode = llfuse.ROOT_INODE+1
         self.hello_data = b"hello world\n"
 
-    def getattr(self, inode):
+    def getattr(self, inode, ctx=None):
         entry = llfuse.EntryAttributes()
         if inode == llfuse.ROOT_INODE:
             entry.st_mode = (stat.S_IFDIR | 0o755)
@@ -51,22 +68,22 @@ class TestFs(llfuse.Operations):
         else:
             raise llfuse.FUSEError(errno.ENOENT)
 
-        stamp = 1438467123.985654
-        entry.st_atime = stamp
-        entry.st_ctime = stamp
-        entry.st_mtime = stamp
+        stamp = int(1438467123.985654 * 1e9)
+        entry.st_atime_ns = stamp
+        entry.st_ctime_ns = stamp
+        entry.st_mtime_ns = stamp
         entry.st_gid = os.getgid()
         entry.st_uid = os.getuid()
         entry.st_ino = inode
 
         return entry
 
-    def lookup(self, parent_inode, name):
+    def lookup(self, parent_inode, name, ctx=None):
         if parent_inode != llfuse.ROOT_INODE or name != self.hello_name:
             raise llfuse.FUSEError(errno.ENOENT)
         return self.getattr(self.hello_inode)
 
-    def opendir(self, inode):
+    def opendir(self, inode, ctx):
         if inode != llfuse.ROOT_INODE:
             raise llfuse.FUSEError(errno.ENOENT)
         return inode
@@ -78,7 +95,7 @@ class TestFs(llfuse.Operations):
         if off == 0:
             yield (self.hello_name, self.getattr(self.hello_inode), 1)
 
-    def open(self, inode, flags):
+    def open(self, inode, flags, ctx):
         if inode != self.hello_inode:
             raise llfuse.FUSEError(errno.ENOENT)
         if flags & os.O_RDWR or flags & os.O_WRONLY:
@@ -112,7 +129,8 @@ def parse_args():
                         help='Where to mount the file system')
     parser.add_argument('--debug', action='store_true', default=False,
                         help='Enable debugging output')
-
+    parser.add_argument('--debug-fuse', action='store_true', default=False,
+                        help='Enable FUSE debugging output')
     return parser.parse_args()
 
 
@@ -121,9 +139,13 @@ def main():
     init_logging(options.debug)
 
     testfs = TestFs()
-    llfuse.init(testfs, options.mountpoint, [ 'fsname=lltest' ])
+    fuse_options = set(llfuse.default_options)
+    fuse_options.add('fsname=lltest')
+    if options.debug_fuse:
+        fuse_options.add('debug')
+    llfuse.init(testfs, options.mountpoint, fuse_options)
     try:
-        llfuse.main(single=True)
+        llfuse.main(workers=1)
     except:
         llfuse.close(unmount=False)
         raise

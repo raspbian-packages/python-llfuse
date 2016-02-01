@@ -27,8 +27,18 @@ Caveats:
 
 Copyright ©  Nikolaus Rath <Nikolaus.org>
 
-This file is part of Python-LLFUSE. This work may be distributed under
-the terms of the GNU LGPL.
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 
 import os
@@ -49,6 +59,9 @@ import stat as stat_m
 from llfuse import FUSEError
 from os import fsencode, fsdecode
 from collections import defaultdict
+
+import faulthandler
+faulthandler.enable()
 
 log = logging.getLogger(__name__)
 
@@ -101,27 +114,36 @@ class Operations(llfuse.Operations):
             except KeyError: # may have been deleted
                 pass
 
-    def lookup(self, inode_p, name):
+    def lookup(self, inode_p, name, ctx=None):
         name = fsdecode(name)
         log.debug('lookup for %s in %d', name, inode_p)
         path = os.path.join(self._inode_to_path(inode_p), name)
-        attr = self.getattr_path(path)
+        attr = self._getattr(path=path)
         if name != '.' and name != '..':
             self._add_path(attr.st_ino, path)
         return attr
 
-    def getattr(self, inode):
-        return self.getattr_path(self._inode_to_path(inode))
+    def getattr(self, inode, ctx=None):
+        if inode in self._inode_fd_map:
+            return self._getattr(fd=self._inode_fd_map[inode])
+        else:
+            return self._getattr(path=self._inode_to_path(inode))
 
-    def getattr_path(self, path):
+    def _getattr(self, path=None, fd=None):
+        assert fd is None or path is None
+        assert not(fd is None and path is None)
         try:
-            stat = os.lstat(path)
+            if fd is None:
+                stat = os.lstat(path)
+            else:
+                stat = os.fstat(fd)
         except OSError as exc:
             raise FUSEError(exc.errno)
 
         entry = llfuse.EntryAttributes()
         for attr in ('st_ino', 'st_mode', 'st_nlink', 'st_uid', 'st_gid',
-                     'st_rdev', 'st_size', 'st_atime', 'st_mtime', 'st_ctime'):
+                     'st_rdev', 'st_size', 'st_atime_ns', 'st_mtime_ns',
+                     'st_ctime_ns'):
             setattr(entry, attr, getattr(stat, attr))
         entry.generation = 0
         entry.entry_timeout = 5
@@ -131,7 +153,7 @@ class Operations(llfuse.Operations):
 
         return entry
 
-    def readlink(self, inode):
+    def readlink(self, inode, ctx):
         path = self._inode_to_path(inode)
         try:
             target = os.readlink(path)
@@ -139,7 +161,7 @@ class Operations(llfuse.Operations):
             raise FUSEError(exc.errno)
         return fsencode(target)
 
-    def opendir(self, inode):
+    def opendir(self, inode, ctx):
         return inode
 
     def readdir(self, inode, off):
@@ -147,7 +169,7 @@ class Operations(llfuse.Operations):
         log.debug('reading %s', path)
         entries = []
         for name in os.listdir(path):
-            attr = self.getattr_path(os.path.join(path, name))
+            attr = self._getattr(path=os.path.join(path, name))
             entries.append((attr.st_ino, name, attr))
 
         log.debug('read %d entries, starting at %d', len(entries), off)
@@ -163,7 +185,7 @@ class Operations(llfuse.Operations):
                 continue
             yield (fsencode(name), attr, ino)
 
-    def unlink(self, inode_p, name):
+    def unlink(self, inode_p, name, ctx):
         name = fsdecode(name)
         parent = self._inode_to_path(inode_p)
         path = os.path.join(parent, name)
@@ -175,7 +197,7 @@ class Operations(llfuse.Operations):
         if inode in self._lookup_cnt:
             self._forget_path(inode, path)
 
-    def rmdir(self, inode_p, name):
+    def rmdir(self, inode_p, name, ctx):
         name = fsdecode(name)
         parent = self._inode_to_path(inode_p)
         path = os.path.join(parent, name)
@@ -210,7 +232,7 @@ class Operations(llfuse.Operations):
         self._add_path(stat.st_ino, path)
         return self.getattr(stat.st_ino)
 
-    def rename(self, inode_p_old, name_old, inode_p_new, name_new):
+    def rename(self, inode_p_old, name_old, inode_p_new, name_new, ctx):
         name_old = fsdecode(name_old)
         name_new = fsdecode(name_new)
         parent_old = self._inode_to_path(inode_p_old)
@@ -234,7 +256,7 @@ class Operations(llfuse.Operations):
             assert val == path_old
             self._inode_path_map[inode] = path_new
 
-    def link(self, inode, new_inode_p, new_name):
+    def link(self, inode, new_inode_p, new_name, ctx):
         new_name = fsdecode(new_name)
         parent = self._inode_to_path(new_inode_p)
         path = os.path.join(parent, new_name)
@@ -245,25 +267,36 @@ class Operations(llfuse.Operations):
         self._add_path(inode, path)
         return self.getattr(inode)
 
-    def setattr(self, inode, attr):
-        path = self._inode_to_path(inode)
+    def setattr(self, inode, attr, fields, fh, ctx):
+        # We use the f* functions if possible so that we can handle
+        # a setattr() call for an inode without associated directory
+        # handle.
+        if fh is None:
+            path_or_fh = self._inode_to_path(inode)
+            truncate = os.truncate
+            chmod = os.chmod
+            chown = os.chown
+        else:
+            path_or_fh = fh
+            truncate = os.ftruncate
+            chmod = os.fchmod
+            chown = os.fchown
 
         try:
-            if attr.st_size is not None:
-                os.truncate(path, attr.st_size)
+            if fields.update_size:
+                truncate(path_or_fh, attr.st_size)
 
-            if attr.st_mode is not None:
-                os.chmod(path, ~stat_m.S_IFMT & attr.st_mode,
-                         follow_symlinks=False)
+            if fields.update_mode:
+                chmod(path_or_fh, ~stat_m.S_IFMT & attr.st_mode,
+                      follow_symlinks=False)
 
+            if fields.update_uid or fields.update_gid:
+                chown(path_or_fh, attr.st_uid, attr.st_gid,
+                      follow_symlinks=False)
 
-            assert (attr.st_uid is None) == (attr.st_gid is None)
-            if attr.st_uid is not None:
-                os.chown(path, attr.st_uid, attr.st_gid, follow_symlinks=False)
-
-            assert (attr.st_atime is None) == (attr.st_mtime is None)
-            if attr.st_atime is not None:
-                os.utime(path, None, follow_symlinks=False,
+            if fields.update_atime or fields.update_mtime:
+                # utime accepts both paths and file descriptiors
+                os.utime(path_or_fh, None, follow_symlinks=False,
                          ns=(attr.st_atime_ns, attr.st_mtime_ns))
 
         except OSError as exc:
@@ -278,7 +311,7 @@ class Operations(llfuse.Operations):
             os.chown(path, ctx.uid, ctx.gid)
         except OSError as exc:
             raise FUSEError(exc.errno)
-        attr = self.getattr_path(path)
+        attr = self._getattr(path=path)
         self._add_path(attr.st_ino, path)
         return attr
 
@@ -289,11 +322,11 @@ class Operations(llfuse.Operations):
             os.chown(path, ctx.uid, ctx.gid)
         except OSError as exc:
             raise FUSEError(exc.errno)
-        attr = self.getattr_path(path)
+        attr = self._getattr(path=path)
         self._add_path(attr.st_ino, path)
         return attr
 
-    def statfs(self):
+    def statfs(self, ctx):
         stat_ = llfuse.StatvfsData()
         try:
             statfs = os.statvfs(self._inode_path_map[llfuse.ROOT_INODE])
@@ -304,7 +337,7 @@ class Operations(llfuse.Operations):
             setattr(stat_, attr, getattr(statfs, attr))
         return stat_
 
-    def open(self, inode, flags):
+    def open(self, inode, flags, ctx):
         if inode in self._inode_fd_map:
             fd = self._inode_fd_map[inode]
             self._fd_open_count[fd] += 1
@@ -325,7 +358,7 @@ class Operations(llfuse.Operations):
             fd = os.open(path, flags | os.O_CREAT | os.O_TRUNC)
         except OSError as exc:
             raise FUSEError(exc.errno)
-        attr = self.getattr_path(path)
+        attr = self._getattr(fd=fd)
         self._add_path(attr.st_ino, path)
         self._inode_fd_map[attr.st_ino] = fd
         self._fd_inode_map[fd] = attr.st_ino
@@ -382,6 +415,8 @@ def parse_args(args):
                         help='Run single threaded')
     parser.add_argument('--debug', action='store_true', default=False,
                         help='Enable debugging output')
+    parser.add_argument('--debug-fuse', action='store_true', default=False,
+                        help='Enable FUSE debugging output')
 
     return parser.parse_args(args)
 
@@ -392,13 +427,19 @@ def main():
     operations = Operations(options.source)
 
     log.debug('Mounting...')
-    llfuse.init(operations, options.mountpoint,
-                [  'fsname=passthroughfs', "nonempty",
-                   'default_permissions' ])
+    fuse_options = set(llfuse.default_options)
+    fuse_options.add('fsname=passthroughfs')
+    fuse_options.add('default_permissions')
+    if options.debug_fuse:
+        fuse_options.add('debug')
+    llfuse.init(operations, options.mountpoint, fuse_options)
 
     try:
         log.debug('Entering main loop..')
-        llfuse.main(options.single)
+        if options.single:
+            llfuse.main(workers=1)
+        else:
+            llfuse.main()
     except:
         llfuse.close(unmount=False)
         raise

@@ -1,8 +1,5 @@
 /*
-time.c
-
-Functions to access the nanosecond attributes in struct stat
-in a platform independent way. Stolen from fuse_misc.h.
+macros.c - Pre-processor macros
 
 Copyright © 2013 Nikolaus Rath <Nikolaus.org>
 
@@ -10,6 +7,11 @@ This file is part of Python-LLFUSE. This work may be distributed under
 the terms of the GNU LGPL.
 */
 
+
+/*
+ * Macros to access the nanosecond attributes in struct stat in a
+ * platform independent way. Stolen from fuse_misc.h.
+ */
 
 /* Linux */
 #ifdef HAVE_STRUCT_STAT_ST_ATIM
@@ -38,3 +40,25 @@ the terms of the GNU LGPL.
 #define SET_CTIME_NS(stbuf, val) do { } while (0)
 #define SET_MTIME_NS(stbuf, val) do { } while (0)
 #endif
+
+
+/*
+ * Macros for conditional assignments that depend on the installed
+ * FUSE version or platform.
+ */
+
+#if PLATFORM == PLATFORM_LINUX || PLATFORM == PLATFORM_BSD
+#define ASSIGN_DARWIN(x,y)
+#define ASSIGN_NOT_DARWIN(x,y) ((x) = (y))
+#elif PLATFORM == PLATFORM_DARWIN
+#define ASSIGN_DARWIN(x,y) ((x) = (y))
+#define ASSIGN_NOT_DARWIN(x,y)
+#else
+#error This should not happen
+#endif
+
+/*
+ * Constants
+ */
+#define NOTIFY_INVAL_INODE 1
+#define NOTIFY_INVAL_ENTRY 2

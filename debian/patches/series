@@ -1,4 +1,1 @@
 use-local-intersphinx-inventory.patch
-force_xattr_api.diff
-setattr_compat_patch.diff
-mips_dev_t.diff
