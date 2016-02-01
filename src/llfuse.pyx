@@ -20,7 +20,7 @@ cdef extern from "llfuse.h":
 
 from fuse_lowlevel cimport *
 from pthread cimport *
-from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
+from posix.stat cimport struct_mstat as struct_stat, S_IFMT, S_IFDIR, S_IFREG
 from posix.types cimport mode_t, dev_t, off_t
 from libc.stdint cimport uint32_t
 from libc.stdlib cimport const_char

@@ -30,7 +30,7 @@ cdef extern from "<fuse_lowlevel.h>" nogil:
     struct fuse_entry_param:
         fuse_ino_t ino
         unsigned long generation
-        struct_stat attr
+        struct_mstat attr
         double attr_timeout
         double entry_timeout
 
