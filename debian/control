@@ -17,7 +17,7 @@ Build-Depends: debhelper (>= 9),
                python-pytest,
                python3-pytest,
                pkg-config,
-               fuse [linux-any] | fuse4bsd [kfreebsd-any],
+               fuse [linux-any], fuse4bsd [kfreebsd-any],
                python-distribute,
                python3-setuptools,
                cython3 (>= 0.24)
