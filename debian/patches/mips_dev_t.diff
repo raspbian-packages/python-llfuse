@@ -1,4 +1,4 @@
-From 969aab620c3a3b9e01d3571b527ea7b5465069fd Mon Sep 17 00:00:00 2001
+From 3f2af3423273803ea6cca5cf4bc1a9ed4690bd02 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 09:40:04 -0800
 Subject: Work around bug in mips+mipsel libc
