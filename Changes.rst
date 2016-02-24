@@ -4,6 +4,14 @@
 
 .. currentmodule:: llfuse
 
+Release 0.43 (2016-02-23)
+=========================
+
+* Fixed build-failure under OS-X.
+* Fixed some build failures under FreeBSD (hopefully all of them, but
+  no testers were available before the release).
+* The *workers* parameter to `llfuse.main` may now be `None`.
+
 Release 0.42.1 (2016-02-01)
 ===========================
 

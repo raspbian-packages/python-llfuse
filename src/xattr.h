@@ -50,10 +50,18 @@ static int setxattr_p (char *path, char *name, void *value, size_t size,
 #include <sys/types.h>
 #include <sys/extattr.h>
 #include <limits.h>
+#include <stddef.h>
 
 #define XATTR_NOFOLLOW 0
 #define XATTR_NODEFAULT 0
 #define XATTR_NOSECURITY 0
+
+/* FreeBSD doesn't have on operation to only set the attribute
+   if it already exists (XATTR_REPLACE), or only if it does not
+   yet exist (XATTR_CREATE). Setting these values to zero ensures
+   that we can never test positively for them */
+#define XATTR_CREATE 0
+#define XATTR_REPLACE 0
 
 static ssize_t getxattr_p (char *path, char *name, void *value, size_t size,
                            int namespace) {
@@ -66,7 +74,7 @@ static ssize_t getxattr_p (char *path, char *name, void *value, size_t size,
 
     ssize_t ret;
     ret = extattr_get_file(path, namespace, name, value, size);
-    if (ret > 0 && <size_t> ret == size) {
+    if (ret > 0 && (size_t) ret == size) {
         errno = ERANGE;
         return -1;
     }
