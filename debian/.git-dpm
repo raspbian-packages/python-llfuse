@@ -2,10 +2,10 @@
 72287b8c48be269af7338bf1c876212332edbd98
 72287b8c48be269af7338bf1c876212332edbd98
 1de78f8c7c630dbc2338f5a51ed35328e2f79449
-1de78f8c7c630dbc2338f5a51ed35328e2f79449
-python-llfuse_0.42.1+dfsg.orig.tar.gz
-23b9a0256f43de3fc8c232ffebfcbde852aee315
-254890
+55ca1732373dd9ca6cb7e46c73a401dc3a62ac45
+python-llfuse_0.43+dfsg.orig.tar.gz
+44342fde1ecdb8d869b0d1577498b627de7d6aec
+254663
 debianTag="debian/%e%v"
 patchedTag="patched/%e%v"
 upstreamTag="upstream/%e%u"
