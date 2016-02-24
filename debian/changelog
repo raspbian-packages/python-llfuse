@@ -3,7 +3,7 @@ python-llfuse (0.43+dfsg-1) UNRELEASED; urgency=medium
   * Updated URL in copyright file.
   * New upstream release.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 23 Feb 2016 16:05:43 -0800
+ -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 23 Feb 2016 16:10:05 -0800
 
 python-llfuse (0.41.1+dfsg-4) unstable; urgency=medium
 
