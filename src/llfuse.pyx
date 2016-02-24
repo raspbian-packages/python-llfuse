@@ -46,7 +46,7 @@ from libc.errno cimport ETIMEDOUT, EPROTO, EINVAL, EPERM, ENOMSG
 from posix.unistd cimport getpid
 from posix.time cimport timespec
 from posix.signal cimport (sigemptyset, sigaddset, SIG_BLOCK, SIG_SETMASK,
-                           siginfo_t, sigaction_t, sigaction, SA_SIGINFO)
+                           siginfo_t, sigaction, SA_SIGINFO)
 from cpython.bytes cimport (PyBytes_AsStringAndSize, PyBytes_FromStringAndSize,
                             PyBytes_AsString, PyBytes_FromString, PyBytes_AS_STRING)
 from cpython.buffer cimport (PyObject_GetBuffer, PyBuffer_Release,
@@ -60,6 +60,13 @@ from libc cimport signal
 ######################
 # EXTERNAL DEFINITIONS
 ######################
+
+cdef extern from * nogil:
+     cdef struct sigaction_t "sigaction":
+        void     sa_handler(int)
+        void     sa_sigaction(int, siginfo_t *, void *)
+        sigset_t sa_mask
+        int      sa_flags
 
 cdef extern from "lock.h" nogil:
     int acquire(double timeout) nogil
