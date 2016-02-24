@@ -1,4 +1,4 @@
-From 02ce315ec54196fa8d087160d413fc7f8dd16f6b Mon Sep 17 00:00:00 2001
+From 10d26bd9c7c4c244fcc1e7dcb86da85fd5ab243c Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:14:11 -0800
 Subject: Ignore compiler warnings due to old Cython version
@@ -15,7 +15,7 @@ Since Cython 0.24 isn't in Debian yet, we ignore these warnings.
  1 file changed, 3 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index 9df7..ba58 100755
+index f7af5..1ca6 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -80,9 +80,6 @@ def main():

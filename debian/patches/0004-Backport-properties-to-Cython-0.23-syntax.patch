@@ -1,4 +1,4 @@
-From f6e73da8bce4176dd571121bbe83eece5be150e7 Mon Sep 17 00:00:00 2001
+From 9bb6f64b86015e0a0e3c1101a7a3daea96a6db12 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:17:31 -0800
 Subject: Backport properties to Cython 0.23 syntax
@@ -13,9 +13,25 @@ version 0.23 to 0.24. Upstream uses the newer syntax, but Cython
 0.24 is not available in Debian yet. Thus, we backport to the
 older syntax.
 ---
+ setup.py     |   4 +-
  src/misc.pxi | 274 +++++++++++++++++++++++------------------------------------
- 1 file changed, 107 insertions(+), 167 deletions(-)
+ 2 files changed, 109 insertions(+), 169 deletions(-)
 
+diff --git a/setup.py b/setup.py
+index d347..f7af5 100755
+--- a/setup.py
++++ b/setup.py
+@@ -218,8 +218,8 @@ class build_cython(setuptools.Command):
+             raise SystemExit('Cython needs to be installed for this command')
+ 
+         hit = re.match('^Cython version (.+)$', version)
+-        if not hit or LooseVersion(hit.group(1)) < "0.24":
+-            raise SystemExit('Need Cython 0.24 or newer, found ' + version)
++        if not hit or LooseVersion(hit.group(1)) < "0.23":
++            raise SystemExit('Need Cython 0.23 or newer, found ' + version)
+ 
+         cmd = ['cython3', '-Wextra', '--force', '-3', '--fast-fail',
+                '--directive', 'embedsignature=True', '--include-dir',
 diff --git a/src/misc.pxi b/src/misc.pxi
 index bd21..02e1 100644
 --- a/src/misc.pxi
