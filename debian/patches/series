@@ -1,4 +1,3 @@
 0001-Use-cython3-instead-of-cython.patch
 use-local-intersphinx-inventory.patch
-force_xattr_api.diff
 mips_dev_t.diff

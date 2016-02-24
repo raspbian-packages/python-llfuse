@@ -1,4 +1,4 @@
-From 5a7fcc2d5d160bc6ef6880dde4e58749b9ae65ef Mon Sep 17 00:00:00 2001
+From 6d9ec1c760e605466d9033b87973cab2170faf36 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 10:15:47 -0800
 Subject: Use 'cython3' instead of 'cython'
@@ -11,7 +11,7 @@ version.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index d028..c53d 100755
+index 9df7..d347 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -211,7 +211,7 @@ class build_cython(setuptools.Command):
