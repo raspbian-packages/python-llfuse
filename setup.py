@@ -179,14 +179,14 @@ class build_cython(setuptools.Command):
 
     def run(self):
         try:
-            version = subprocess.check_output(['cython', '--version'],
+            version = subprocess.check_output(['cython3', '--version'],
                                               universal_newlines=True,
                                               stderr=subprocess.STDOUT)
         except OSError:
             raise SystemExit('Cython needs to be installed for this command')
         print(f"Using {version.strip()}.")
 
-        cmd = ['cython', '-Wextra', '--force', '-3', '--fast-fail',
+        cmd = ['cython3', '-Wextra', '--force', '-3', '--fast-fail',
                '--directive', 'embedsignature=True', '--include-dir',
                os.path.join(basedir, 'Include'), '--verbose' ]
         if DEVELOPER_MODE:
