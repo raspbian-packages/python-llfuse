@@ -34,7 +34,8 @@ Depends: ${misc:Depends},
          ${shlibs:Depends}
 Suggests: python-llfuse-doc
 Replaces: s3ql (<= 0.28)
-Breaks: s3ql (<< 1.2)
+Breaks: s3ql (<< 1.2),
+        borgbackup (<= 1.0.0~rc1-3)
 Provides: ${python:Provides}
 Description: Python bindings for the low-level FUSE API
  Python-llfuse is a set of Python bindings for the low level
@@ -75,6 +76,7 @@ Depends: ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
 Provides: ${python3:Provides}
+Breaks: borgbackup (<= 1.0.0~rc1-3)
 Suggests: python-llfuse-doc
 Description: Python 3 bindings for the low-level FUSE API
  Python-llfuse is a set of Python bindings for the low level FUSE API.
