@@ -21,6 +21,7 @@ import tempfile
 import os
 import errno
 import pytest
+import sys
 
 def test_inquire_bits():
     assert 0 < llfuse.get_ino_t_bits() < 256
