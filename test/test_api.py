@@ -21,6 +21,7 @@ import tempfile
 import os
 import errno
 import pytest
+import sys
 
 def test_inquire_bits():
     assert 0 < llfuse.get_ino_t_bits() < 256
@@ -58,7 +59,8 @@ def _getxattr_helper(path, name):
 
     return value
 
-
+@pytest.mark.skipif(sys.platform.startswith('gnukfreebsd'),
+                    reason='GNU/kFreeBSD does not have xattr support')
 def test_xattr():
     with tempfile.NamedTemporaryFile() as fh:
         key = 'user.new_attribute'
