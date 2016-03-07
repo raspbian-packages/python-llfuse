@@ -1,0 +1,28 @@
+From e599445631b51ff25333e801d27a79ff534071bf Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Mon, 7 Mar 2016 13:22:36 -0800
+Subject: Skip extended attribute tests under GNU/kFreeBSD
+
+Origin: Debian
+Forwarded: not-needed
+
+Under GNU/kFreeBSD the setxattr and getxattr functions are dummies
+that return ENOTIMPL.
+---
+ test/test_api.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/test/test_api.py b/test/test_api.py
+index 990b..ec6a 100755
+--- a/test/test_api.py
++++ b/test/test_api.py
+@@ -58,7 +58,8 @@ def _getxattr_helper(path, name):
+ 
+     return value
+ 
+-
++@pytest.mark.skipif(sys.platform.startswith('gnukfreebsd'),
++                    reason='GNU/kFreeBSD does not have xattr support')
+ def test_xattr():
+     with tempfile.NamedTemporaryFile() as fh:
+         key = 'user.new_attribute'
