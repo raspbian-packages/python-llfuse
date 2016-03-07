@@ -58,7 +58,8 @@ def _getxattr_helper(path, name):
 
     return value
 
-
+@pytest.mark.skipif(sys.platform.startswith('gnukfreebsd'),
+                    reason='GNU/kFreeBSD does not have xattr support')
 def test_xattr():
     with tempfile.NamedTemporaryFile() as fh:
         key = 'user.new_attribute'
