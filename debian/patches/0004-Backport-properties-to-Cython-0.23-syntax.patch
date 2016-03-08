@@ -1,4 +1,4 @@
-From 9bb6f64b86015e0a0e3c1101a7a3daea96a6db12 Mon Sep 17 00:00:00 2001
+From 38a81195398ba38f2702ca3acc8c6522e220bc66 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:17:31 -0800
 Subject: Backport properties to Cython 0.23 syntax
@@ -18,7 +18,7 @@ older syntax.
  2 files changed, 109 insertions(+), 169 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index d347..f7af5 100755
+index e9c0..5186 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -218,8 +218,8 @@ class build_cython(setuptools.Command):
@@ -33,10 +33,10 @@ index d347..f7af5 100755
          cmd = ['cython3', '-Wextra', '--force', '-3', '--fast-fail',
                 '--directive', 'embedsignature=True', '--include-dir',
 diff --git a/src/misc.pxi b/src/misc.pxi
-index bd21..02e1 100644
+index 17bf..1541 100644
 --- a/src/misc.pxi
 +++ b/src/misc.pxi
-@@ -369,126 +369,91 @@ cdef class EntryAttributes:
+@@ -368,126 +368,91 @@ cdef class EntryAttributes:
          self.attr.st_blksize = 4096
          self.attr.st_nlink = 1
  
@@ -186,7 +186,7 @@ index bd21..02e1 100644
 +
 +    property st_atime_ns:
          '''Time of last access in (integer) nanoseconds'''
--        return (self.attr.st_atime * 10**9 + GET_ATIME_NS(self.attr))
+-        return (int(self.attr.st_atime) * 10**9 + GET_ATIME_NS(self.attr))
 -    @st_atime_ns.setter
 -    def st_atime_ns(self, val):
 -        self.attr.st_atime = val / 10**9
@@ -195,7 +195,7 @@ index bd21..02e1 100644
 -    @property
 -    def st_mtime_ns(self):
 +        def __get__(self):
-+            return (self.attr.st_atime * 10**9
++            return (int(self.attr.st_atime) * 10**9
 +                    + GET_ATIME_NS(self.attr))
 +        def __set__(self, val):
 +            self.attr.st_atime = val / 10**9
@@ -203,7 +203,7 @@ index bd21..02e1 100644
 +
 +    property st_mtime_ns:
          '''Time of last modification in (integer) nanoseconds'''
--        return (self.attr.st_mtime * 10**9 + GET_MTIME_NS(self.attr))
+-        return (int(self.attr.st_mtime) * 10**9 + GET_MTIME_NS(self.attr))
 -    @st_mtime_ns.setter
 -    def st_mtime_ns(self, val):
 -        self.attr.st_mtime = val / 10**9
@@ -212,7 +212,7 @@ index bd21..02e1 100644
 -    @property
 -    def st_ctime_ns(self):
 +        def __get__(self):
-+            return (self.attr.st_mtime * 10**9
++            return (int(self.attr.st_mtime) * 10**9
 +                    + GET_MTIME_NS(self.attr))
 +        def __set__(self, val):
 +            self.attr.st_mtime = val / 10**9
@@ -220,13 +220,13 @@ index bd21..02e1 100644
 +
 +    property st_ctime_ns:
          '''Time of last inode modification in (integer) nanoseconds'''
--        return (self.attr.st_ctime * 10**9 + GET_CTIME_NS(self.attr))
+-        return (int(self.attr.st_ctime) * 10**9 + GET_CTIME_NS(self.attr))
 -    @st_ctime_ns.setter
 -    def st_ctime_ns(self, val):
 -        self.attr.st_ctime = val / 10**9
 -        SET_CTIME_NS(self.attr, val % 10**9)
 +        def __get__(self):
-+            return (self.attr.st_ctime * 10**9
++            return (int(self.attr.st_ctime) * 10**9
 +                    + GET_CTIME_NS(self.attr))
 +        def __set__(self, val):
 +            self.attr.st_ctime = val / 10**9
@@ -234,7 +234,7 @@ index bd21..02e1 100644
  
  @cython.freelist(1)
  cdef class StatvfsData:
-@@ -503,61 +468,37 @@ cdef class StatvfsData:
+@@ -502,61 +467,37 @@ cdef class StatvfsData:
      def __cinit__(self):
          string.memset(&self.stat, 0, sizeof(statvfs))
  
@@ -327,7 +327,7 @@ index bd21..02e1 100644
  
  
  # As of Cython 0.23.1, @cython.freelist cannot be used for
-@@ -575,13 +516,12 @@ cdef class FUSEError(Exception):
+@@ -574,13 +515,12 @@ cdef class FUSEError(Exception):
      # a macro?)
      cdef int errno_
  

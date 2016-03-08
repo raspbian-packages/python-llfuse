@@ -1,4 +1,10 @@
-python-llfuse (0.43+dfsg-3) UNRELEASED; urgency=medium
+python-llfuse (1.0+dfsg-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 08 Mar 2016 09:04:29 -0800
+
+python-llfuse (0.43+dfsg-3) unstable; urgency=medium
 
   * Skip extended attribute tests under kFreeBSD.
   * Bump standards version to 3.9.7, no changes required.
