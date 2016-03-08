@@ -108,7 +108,7 @@ def main():
     link_args.append('-lpthread')
     c_sources = ['src/llfuse.c', 'src/lock.c']
 
-    if os.uname()[0] == 'Linux':
+    if os.uname()[0] in ('Linux', 'GNU/kFreeBSD'):
         link_args.append('-lrt')
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
 
