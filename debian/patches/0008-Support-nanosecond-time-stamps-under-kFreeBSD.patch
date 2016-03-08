@@ -1,0 +1,23 @@
+From 27ac5369ee344d937d7103dcda8831775ce7fa0d Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Tue, 8 Mar 2016 14:12:50 -0800
+Subject: Support nanosecond time stamps under kFreeBSD.
+
+Cherry-picked from upstream.
+---
+ setup.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/setup.py b/setup.py
+index 895b..38fe 100755
+--- a/setup.py
++++ b/setup.py
+@@ -108,7 +108,7 @@ def main():
+     link_args.append('-lpthread')
+     c_sources = ['src/llfuse.c', 'src/lock.c']
+ 
+-    if os.uname()[0] == 'Linux':
++    if os.uname()[0] in ('Linux', 'GNU/kFreeBSD'):
+         link_args.append('-lrt')
+         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
+ 
