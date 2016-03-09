@@ -44,5 +44,9 @@ update_intersphinx:
 
 .PHONY: get-orig-source
 get-orig-source:
-	uscan --rename --destdir=$(CURDIR) --repack --force-download \
+	uscan --rename --destdir=$(CURDIR)/.. --repack --force-download \
 	      --download-current-version --compression xz
+
+.PHONY: uscan
+uscan:
+	uscan --rename --destdir=$(CURDIR)/.. --repack --compression xz
