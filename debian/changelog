@@ -1,8 +1,8 @@
-python-llfuse (1.0+dfsg-2) UNRELEASED; urgency=medium
+python-llfuse (1.0+dfsg-2) unstable; urgency=medium
 
   * Cherry picked ns-resolution support for kFreeBSD
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Tue, 08 Mar 2016 14:13:42 -0800
+ -- Nikolaus Rath <Nikolaus@rath.org>  Thu, 10 Mar 2016 09:13:08 -0800
 
 python-llfuse (1.0+dfsg-1) unstable; urgency=medium
 
