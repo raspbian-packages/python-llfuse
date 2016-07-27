@@ -2363,7 +2363,7 @@ static PyObject *__pyx_pf_6llfuse_10Operations_2destroy(CYTHON_UNUSED PyObject *
 
 /* Python wrapper */
 static PyObject *__pyx_pw_6llfuse_10Operations_5lookup(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_6llfuse_10Operations_4lookup[] = "Operations.lookup(self, parent_inode, name, ctx)\nLook up a directory entry by name and get its attributes.\n\n        This method should return an `EntryAttributes` instance for the\n        directory entry *name* in the directory with inode *parent_inode*.\n\n        If there is no such entry, the method should either return an\n        `EntryAttributes` instance with negative ``st_ino`` value (in which case\n        the negative lookup will be cached as specified by ``entry_timeout``),\n        or it should raise `FUSEError` with an errno of `errno.ENOENT` (in this\n        case the negative result will not be cached).\n\n        *ctx* will be a `RequestContext` instance.\n\n        The file system must be able to handle lookups for :file:`.` and\n        :file:`..`, no matter if these entries are returned by `readdir` or not.\n\n        (Successful) execution of this handler increases the lookup count for\n        the returned inode by one.\n        ";
+static char __pyx_doc_6llfuse_10Operations_4lookup[] = "Operations.lookup(self, parent_inode, name, ctx)\nLook up a directory entry by name and get its attributes.\n\n        This method should return an `EntryAttributes` instance for the\n        directory entry *name* in the directory with inode *parent_inode*.\n\n        If there is no such entry, the method should either return an\n        `EntryAttributes` instance with zero ``st_ino`` value (in which case\n        the negative lookup will be cached as specified by ``entry_timeout``),\n        or it should raise `FUSEError` with an errno of `errno.ENOENT` (in this\n        case the negative result will not be cached).\n\n        *ctx* will be a `RequestContext` instance.\n\n        The file system must be able to handle lookups for :file:`.` and\n        :file:`..`, no matter if these entries are returned by `readdir` or not.\n\n        (Successful) execution of this handler increases the lookup count for\n        the returned inode by one.\n        ";
 static PyMethodDef __pyx_mdef_6llfuse_10Operations_5lookup = {"lookup", (PyCFunction)__pyx_pw_6llfuse_10Operations_5lookup, METH_VARARGS|METH_KEYWORDS, __pyx_doc_6llfuse_10Operations_4lookup};
 static PyObject *__pyx_pw_6llfuse_10Operations_5lookup(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   CYTHON_UNUSED PyObject *__pyx_v_self = 0;
@@ -29315,7 +29315,7 @@ static int __pyx_pf_6llfuse_15EntryAttributes_10generation_2__set__(struct __pyx
  * 
  *     @property
  *     def attr_timeout(self):             # <<<<<<<<<<<<<<
- *         '''Validity timeout for the name of the directory entry
+ *         '''Validity timeout for the attributes of the directory entry
  * 
  */
 
@@ -29356,7 +29356,7 @@ static PyObject *__pyx_pf_6llfuse_15EntryAttributes_12attr_timeout___get__(struc
  * 
  *     @property
  *     def attr_timeout(self):             # <<<<<<<<<<<<<<
- *         '''Validity timeout for the name of the directory entry
+ *         '''Validity timeout for the attributes of the directory entry
  * 
  */
 
@@ -29431,7 +29431,7 @@ static int __pyx_pf_6llfuse_15EntryAttributes_12attr_timeout_2__set__(struct __p
  * 
  *     @property
  *     def entry_timeout(self):             # <<<<<<<<<<<<<<
- *         '''Validity timeout for the attributes of the directory entry
+ *         '''Validity timeout for the name/existence of the directory entry
  * 
  */
 
@@ -29472,7 +29472,7 @@ static PyObject *__pyx_pf_6llfuse_15EntryAttributes_13entry_timeout___get__(stru
  * 
  *     @property
  *     def entry_timeout(self):             # <<<<<<<<<<<<<<
- *         '''Validity timeout for the attributes of the directory entry
+ *         '''Validity timeout for the name/existence of the directory entry
  * 
  */
 
@@ -40262,8 +40262,8 @@ static PyMethodDef __pyx_methods_6llfuse_EntryAttributes[] = {
 static struct PyGetSetDef __pyx_getsets_6llfuse_EntryAttributes[] = {
   {(char *)"st_ino", __pyx_getprop_6llfuse_15EntryAttributes_st_ino, __pyx_setprop_6llfuse_15EntryAttributes_st_ino, (char *)0, 0},
   {(char *)"generation", __pyx_getprop_6llfuse_15EntryAttributes_generation, __pyx_setprop_6llfuse_15EntryAttributes_generation, (char *)"The inode generation number", 0},
-  {(char *)"attr_timeout", __pyx_getprop_6llfuse_15EntryAttributes_attr_timeout, __pyx_setprop_6llfuse_15EntryAttributes_attr_timeout, (char *)"Validity timeout for the name of the directory entry\n\n        Floating point numbers may be used. Units are seconds.\n        ", 0},
-  {(char *)"entry_timeout", __pyx_getprop_6llfuse_15EntryAttributes_entry_timeout, __pyx_setprop_6llfuse_15EntryAttributes_entry_timeout, (char *)"Validity timeout for the attributes of the directory entry\n\n        Floating point numbers may be used. Units are seconds.\n        ", 0},
+  {(char *)"attr_timeout", __pyx_getprop_6llfuse_15EntryAttributes_attr_timeout, __pyx_setprop_6llfuse_15EntryAttributes_attr_timeout, (char *)"Validity timeout for the attributes of the directory entry\n\n        Floating point numbers may be used. Units are seconds.\n        ", 0},
+  {(char *)"entry_timeout", __pyx_getprop_6llfuse_15EntryAttributes_entry_timeout, __pyx_setprop_6llfuse_15EntryAttributes_entry_timeout, (char *)"Validity timeout for the name/existence of the directory entry\n\n        Floating point numbers may be used. Units are seconds.\n        ", 0},
   {(char *)"st_mode", __pyx_getprop_6llfuse_15EntryAttributes_st_mode, __pyx_setprop_6llfuse_15EntryAttributes_st_mode, (char *)0, 0},
   {(char *)"st_nlink", __pyx_getprop_6llfuse_15EntryAttributes_st_nlink, __pyx_setprop_6llfuse_15EntryAttributes_st_nlink, (char *)0, 0},
   {(char *)"st_uid", __pyx_getprop_6llfuse_15EntryAttributes_st_uid, __pyx_setprop_6llfuse_15EntryAttributes_st_uid, (char *)0, 0},

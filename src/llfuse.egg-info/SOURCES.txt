@@ -100,9 +100,9 @@ src/llfuse.egg-info/top_level.txt
 src/llfuse.egg-info/zip-safe
 test/conftest.py
 test/pytest.ini
+test/pytest_checklogs.py
 test/test_api.py
 test/test_examples.py
 test/test_fs.py
 test/util.py
-test/.cache/v/cache/lastfailed
 util/sphinx_cython.py
