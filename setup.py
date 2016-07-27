@@ -59,7 +59,7 @@ if DEVELOPER_MODE:
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-LLFUSE_VERSION = '1.0'
+LLFUSE_VERSION = '1.1.1'
 
 def main():
 
@@ -111,7 +111,6 @@ def main():
     if os.uname()[0] in ('Linux', 'GNU/kFreeBSD'):
         link_args.append('-lrt')
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
-
     elif os.uname()[0] == 'Darwin':
         compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
         c_sources.append('src/darwin_compat.c')

@@ -379,16 +379,18 @@ cdef class EntryAttributes:
         def __get__(self): return self.fuse_param.generation
         def __set__(self, val): self.fuse_param.generation = val
 
-    property attr_timeout:
-        '''Validity timeout for the name of the directory entry
+    @property
+    def attr_timeout(self):
+        '''Validity timeout for the attributes of the directory entry
 
         Floating point numbers may be used. Units are seconds.
         '''
         def __get__(self): return self.fuse_param.attr_timeout
         def __set__(self, val): self.fuse_param.attr_timeout = val
 
-    property entry_timeout:
-        '''Validity timeout for the attributes of the directory entry
+    @property
+    def entry_timeout(self):
+        '''Validity timeout for the name/existence of the directory entry
 
         Floating point numbers may be used. Units are seconds.
         '''

@@ -5,4 +5,3 @@ mips_dev_t.diff
 0005-Ignore-compiler-warnings-due-to-old-Cython-version.patch
 0006-Work-around-Cython-0.23-bug.patch
 0007-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
-0008-Support-nanosecond-time-stamps-under-kFreeBSD.patch

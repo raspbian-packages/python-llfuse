@@ -1,4 +1,4 @@
-From 8a9d3f8e5417c37dd138b51cf89dbd29e886c8e2 Mon Sep 17 00:00:00 2001
+From 3413ecacfcdd51095a33679583fd6f5578029784 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:39:59 -0800
 Subject: Work around Cython 0.23 bug.

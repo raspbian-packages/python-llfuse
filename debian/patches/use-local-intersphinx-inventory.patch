@@ -1,4 +1,4 @@
-From 9fd52da8773948af3474309e3d9beac6610e3e45 Mon Sep 17 00:00:00 2001
+From 48e6c33f77106b9368e7db430d296ba6c31e47a6 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Thu, 8 Oct 2015 12:24:34 -0700
 Subject: Use local intersphinx inventory
