@@ -1,4 +1,4 @@
-From 1b909e2401d683717de92a19b01900735d874a00 Mon Sep 17 00:00:00 2001
+From 1069a4f2bbc3d2aba2984d64eb19c73f20aec500 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:14:11 -0800
 Subject: Ignore compiler warnings due to old Cython version

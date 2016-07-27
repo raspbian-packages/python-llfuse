@@ -375,25 +375,14 @@ cdef class EntryAttributes:
             self.attr.st_ino = val
 
     property generation:
-        '''The inode generation number'''
         def __get__(self): return self.fuse_param.generation
         def __set__(self, val): self.fuse_param.generation = val
 
-    @property
-    def attr_timeout(self):
-        '''Validity timeout for the attributes of the directory entry
-
-        Floating point numbers may be used. Units are seconds.
-        '''
+    property attr_timeout:
         def __get__(self): return self.fuse_param.attr_timeout
         def __set__(self, val): self.fuse_param.attr_timeout = val
 
-    @property
-    def entry_timeout(self):
-        '''Validity timeout for the name/existence of the directory entry
-
-        Floating point numbers may be used. Units are seconds.
-        '''
+    property entry_timeout:
         def __get__(self): return self.fuse_param.entry_timeout
         def __set__(self, val): self.fuse_param.entry_timeout = val
 
