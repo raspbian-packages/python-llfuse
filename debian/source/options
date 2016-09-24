@@ -1,0 +1,4 @@
+compression = "xz"
+compression-level = 6
+extend-diff-ignore = "\.pyc$"
+tar-ignore = "*.pyc"
