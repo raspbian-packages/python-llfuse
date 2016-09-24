@@ -1,4 +1,4 @@
-python-llfuse (1.1.1+dfsg-3) UNRELEASED; urgency=medium
+python-llfuse (1.1.1+dfsg-3) unstable; urgency=medium
 
   [ Ondřej Nový ]
   * Fixed VCS URL (https)
@@ -6,7 +6,7 @@ python-llfuse (1.1.1+dfsg-3) UNRELEASED; urgency=medium
   [ Nikolaus Rath ]
   * Don't use pytest.skip at module level. Closes: #837254.
 
- -- Ondřej Nový <novy@ondrej.org>  Tue, 29 Mar 2016 22:10:26 +0200
+ -- Nikolaus Rath <Nikolaus@rath.org>  Fri, 23 Sep 2016 20:41:07 -0700
 
 python-llfuse (1.1.1+dfsg-2) unstable; urgency=medium
 
