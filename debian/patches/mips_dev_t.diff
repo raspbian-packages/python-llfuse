@@ -22,7 +22,7 @@ Upstream is not interested in this change for obvious reasons.
  1 file changed, 18 insertions(+), 1 deletion(-)
 
 diff --git a/src/llfuse.pyx b/src/llfuse.pyx
-index 53a6..10c6 100644
+index 53a64..10c61 100644
 --- a/src/llfuse.pyx
 +++ b/src/llfuse.pyx
 @@ -20,7 +20,24 @@ cdef extern from "llfuse.h":

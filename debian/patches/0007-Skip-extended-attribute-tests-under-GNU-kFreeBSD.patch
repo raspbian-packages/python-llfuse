@@ -13,7 +13,7 @@ that return ENOTIMPL.
  1 file changed, 4 insertions(+)
 
 diff --git a/test/test_api.py b/test/test_api.py
-index 8124..e2b3 100755
+index 81242..e2b37 100755
 --- a/test/test_api.py
 +++ b/test/test_api.py
 @@ -21,6 +21,7 @@ import tempfile

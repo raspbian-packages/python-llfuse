@@ -13,7 +13,7 @@ so we provide the correct one. This is fixed in Cython 0.24.
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/src/llfuse.pyx b/src/llfuse.pyx
-index 10c6..357a 100644
+index 10c61..357ae 100644
 --- a/src/llfuse.pyx
 +++ b/src/llfuse.pyx
 @@ -46,7 +46,7 @@ from libc.errno cimport ETIMEDOUT, EPROTO, EINVAL, EPERM, ENOMSG

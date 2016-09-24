@@ -13,7 +13,7 @@ Patch-Name: use-local-intersphinx-inventory.patch
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/rst/conf.py b/rst/conf.py
-index 2290..f642 100644
+index 2290d..f6425 100644
 --- a/rst/conf.py
 +++ b/rst/conf.py
 @@ -27,7 +27,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx',

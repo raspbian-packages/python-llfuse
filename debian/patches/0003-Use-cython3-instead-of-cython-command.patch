@@ -14,7 +14,7 @@ python-cython, we use 'cython3' instead.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index 353c..8a5c 100755
+index 353c0..8a5ca 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -210,7 +210,7 @@ class build_cython(setuptools.Command):
