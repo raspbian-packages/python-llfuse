@@ -1,0 +1,41 @@
+From e7fc1d9b0413e9a72fdb0fb55aab2ee024572a43 Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Tue, 23 Feb 2016 16:39:59 -0800
+Subject: Work around Cython 0.23 bug.
+
+Origin: Debian
+Forwarded: not-needed
+
+Cython 0.23 has a wrong definition of posix.signal.sigaction_t,
+so we provide the correct one. This is fixed in Cython 0.24.
+---
+ src/llfuse.pyx | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/src/llfuse.pyx b/src/llfuse.pyx
+index 10c61..357ae 100644
+--- a/src/llfuse.pyx
++++ b/src/llfuse.pyx
+@@ -46,7 +46,7 @@ from libc.errno cimport ETIMEDOUT, EPROTO, EINVAL, EPERM, ENOMSG
+ from posix.unistd cimport getpid
+ from posix.time cimport timespec
+ from posix.signal cimport (sigemptyset, sigaddset, SIG_BLOCK, SIG_SETMASK,
+-                           siginfo_t, sigaction_t, sigaction, SA_SIGINFO)
++                           siginfo_t, sigaction, SA_SIGINFO)
+ from cpython.bytes cimport (PyBytes_AsStringAndSize, PyBytes_FromStringAndSize,
+                             PyBytes_AsString, PyBytes_FromString, PyBytes_AS_STRING)
+ from cpython.buffer cimport (PyObject_GetBuffer, PyBuffer_Release,
+@@ -61,6 +61,13 @@ from libc cimport signal
+ # EXTERNAL DEFINITIONS
+ ######################
+ 
++cdef extern from * nogil:
++     cdef struct sigaction_t "sigaction":
++        void     sa_handler(int)
++        void     sa_sigaction(int, siginfo_t *, void *)
++        sigset_t sa_mask
++        int      sa_flags
++
+ cdef extern from "lock.h" nogil:
+     int acquire(double timeout) nogil
+     int release() nogil
