@@ -1,10 +1,10 @@
 Tests: upstream-standard
-Depends: python3-pytest, python-pytest, python-llfuse, python3-llfuse, fuse
+Depends: python3-pytest, python-pytest, python-llfuse, python3-llfuse, fuse, python3-pytest-catchlog, python-pytest-catchlog
 
 # This is really the same test suite, but when run with root
 # access (or permission to mount fuse file systems), additional
 # tests will be run.
 Tests: upstream-with-fuse
-Depends: python3-pytest, python-pytest, python-llfuse, python3-llfuse, fuse
+Depends: python3-pytest, python-pytest, python-llfuse, python3-llfuse, fuse, python3-pytest-catchlog, python-pytest-catchlog
 Restrictions: needs-root
 
