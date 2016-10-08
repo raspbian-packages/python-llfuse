@@ -1,0 +1,8 @@
+# watch control file for uscan
+version=3
+opts=\
+pgpsigurlmangle=s/$/.asc/,\
+uversionmangle=s/$/+dfsg/,\
+  https://pypi.python.org/pypi/llfuse/ \
+  .*/llfuse-(\d\S*)\.tar\.bz2 \
+  debian
