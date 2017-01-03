@@ -1,8 +1,8 @@
-python-llfuse (1.1.1+dfsg-5) UNRELEASED; urgency=medium
+python-llfuse (1.1.1+dfsg-5) unstable; urgency=medium
 
   * Added missing python-pytest-catchlog dependency for tests
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 02 Jan 2017 20:17:02 -0800
+ -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 02 Jan 2017 20:17:51 -0800
 
 python-llfuse (1.1.1+dfsg-4) unstable; urgency=medium
 
