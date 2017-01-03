@@ -1,0 +1,2 @@
+#!/bin/sh
+exec py.test-3 --installed test/
