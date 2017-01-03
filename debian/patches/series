@@ -1,0 +1,8 @@
+use-local-intersphinx-inventory.patch
+mips_dev_t.diff
+0003-Use-cython3-instead-of-cython-command.patch
+0004-Backport-properties-to-Cython-0.23-syntax.patch
+0005-Ignore-compiler-warnings-due-to-old-Cython-version.patch
+0006-Work-around-Cython-0.23-bug.patch
+0007-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
+pytest-skip.diff
