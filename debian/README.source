@@ -1,0 +1,19 @@
+* As requested by ftpmaster, the upstream tarball is repacked to
+  remove minified javascript files.
+
+* Since removing just the minified javascript files would leave the
+  rest of them broken, we are removing the entire pre-rendered HTML
+  documentation. There is no loss of information, since the entire
+  documentation (including the problematic javascript files) is
+  regenerated during build.
+
+* Repackaging of the upstream tarball is done with uscan. The list of
+  excluded files is specified in the Files-Excluded paragraph in
+  debian/copyright. To retrieve and repack the latest upstream
+  tarball, run
+
+  # uscan --repack
+
+  To retrieve a tarball for the current version, run
+
+  # debian/rules get-orig-source
