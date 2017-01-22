@@ -1,8 +1,8 @@
-python-llfuse (1.1.1+dfsg-7) UNRELEASED; urgency=medium
+python-llfuse (1.1.1+dfsg-7) unstable; urgency=medium
 
   * Fix syntax error introduced with new Debian patch in -6.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Sun, 22 Jan 2017 09:54:24 -0800
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sun, 22 Jan 2017 09:54:54 -0800
 
 python-llfuse (1.1.1+dfsg-6) unstable; urgency=medium
 
