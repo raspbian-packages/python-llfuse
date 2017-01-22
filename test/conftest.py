@@ -21,6 +21,13 @@ def register_false_checklog_pos(reg_output):
     reg_output(r'^==\d+== For counts of detected and suppressed errors, rerun with: -v')
     reg_output(r'^==\d+== ERROR SUMMARY: 0 errors from 0 contexts')
 
+    # Exception during interpreter shutdown (cf. https://bugs.debian.org/851724)
+    reg_output(r'^Exception in thread [a-z0-9_-]+ '
+               r'\(most likely raised during interpreter shutdown\):\n'
+               r'Traceback .+\n'
+               r'(  File.+\n)+'
+               r'.+: .+\n')
+
 def pytest_addoption(parser):
     group = parser.getgroup("general")
     group._addoption("--installed", action="store_true", default=False,
