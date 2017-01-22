@@ -276,26 +276,43 @@ class Operations(llfuse.Operations):
             truncate = os.truncate
             chmod = os.chmod
             chown = os.chown
+            stat = os.lstat
         else:
             path_or_fh = fh
             truncate = os.ftruncate
             chmod = os.fchmod
             chown = os.fchown
+            stat = os.fstat
 
         try:
             if fields.update_size:
                 truncate(path_or_fh, attr.st_size)
 
             if fields.update_mode:
-                chmod(path_or_fh, ~stat_m.S_IFMT & attr.st_mode,
-                      follow_symlinks=False)
+                # Under Linux, chmod always resolves symlinks so we should
+                # actually never get a setattr() request for a symbolic
+                # link.
+                assert not stat_m.S_ISLNK(attr.st_mode)
+                chmod(path_or_fh, stat_m.S_IMODE(attr.st_mode))
 
-            if fields.update_uid or fields.update_gid:
-                chown(path_or_fh, attr.st_uid, attr.st_gid,
-                      follow_symlinks=False)
+            if fields.update_uid:
+                chown(path_or_fh, attr.st_uid, -1, follow_symlinks=False)
 
-            if fields.update_atime or fields.update_mtime:
+            if fields.update_gid:
+                chown(path_or_fh, -1, attr.st_gid, follow_symlinks=False)
+
+            if fields.update_atime and fields.update_mtime:
                 # utime accepts both paths and file descriptiors
+                os.utime(path_or_fh, None, follow_symlinks=False,
+                         ns=(attr.st_atime_ns, attr.st_mtime_ns))
+            elif fields.update_atime or fields.update_mtime:
+                # We can only set both values, so we first need to retrieve the
+                # one that we shouldn't be changing.
+                oldstat = stat(path_or_fh)
+                if not fields.update_atime:
+                    attr.st_atime_ns = oldstat.st_atime_ns
+                else:
+                    attr.st_mtime_ns = oldstat.st_mtime_ns
                 os.utime(path_or_fh, None, follow_symlinks=False,
                          ns=(attr.st_atime_ns, attr.st_mtime_ns))
 

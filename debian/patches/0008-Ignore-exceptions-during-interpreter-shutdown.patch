@@ -1,4 +1,4 @@
-From aaa6a541c176addaf0ef263e22fb77982435e4b9 Mon Sep 17 00:00:00 2001
+From 9f725f7c982100bc4ee7bf4b99d5b01046835f29 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Sat, 21 Jan 2017 16:34:50 -0800
 Subject: Ignore exceptions during interpreter shutdown

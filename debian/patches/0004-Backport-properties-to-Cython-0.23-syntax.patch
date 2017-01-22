@@ -1,4 +1,4 @@
-From 4423b7ddfd6e035ac862e4a008c3bc5df2d25d96 Mon Sep 17 00:00:00 2001
+From 7746bd4e2287f5268cf9759b4c891dc22a02ad3d Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:17:31 -0800
 Subject: Backport properties to Cython 0.23 syntax
@@ -18,7 +18,7 @@ older syntax.
  2 files changed, 109 insertions(+), 178 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index 8a5ca..cc21a 100755
+index ddd49..6d346 100755
 --- a/setup.py
 +++ b/setup.py
 @@ -217,8 +217,8 @@ class build_cython(setuptools.Command):
