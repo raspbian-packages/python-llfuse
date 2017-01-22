@@ -1,4 +1,4 @@
-From 73838223a9bb149827205968deca8778da3a51e6 Mon Sep 17 00:00:00 2001
+From aaa6a541c176addaf0ef263e22fb77982435e4b9 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Sat, 21 Jan 2017 16:34:50 -0800
 Subject: Ignore exceptions during interpreter shutdown
@@ -11,7 +11,7 @@ caused by a bug in Python. Closes: #851724.
  1 file changed, 7 insertions(+)
 
 diff --git a/test/conftest.py b/test/conftest.py
-index fa19c..9bf32 100644
+index fa19c..d1e88 100644
 --- a/test/conftest.py
 +++ b/test/conftest.py
 @@ -21,6 +21,13 @@ def register_false_checklog_pos(reg_output):
@@ -22,7 +22,7 @@ index fa19c..9bf32 100644
 +    reg_output(r'^Exception in thread [a-z0-9_-]+ '
 +               r'\(most likely raised during interpreter shutdown\):\n'
 +               r'Traceback .+\n'
-+               r'(  File.+\n)+',
++               r'(  File.+\n)+'
 +               r'.+: .+\n')
 +
  def pytest_addoption(parser):

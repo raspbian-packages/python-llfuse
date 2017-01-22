@@ -25,7 +25,7 @@ def register_false_checklog_pos(reg_output):
     reg_output(r'^Exception in thread [a-z0-9_-]+ '
                r'\(most likely raised during interpreter shutdown\):\n'
                r'Traceback .+\n'
-               r'(  File.+\n)+',
+               r'(  File.+\n)+'
                r'.+: .+\n')
 
 def pytest_addoption(parser):
