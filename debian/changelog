@@ -1,4 +1,4 @@
-python-llfuse (1.1.1+dfsg-6) UNRELEASED; urgency=medium
+python-llfuse (1.1.1+dfsg-6) unstable; urgency=medium
 
   * Ignore exceptions during interpreter shutdown
 
@@ -6,7 +6,7 @@ python-llfuse (1.1.1+dfsg-6) UNRELEASED; urgency=medium
     case that we are addressing with this, they also seem to be
     caused by a bug in Python. Closes: #851724.
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 21 Jan 2017 16:36:13 -0800
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 21 Jan 2017 16:36:43 -0800
 
 python-llfuse (1.1.1+dfsg-5) unstable; urgency=medium
 
