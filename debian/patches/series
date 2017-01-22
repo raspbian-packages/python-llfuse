@@ -6,3 +6,4 @@ mips_dev_t.diff
 0006-Work-around-Cython-0.23-bug.patch
 0007-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
 pytest-skip.diff
+0009-Ignore-exceptions-during-interpreter-shutdown.patch
