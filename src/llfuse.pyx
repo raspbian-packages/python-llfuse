@@ -20,24 +20,7 @@ cdef extern from "llfuse.h":
 
 from fuse_lowlevel cimport *
 from pthread cimport *
-IF UNAME_MACHINE.startswith('mips64'):
-    cdef extern from "sys/stat.h" nogil:
-      struct stat:
-        int       st_dev
-        ino_t     st_ino
-        mode_t    st_mode
-        nlink_t   st_nlink
-        uid_t     st_uid
-        gid_t     st_gid
-        int       st_rdev
-        off_t     st_size
-        blksize_t st_blksize
-        blkcnt_t  st_blocks
-        time_t    st_atime
-        time_t    st_mtime
-        time_t    st_ctime
-ELSE:
-    from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
+from posix.stat cimport struct_mstat as struct_stat, S_IFMT, S_IFDIR, S_IFREG
 from posix.types cimport mode_t, dev_t, off_t
 from libc.stdint cimport uint32_t
 from libc.stdlib cimport const_char

@@ -1,5 +1,5 @@
 use-local-intersphinx-inventory.patch
+0002-Use-cython3-instead-of-cython-command.patch
+0003-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
+0004-Ignore-exceptions-during-interpreter-shutdown.patch
 mips_dev_t.diff
-0003-Use-cython3-instead-of-cython-command.patch
-0004-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
-0005-Ignore-exceptions-during-interpreter-shutdown.patch

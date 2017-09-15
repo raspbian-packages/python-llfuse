@@ -1,4 +1,4 @@
-From f91cc00c4493627c98980d06195028b8647b0e5d Mon Sep 17 00:00:00 2001
+From 2788f389a65bdcf6c35687fc8dce066bb1b55277 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 09:40:04 -0800
 Subject: Work around bug in mips+mipsel libc
@@ -18,36 +18,95 @@ generated C file is suitable for any architecture).
 
 Upstream is not interested in this change for obvious reasons.
 ---
- src/llfuse.pyx | 19 ++++++++++++++++++-
- 1 file changed, 18 insertions(+), 1 deletion(-)
+ Include/fuse_lowlevel.pxd |  2 +-
+ Include/posix/stat.pxd    | 50 ++++++++++++++++++++++++++++++++---------------
+ src/llfuse.pyx            |  2 +-
+ 3 files changed, 36 insertions(+), 18 deletions(-)
 
+diff --git a/Include/fuse_lowlevel.pxd b/Include/fuse_lowlevel.pxd
+index 63ffc..2ef8c 100644
+--- a/Include/fuse_lowlevel.pxd
++++ b/Include/fuse_lowlevel.pxd
+@@ -30,7 +30,7 @@ cdef extern from "<fuse_lowlevel.h>" nogil:
+     struct fuse_entry_param:
+         fuse_ino_t ino
+         unsigned long generation
+-        struct_stat attr
++        struct_mstat attr
+         double attr_timeout
+         double entry_timeout
+ 
+diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
+index 0d61b..8b783 100644
+--- a/Include/posix/stat.pxd
++++ b/Include/posix/stat.pxd
+@@ -2,22 +2,40 @@ from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
+                           nlink_t, off_t, time_t, uid_t)
+ 
+ 
+-cdef extern from "<sys/stat.h>" nogil:
+-    cdef struct struct_stat "stat":
+-        dev_t   st_dev
+-        ino_t   st_ino
+-        mode_t  st_mode
+-        nlink_t st_nlink
+-        uid_t   st_uid
+-        gid_t   st_gid
+-        dev_t   st_rdev
+-        off_t   st_size
+-        blksize_t st_blksize
+-        blkcnt_t st_blocks
+-        time_t  st_atime
+-        time_t  st_mtime
+-        time_t  st_ctime
+-        time_t  st_birthtime
++IF UNAME_MACHINE.startswith('mips64'):
++    cdef extern from "<sys/stat.h>" nogil:
++        cdef struct struct_mstat "stat":
++            int     st_dev
++            ino_t   st_ino
++            mode_t  st_mode
++            nlink_t st_nlink
++            uid_t   st_uid
++            gid_t   st_gid
++            int     st_rdev
++            off_t   st_size
++            blksize_t st_blksize
++            blkcnt_t st_blocks
++            time_t  st_atime
++            time_t  st_mtime
++            time_t  st_ctime
++            time_t  st_birthtime
++ELSE:
++    cdef extern from "<sys/stat.h>" nogil:
++        cdef struct struct_mstat "stat":
++            dev_t   st_dev
++            ino_t   st_ino
++            mode_t  st_mode
++            nlink_t st_nlink
++            uid_t   st_uid
++            gid_t   st_gid
++            dev_t   st_rdev
++            off_t   st_size
++            blksize_t st_blksize
++            blkcnt_t st_blocks
++            time_t  st_atime
++            time_t  st_mtime
++            time_t  st_ctime
++            time_t  st_birthtime
+ 
+ # POSIX prescribes including both <sys/stat.h> and <unistd.h> for these
+ cdef extern from "<unistd.h>" nogil:
 diff --git a/src/llfuse.pyx b/src/llfuse.pyx
-index f783f..c3cdb 100644
+index f783f..59c42 100644
 --- a/src/llfuse.pyx
 +++ b/src/llfuse.pyx
-@@ -20,7 +20,24 @@ cdef extern from "llfuse.h":
+@@ -20,7 +20,7 @@ cdef extern from "llfuse.h":
  
  from fuse_lowlevel cimport *
  from pthread cimport *
 -from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
-+IF UNAME_MACHINE.startswith('mips64'):
-+    cdef extern from "sys/stat.h" nogil:
-+      struct stat:
-+        int       st_dev
-+        ino_t     st_ino
-+        mode_t    st_mode
-+        nlink_t   st_nlink
-+        uid_t     st_uid
-+        gid_t     st_gid
-+        int       st_rdev
-+        off_t     st_size
-+        blksize_t st_blksize
-+        blkcnt_t  st_blocks
-+        time_t    st_atime
-+        time_t    st_mtime
-+        time_t    st_ctime
-+ELSE:
-+    from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
++from posix.stat cimport struct_mstat as struct_stat, S_IFMT, S_IFDIR, S_IFREG
  from posix.types cimport mode_t, dev_t, off_t
  from libc.stdint cimport uint32_t
  from libc.stdlib cimport const_char
