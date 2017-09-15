@@ -28,6 +28,7 @@ Please report any bugs on the `issue tracker`_. For discussion and
 questions, please use the general `FUSE mailing list`_. A searchable
 `mailing list archive`_ is kindly provided by Gmane_.
 
+
 Development Status
 ------------------
 
@@ -39,6 +40,12 @@ backwards-incompatible version will be 1.0. Projects designed for
 e.g. version 0.42.1 of Python-LLFUSE are thus recommended to declare a
 dependency on ``llfuse >= 0.42.1, < 1.0``.
 
+
+Professional Support
+--------------------
+
+Professional support is available. Please contact Nikolaus Rath
+<Nikolaus@rath.org> for details.
 
 Contributing
 ------------
@@ -53,4 +60,4 @@ The Python-LLFUSE source code is available both on GitHub_ and BitBucket_.
 .. _Gmane: http://www.gmane.org/
 .. _PyPi: https://pypi.python.org/pypi/llfuse/
 .. _BitBucket: https://bitbucket.org/nikratio/python-llfuse/
-.. _GitHub: https://github.com/python-llfuse/main
+.. _GitHub: https://github.com/python-llfuse/python-llfuse

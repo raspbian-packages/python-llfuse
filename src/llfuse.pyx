@@ -46,7 +46,7 @@ from libc.errno cimport ETIMEDOUT, EPROTO, EINVAL, EPERM, ENOMSG
 from posix.unistd cimport getpid
 from posix.time cimport timespec
 from posix.signal cimport (sigemptyset, sigaddset, SIG_BLOCK, SIG_SETMASK,
-                           siginfo_t, sigaction, SA_SIGINFO)
+                           siginfo_t, sigaction_t, sigaction, SA_SIGINFO)
 from cpython.bytes cimport (PyBytes_AsStringAndSize, PyBytes_FromStringAndSize,
                             PyBytes_AsString, PyBytes_FromString, PyBytes_AS_STRING)
 from cpython.buffer cimport (PyObject_GetBuffer, PyBuffer_Release,
@@ -61,13 +61,6 @@ from libc cimport signal
 # EXTERNAL DEFINITIONS
 ######################
 
-cdef extern from * nogil:
-     cdef struct sigaction_t "sigaction":
-        void     sa_handler(int)
-        void     sa_sigaction(int, siginfo_t *, void *)
-        sigset_t sa_mask
-        int      sa_flags
-
 cdef extern from "lock.h" nogil:
     int acquire(double timeout) nogil
     int release() nogil
@@ -75,13 +68,17 @@ cdef extern from "lock.h" nogil:
     int init_lock() nogil
 
 cdef extern from "macros.c" nogil:
+    long GET_BIRTHTIME(struct_stat* buf)
     long GET_ATIME_NS(struct_stat* buf)
     long GET_CTIME_NS(struct_stat* buf)
     long GET_MTIME_NS(struct_stat* buf)
+    long GET_BIRTHTIME_NS(struct_stat* buf)
 
+    void SET_BIRTHTIME(struct_stat* buf, long val)
     void SET_ATIME_NS(struct_stat* buf, long val)
     void SET_CTIME_NS(struct_stat* buf, long val)
     void SET_MTIME_NS(struct_stat* buf, long val)
+    void SET_BIRTHTIME_NS(struct_stat* buf, long val)
 
     void ASSIGN_DARWIN(void*, void*)
     void ASSIGN_NOT_DARWIN(void*, void*)
@@ -109,11 +106,6 @@ cdef extern from "xattr.h" nogil:
 cdef extern from "gettime.h" nogil:
     int gettime_realtime(timespec *tp)
 
-cdef extern from "Python.h" nogil:
-    void PyEval_InitThreads()
-    ctypedef class __builtin__.Exception [object PyBaseExceptionObject]:
-        pass
-
 cdef extern from *:
     # Missing in the Cython provided libc/errno.pxd:
     enum:
@@ -137,6 +129,7 @@ import logging
 import sys
 import os.path
 import threading
+from pickle import PicklingError
 
 if PY_MAJOR_VERSION < 3:
     from Queue import Queue

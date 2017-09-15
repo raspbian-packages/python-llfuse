@@ -21,6 +21,8 @@ import tempfile
 import os
 import errno
 import pytest
+from copy import copy
+from pickle import PicklingError
 import sys
 
 def test_inquire_bits():
@@ -90,3 +92,20 @@ def test_xattr():
         value = b'a nice little bytestring, but slightly modified'
         os.setxattr(fh.name, key, value)
         assert _getxattr_helper(fh.name, key) == value
+
+def test_copy():
+
+    for obj in (llfuse.SetattrFields(),
+                llfuse.RequestContext(),
+                llfuse.lock,
+                llfuse.lock_released):
+        pytest.raises(PicklingError, copy, obj)
+
+    for (inst, attr) in ((llfuse.EntryAttributes(), 'st_mode'),
+                         (llfuse.StatvfsData(), 'f_files')):
+        setattr(inst, attr, 42)
+        inst_copy = copy(inst)
+        assert getattr(inst, attr) == getattr(inst_copy, attr)
+
+    inst = llfuse.FUSEError(10)
+    assert inst.errno == copy(inst).errno

@@ -1,4 +1,4 @@
-From b33b3f9a4625eb0b9af646d7bc07636be05667f3 Mon Sep 17 00:00:00 2001
+From 16f5e3b904706afa94943ace0576d195d51d688d Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Tue, 23 Feb 2016 16:30:36 -0800
 Subject: Use 'cython3' instead of 'cython' command
@@ -14,10 +14,10 @@ python-cython, we use 'cython3' instead.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/setup.py b/setup.py
-index 6c218..ddd49 100755
+index b7f1c..9513b 100755
 --- a/setup.py
 +++ b/setup.py
-@@ -210,7 +210,7 @@ class build_cython(setuptools.Command):
+@@ -205,7 +205,7 @@ class build_cython(setuptools.Command):
  
      def run(self):
          try:
@@ -26,7 +26,7 @@ index 6c218..ddd49 100755
                                                universal_newlines=True,
                                                stderr=subprocess.STDOUT)
          except OSError:
-@@ -220,7 +220,7 @@ class build_cython(setuptools.Command):
+@@ -215,7 +215,7 @@ class build_cython(setuptools.Command):
          if not hit or LooseVersion(hit.group(1)) < "0.24":
              raise SystemExit('Need Cython 0.24 or newer, found ' + version)
  

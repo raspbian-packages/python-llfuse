@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+#-*- coding: us-ascii -*-
 '''
 setup.py
 
 Installation script for Python-LLFUSE.
 
-Copyright © 2010 Nikolaus Rath <Nikolaus.org>
+Copyright (c) 2010 Nikolaus Rath <Nikolaus.org>
 
 This file is part of Python-LLFUSE. This work may be distributed under
 the terms of the GNU LGPL.
@@ -59,7 +59,7 @@ if DEVELOPER_MODE:
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-LLFUSE_VERSION = '1.2'
+LLFUSE_VERSION = '1.3'
 
 def main():
 
@@ -79,6 +79,12 @@ def main():
 
     # We may have unused functions if we compile for older FUSE versions
     compile_args.append('-Wno-unused-function')
+
+    # Due to platform specific conditions, these are unavoidable
+    compile_args.append('-Wno-unused-parameter')
+
+    # Value-changing conversions should always be explicit.
+    compile_args.append('-Werror=conversion')
 
     # Note that (i > -1) is false if i is unsigned (-1 will be converted to
     # a large positive value). We certainly don't want to do this by
@@ -110,16 +116,8 @@ def main():
 
     if os.uname()[0] in ('Linux', 'GNU/kFreeBSD'):
         link_args.append('-lrt')
-        compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIM')
     elif os.uname()[0] == 'Darwin':
-        compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
         c_sources.append('src/darwin_compat.c')
-    elif os.uname()[0] in ('FreeBSD', 'NetBSD'):
-        compile_args.append('-DHAVE_STRUCT_STAT_ST_ATIMESPEC')
-    else:
-        print("NOTE: unknown system (%s), nanosecond resolution file times "
-              "will not be available" % os.uname()[0])
-
 
     install_requires = []
     if sys.version_info[0] == 2:
@@ -214,8 +212,8 @@ class build_cython(setuptools.Command):
             raise SystemExit('Cython needs to be installed for this command')
 
         hit = re.match('^Cython version (.+)$', version)
-        if not hit or LooseVersion(hit.group(1)) < "0.23":
-            raise SystemExit('Need Cython 0.23 or newer, found ' + version)
+        if not hit or LooseVersion(hit.group(1)) < "0.24":
+            raise SystemExit('Need Cython 0.24 or newer, found ' + version)
 
         cmd = ['cython3', '-Wextra', '--force', '-3', '--fast-fail',
                '--directive', 'embedsignature=True', '--include-dir',

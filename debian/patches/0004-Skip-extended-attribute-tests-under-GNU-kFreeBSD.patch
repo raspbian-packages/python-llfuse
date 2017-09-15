@@ -1,4 +1,4 @@
-From 6b200481b386136c3c0a7c2d7f96a359b544aa5f Mon Sep 17 00:00:00 2001
+From 1b64d3cfa79823056c7c6cbe803fc29b16f0d3e1 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 7 Mar 2016 13:22:36 -0800
 Subject: Skip extended attribute tests under GNU/kFreeBSD
@@ -13,18 +13,18 @@ that return ENOTIMPL.
  1 file changed, 4 insertions(+)
 
 diff --git a/test/test_api.py b/test/test_api.py
-index 81242..e2b37 100755
+index 92fab..5c110 100755
 --- a/test/test_api.py
 +++ b/test/test_api.py
-@@ -21,6 +21,7 @@ import tempfile
- import os
- import errno
+@@ -23,6 +23,7 @@ import errno
  import pytest
+ from copy import copy
+ from pickle import PicklingError
 +import sys
  
  def test_inquire_bits():
      assert 0 < llfuse.get_ino_t_bits() < 256
-@@ -64,6 +65,9 @@ def test_entry_res():
+@@ -66,6 +67,9 @@ def test_entry_res():
      a.st_atime_ns = val*1e9
      assert a.st_atime_ns / 1e9 == val
  
