@@ -51,13 +51,17 @@ cdef extern from "lock.h" nogil:
     int init_lock() nogil
 
 cdef extern from "macros.c" nogil:
+    long GET_BIRTHTIME(struct_stat* buf)
     long GET_ATIME_NS(struct_stat* buf)
     long GET_CTIME_NS(struct_stat* buf)
     long GET_MTIME_NS(struct_stat* buf)
+    long GET_BIRTHTIME_NS(struct_stat* buf)
 
+    void SET_BIRTHTIME(struct_stat* buf, long val)
     void SET_ATIME_NS(struct_stat* buf, long val)
     void SET_CTIME_NS(struct_stat* buf, long val)
     void SET_MTIME_NS(struct_stat* buf, long val)
+    void SET_BIRTHTIME_NS(struct_stat* buf, long val)
 
     void ASSIGN_DARWIN(void*, void*)
     void ASSIGN_NOT_DARWIN(void*, void*)
@@ -85,11 +89,6 @@ cdef extern from "xattr.h" nogil:
 cdef extern from "gettime.h" nogil:
     int gettime_realtime(timespec *tp)
 
-cdef extern from "Python.h" nogil:
-    void PyEval_InitThreads()
-    ctypedef class __builtin__.Exception [object PyBaseExceptionObject]:
-        pass
-
 cdef extern from *:
     # Missing in the Cython provided libc/errno.pxd:
     enum:
@@ -113,6 +112,7 @@ import logging
 import sys
 import os.path
 import threading
+from pickle import PicklingError
 
 if PY_MAJOR_VERSION < 3:
     from Queue import Queue

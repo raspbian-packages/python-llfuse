@@ -11,6 +11,7 @@ Include/libc/__init__.py
 Include/libc/dirent.pxd
 Include/libc/sys/__init__.py
 Include/libc/sys/statvfs.pxd
+Include/posix/stat.pxd
 doc/html/.buildinfo
 doc/html/about.html
 doc/html/changes.html
@@ -95,7 +96,6 @@ src/xattr.h
 src/llfuse.egg-info/PKG-INFO
 src/llfuse.egg-info/SOURCES.txt
 src/llfuse.egg-info/dependency_links.txt
-src/llfuse.egg-info/requires.txt
 src/llfuse.egg-info/top_level.txt
 src/llfuse.egg-info/zip-safe
 test/conftest.py
