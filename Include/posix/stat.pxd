@@ -4,7 +4,7 @@ from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
 
 IF UNAME_MACHINE.startswith('mips64'):
     cdef extern from "<sys/stat.h>" nogil:
-        cdef struct struct_mstat "stat":
+        cdef struct struct_stat "stat":
             int     st_dev
             ino_t   st_ino
             mode_t  st_mode
@@ -21,7 +21,7 @@ IF UNAME_MACHINE.startswith('mips64'):
             time_t  st_birthtime
 ELSE:
     cdef extern from "<sys/stat.h>" nogil:
-        cdef struct struct_mstat "stat":
+        cdef struct struct_stat "stat":
             dev_t   st_dev
             ino_t   st_ino
             mode_t  st_mode

@@ -1,4 +1,4 @@
-From 2788f389a65bdcf6c35687fc8dce066bb1b55277 Mon Sep 17 00:00:00 2001
+From 80e95aaff186a282e8743a788659d16d3577ae01 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 09:40:04 -0800
 Subject: Work around bug in mips+mipsel libc
@@ -18,26 +18,20 @@ generated C file is suitable for any architecture).
 
 Upstream is not interested in this change for obvious reasons.
 ---
- Include/fuse_lowlevel.pxd |  2 +-
- Include/posix/stat.pxd    | 50 ++++++++++++++++++++++++++++++++---------------
- src/llfuse.pyx            |  2 +-
- 3 files changed, 36 insertions(+), 18 deletions(-)
+ Include/posix/__init__.pxd |  1 +
+ Include/posix/stat.pxd     | 50 +++++++++++++++++++++++++++++++---------------
+ 2 files changed, 35 insertions(+), 16 deletions(-)
+ create mode 100644 Include/posix/__init__.pxd
 
-diff --git a/Include/fuse_lowlevel.pxd b/Include/fuse_lowlevel.pxd
-index 63ffc..2ef8c 100644
---- a/Include/fuse_lowlevel.pxd
-+++ b/Include/fuse_lowlevel.pxd
-@@ -30,7 +30,7 @@ cdef extern from "<fuse_lowlevel.h>" nogil:
-     struct fuse_entry_param:
-         fuse_ino_t ino
-         unsigned long generation
--        struct_stat attr
-+        struct_mstat attr
-         double attr_timeout
-         double entry_timeout
- 
+diff --git a/Include/posix/__init__.pxd b/Include/posix/__init__.pxd
+new file mode 100644
+index 00000..ea305
+--- /dev/null
++++ b/Include/posix/__init__.pxd
+@@ -0,0 +1 @@
++#empty
 diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
-index 0d61b..8b783 100644
+index 0d61b..2c2fc 100644
 --- a/Include/posix/stat.pxd
 +++ b/Include/posix/stat.pxd
 @@ -2,22 +2,40 @@ from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
@@ -62,7 +56,7 @@ index 0d61b..8b783 100644
 -        time_t  st_birthtime
 +IF UNAME_MACHINE.startswith('mips64'):
 +    cdef extern from "<sys/stat.h>" nogil:
-+        cdef struct struct_mstat "stat":
++        cdef struct struct_stat "stat":
 +            int     st_dev
 +            ino_t   st_ino
 +            mode_t  st_mode
@@ -79,7 +73,7 @@ index 0d61b..8b783 100644
 +            time_t  st_birthtime
 +ELSE:
 +    cdef extern from "<sys/stat.h>" nogil:
-+        cdef struct struct_mstat "stat":
++        cdef struct struct_stat "stat":
 +            dev_t   st_dev
 +            ino_t   st_ino
 +            mode_t  st_mode
@@ -97,16 +91,3 @@ index 0d61b..8b783 100644
  
  # POSIX prescribes including both <sys/stat.h> and <unistd.h> for these
  cdef extern from "<unistd.h>" nogil:
-diff --git a/src/llfuse.pyx b/src/llfuse.pyx
-index f783f..59c42 100644
---- a/src/llfuse.pyx
-+++ b/src/llfuse.pyx
-@@ -20,7 +20,7 @@ cdef extern from "llfuse.h":
- 
- from fuse_lowlevel cimport *
- from pthread cimport *
--from posix.stat cimport struct_stat, S_IFMT, S_IFDIR, S_IFREG
-+from posix.stat cimport struct_mstat as struct_stat, S_IFMT, S_IFDIR, S_IFREG
- from posix.types cimport mode_t, dev_t, off_t
- from libc.stdint cimport uint32_t
- from libc.stdlib cimport const_char
