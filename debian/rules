@@ -19,8 +19,10 @@ build_cython:
 
 build_sphinx:
 	dh_testdir
-	python3 setup.py build_ext --inplace
+ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+        python3 setup.py build_ext --inplace
 	python3 setup.py build_sphinx
+endif
 	touch $@
 
 override_dh_strip:
