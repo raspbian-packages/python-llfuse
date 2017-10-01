@@ -20,7 +20,7 @@ build_cython:
 build_sphinx:
 	dh_testdir
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
-        python3 setup.py build_ext --inplace
+	python3 setup.py build_ext --inplace
 	python3 setup.py build_sphinx
 endif
 	touch $@
