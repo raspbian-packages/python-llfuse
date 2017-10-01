@@ -2,16 +2,16 @@ from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
                           nlink_t, off_t, time_t, uid_t)
 
 
-IF UNAME_MACHINE.startswith('mips64'):
+IF UNAME_MACHINE.startswith('mips'):
     cdef extern from "<sys/stat.h>" nogil:
         cdef struct struct_stat "stat":
-            int     st_dev
+            unsigned st_dev
             ino_t   st_ino
             mode_t  st_mode
             nlink_t st_nlink
             uid_t   st_uid
             gid_t   st_gid
-            int     st_rdev
+            unsigned st_rdev
             off_t   st_size
             blksize_t st_blksize
             blkcnt_t st_blocks

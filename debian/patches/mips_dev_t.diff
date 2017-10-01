@@ -1,4 +1,4 @@
-From 80e95aaff186a282e8743a788659d16d3577ae01 Mon Sep 17 00:00:00 2001
+From 388d91ac97404f71f429c2a78fd676f0bc0a4e77 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 1 Feb 2016 09:40:04 -0800
 Subject: Work around bug in mips+mipsel libc
@@ -31,7 +31,7 @@ index 00000..ea305
 @@ -0,0 +1 @@
 +#empty
 diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
-index 0d61b..2c2fc 100644
+index 0d61b..a4ee4 100644
 --- a/Include/posix/stat.pxd
 +++ b/Include/posix/stat.pxd
 @@ -2,22 +2,40 @@ from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
@@ -54,16 +54,16 @@ index 0d61b..2c2fc 100644
 -        time_t  st_mtime
 -        time_t  st_ctime
 -        time_t  st_birthtime
-+IF UNAME_MACHINE.startswith('mips64'):
++IF UNAME_MACHINE.startswith('mips'):
 +    cdef extern from "<sys/stat.h>" nogil:
 +        cdef struct struct_stat "stat":
-+            int     st_dev
++            unsigned st_dev
 +            ino_t   st_ino
 +            mode_t  st_mode
 +            nlink_t st_nlink
 +            uid_t   st_uid
 +            gid_t   st_gid
-+            int     st_rdev
++            unsigned st_rdev
 +            off_t   st_size
 +            blksize_t st_blksize
 +            blkcnt_t st_blocks

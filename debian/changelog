@@ -3,6 +3,8 @@ python-llfuse (1.3+dfsg-3) UNRELEASED; urgency=medium
   * Updated standards version to 4.1.1
   * Added support for 'nodoc' in DEB_BUILD_OPTIONS.
   * python-llfuse-doc is now Multi-Arch: foreign
+  * Fixed mips_dev_t.diff one more time. One mips, dev_t is unsigned
+    and we have to apply the match for mips, not just mips64.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Sun, 01 Oct 2017 13:08:25 +0100
 
