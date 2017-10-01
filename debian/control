@@ -114,6 +114,7 @@ Description: Python 3 bindings for the low-level FUSE API (debugging symbols)
 Package: python-llfuse-doc
 Architecture: all
 Section: doc
+Multi-Arch: foreign
 Recommends: python-llfuse | python3-llfuse
 Depends: ${sphinxdoc:Depends},
          ${shlibs:Depends},
