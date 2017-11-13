@@ -674,7 +674,7 @@ typedef void (*__pyx_t_4libc_6signal_sighandler_t)(int);
 struct __pyx_t_6llfuse_worker_data_t;
 typedef struct __pyx_t_6llfuse_worker_data_t __pyx_t_6llfuse_worker_data_t;
 
-/* "src/fuse_api.pxi":389
+/* "src/fuse_api.pxi":392
  *         fuse_session_process_buf(session, &buf, ch)
  * 
  * ctypedef struct worker_data_t:             # <<<<<<<<<<<<<<
@@ -1350,6 +1350,9 @@ static void __Pyx_AddTraceback(const char *funcname, int c_line,
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 /* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
+
+/* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_fuse_ino_t(fuse_ino_t value);
 
 /* CIntToPy.proto */
@@ -1369,9 +1372,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_off_t(off_t value);
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint32_t(uint32_t value);
-
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uid_t(uid_t value);
@@ -1556,7 +1556,7 @@ static PyObject *__pyx_v_6llfuse_exc_info = 0;
 static int __pyx_v_6llfuse_exit_reason;
 static pthread_mutex_t __pyx_v_6llfuse_exc_info_mutex;
 static PyObject *__pyx_v_6llfuse__notify_queue = 0;
-static struct sigaction __pyx_v_6llfuse_sa_backup[4];
+static struct sigaction __pyx_v_6llfuse_sa_backup[5];
 static void __pyx_f_6llfuse_fuse_init(void *, struct fuse_conn_info *); /*proto*/
 static void __pyx_f_6llfuse_fuse_destroy(void *); /*proto*/
 static void __pyx_f_6llfuse_fuse_lookup(fuse_req_t, fuse_ino_t, const char *); /*proto*/
@@ -1601,6 +1601,7 @@ static PyObject *__pyx_f_6llfuse_bytes2str(PyObject *); /*proto*/
 static PyObject *__pyx_f_6llfuse_strerror(int); /*proto*/
 static PyObject *__pyx_f_6llfuse_PyBytes_from_bufvec(struct fuse_bufvec *); /*proto*/
 static void __pyx_f_6llfuse_signal_handler(int, siginfo_t *, void *); /*proto*/
+static void __pyx_f_6llfuse_do_nothing(int, siginfo_t *, void *); /*proto*/
 static int __pyx_f_6llfuse_sigaction_p(int, struct sigaction *, struct sigaction *); /*proto*/
 static PyObject *__pyx_f_6llfuse_set_signal_handlers(void); /*proto*/
 static PyObject *__pyx_f_6llfuse_restore_signal_handlers(void); /*proto*/
@@ -1699,8 +1700,10 @@ static const char __pyx_k_split[] = "split";
 static const char __pyx_k_start[] = "start";
 static const char __pyx_k_str_t[] = "str_t";
 static const char __pyx_k_strip[] = "strip";
+static const char __pyx_k_uname[] = "uname";
 static const char __pyx_k_value[] = "value";
 static const char __pyx_k_write[] = "write";
+static const char __pyx_k_Darwin[] = "Darwin";
 static const char __pyx_k_Groups[] = "Groups:";
 static const char __pyx_k_Thread[] = "Thread";
 static const char __pyx_k_access[] = "access";
@@ -1905,6 +1908,7 @@ static const char __pyx_k_Calling_fuse_session_loop[] = "Calling fuse_session_lo
 static const char __pyx_k_fuse_buf_copy_failed_with[] = "fuse_buf_copy failed with ";
 static const char __pyx_k_pthread_create_failed_with[] = "pthread_create failed with ";
 static const char __pyx_k_pthread_join_failed_with_s[] = "pthread_join failed with: %s";
+static const char __pyx_k_pthread_kill_failed_with_s[] = "pthread_kill failed with: %s";
 static const char __pyx_k_Calling_fuse_session_destroy[] = "Calling fuse_session_destroy";
 static const char __pyx_k_Calling_fuse_session_add_chan[] = "Calling fuse_session_add_chan";
 static const char __pyx_k_Need_to_call_init_before_main[] = "Need to call init() before main()";
@@ -1979,6 +1983,7 @@ static PyObject *__pyx_kp_u_Calling_fuse_session_destroy;
 static PyObject *__pyx_kp_u_Calling_fuse_session_loop;
 static PyObject *__pyx_kp_u_Calling_fuse_session_remove_chan;
 static PyObject *__pyx_kp_u_Calling_fuse_unmount;
+static PyObject *__pyx_n_u_Darwin;
 static PyObject *__pyx_n_u_ENOATTR;
 static PyObject *__pyx_kp_u_Exception_after_kill;
 static PyObject *__pyx_n_s_ExitStack;
@@ -2244,6 +2249,7 @@ static PyObject *__pyx_n_s_prepare;
 static PyObject *__pyx_kp_u_proc_d_status;
 static PyObject *__pyx_kp_u_pthread_create_failed_with;
 static PyObject *__pyx_kp_u_pthread_join_failed_with_s;
+static PyObject *__pyx_kp_u_pthread_kill_failed_with_s;
 static PyObject *__pyx_kp_u_pthread_mutex_lock_failed_with_s;
 static PyObject *__pyx_kp_u_pthread_mutex_ulock_failed_with;
 static PyObject *__pyx_n_s_put;
@@ -2308,6 +2314,7 @@ static PyObject *__pyx_n_s_threading;
 static PyObject *__pyx_n_s_timeout;
 static PyObject *__pyx_n_s_tmp;
 static PyObject *__pyx_n_s_traceback;
+static PyObject *__pyx_n_s_uname;
 static PyObject *__pyx_kp_u_unknown_flag_s_o;
 static PyObject *__pyx_n_s_unlink;
 static PyObject *__pyx_n_s_unmount;
@@ -2586,12 +2593,13 @@ static PyObject *__pyx_tuple__154;
 static PyObject *__pyx_tuple__156;
 static PyObject *__pyx_tuple__158;
 static PyObject *__pyx_tuple__159;
-static PyObject *__pyx_tuple__161;
-static PyObject *__pyx_tuple__163;
-static PyObject *__pyx_tuple__165;
-static PyObject *__pyx_tuple__167;
-static PyObject *__pyx_tuple__171;
-static PyObject *__pyx_tuple__173;
+static PyObject *__pyx_tuple__160;
+static PyObject *__pyx_tuple__162;
+static PyObject *__pyx_tuple__164;
+static PyObject *__pyx_tuple__166;
+static PyObject *__pyx_tuple__168;
+static PyObject *__pyx_tuple__172;
+static PyObject *__pyx_tuple__174;
 static PyObject *__pyx_codeobj__87;
 static PyObject *__pyx_codeobj__89;
 static PyObject *__pyx_codeobj__91;
@@ -2628,15 +2636,15 @@ static PyObject *__pyx_codeobj__151;
 static PyObject *__pyx_codeobj__153;
 static PyObject *__pyx_codeobj__155;
 static PyObject *__pyx_codeobj__157;
-static PyObject *__pyx_codeobj__160;
-static PyObject *__pyx_codeobj__162;
-static PyObject *__pyx_codeobj__164;
-static PyObject *__pyx_codeobj__166;
-static PyObject *__pyx_codeobj__168;
+static PyObject *__pyx_codeobj__161;
+static PyObject *__pyx_codeobj__163;
+static PyObject *__pyx_codeobj__165;
+static PyObject *__pyx_codeobj__167;
 static PyObject *__pyx_codeobj__169;
 static PyObject *__pyx_codeobj__170;
-static PyObject *__pyx_codeobj__172;
-static PyObject *__pyx_codeobj__174;
+static PyObject *__pyx_codeobj__171;
+static PyObject *__pyx_codeobj__173;
+static PyObject *__pyx_codeobj__175;
 
 /* "src/operations.pxi":28
  *     '''
@@ -35482,7 +35490,7 @@ static void __pyx_f_6llfuse_signal_handler(int __pyx_v_sig, CYTHON_UNUSED siginf
  *         fuse_session_exit(session)
  *     exit_reason = sig             # <<<<<<<<<<<<<<
  * 
- * cdef int sigaction_p(int sig, sigaction_t *sa,
+ * cdef void do_nothing(int sig, siginfo_t *si, void* ctx) nogil:
  */
   __pyx_v_6llfuse_exit_reason = __pyx_v_sig;
 
@@ -35500,6 +35508,19 @@ static void __pyx_f_6llfuse_signal_handler(int __pyx_v_sig, CYTHON_UNUSED siginf
 /* "src/misc.pxi":702
  *     exit_reason = sig
  * 
+ * cdef void do_nothing(int sig, siginfo_t *si, void* ctx) nogil:             # <<<<<<<<<<<<<<
+ *     pass
+ * 
+ */
+
+static void __pyx_f_6llfuse_do_nothing(CYTHON_UNUSED int __pyx_v_sig, CYTHON_UNUSED siginfo_t *__pyx_v_si, CYTHON_UNUSED void *__pyx_v_ctx) {
+
+  /* function exit code */
+}
+
+/* "src/misc.pxi":705
+ *     pass
+ * 
  * cdef int sigaction_p(int sig, sigaction_t *sa,             # <<<<<<<<<<<<<<
  *                      sigaction_t *old_sa) except -1:
  *     cdef int res
@@ -35515,7 +35536,7 @@ static int __pyx_f_6llfuse_sigaction_p(int __pyx_v_sig, struct sigaction *__pyx_
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("sigaction_p", 0);
 
-  /* "src/misc.pxi":705
+  /* "src/misc.pxi":708
  *                      sigaction_t *old_sa) except -1:
  *     cdef int res
  *     res = sigaction(sig, sa, old_sa)             # <<<<<<<<<<<<<<
@@ -35524,7 +35545,7 @@ static int __pyx_f_6llfuse_sigaction_p(int __pyx_v_sig, struct sigaction *__pyx_
  */
   __pyx_v_res = sigaction(__pyx_v_sig, __pyx_v_sa, __pyx_v_old_sa);
 
-  /* "src/misc.pxi":706
+  /* "src/misc.pxi":709
  *     cdef int res
  *     res = sigaction(sig, sa, old_sa)
  *     if res != 0:             # <<<<<<<<<<<<<<
@@ -35534,37 +35555,37 @@ static int __pyx_f_6llfuse_sigaction_p(int __pyx_v_sig, struct sigaction *__pyx_
   __pyx_t_1 = ((__pyx_v_res != 0) != 0);
   if (__pyx_t_1) {
 
-    /* "src/misc.pxi":707
+    /* "src/misc.pxi":710
  *     res = sigaction(sig, sa, old_sa)
  *     if res != 0:
  *         raise OSError(errno.errno, 'sigaction failed with '             # <<<<<<<<<<<<<<
  *                       + strerror(errno.errno))
  *     return 0
  */
-    __pyx_t_2 = __Pyx_PyInt_From_int(errno); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 707, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_int(errno); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 710, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
 
-    /* "src/misc.pxi":708
+    /* "src/misc.pxi":711
  *     if res != 0:
  *         raise OSError(errno.errno, 'sigaction failed with '
  *                       + strerror(errno.errno))             # <<<<<<<<<<<<<<
  *     return 0
  * 
  */
-    __pyx_t_3 = __pyx_f_6llfuse_strerror(errno); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 708, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_6llfuse_strerror(errno); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 711, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyNumber_Add(__pyx_kp_u_sigaction_failed_with, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 708, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Add(__pyx_kp_u_sigaction_failed_with, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 711, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "src/misc.pxi":707
+    /* "src/misc.pxi":710
  *     res = sigaction(sig, sa, old_sa)
  *     if res != 0:
  *         raise OSError(errno.errno, 'sigaction failed with '             # <<<<<<<<<<<<<<
  *                       + strerror(errno.errno))
  *     return 0
  */
-    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 707, __pyx_L1_error)
+    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 710, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
@@ -35572,14 +35593,14 @@ static int __pyx_f_6llfuse_sigaction_p(int __pyx_v_sig, struct sigaction *__pyx_
     PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
     __pyx_t_2 = 0;
     __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 707, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 710, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_Raise(__pyx_t_4, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __PYX_ERR(2, 707, __pyx_L1_error)
+    __PYX_ERR(2, 710, __pyx_L1_error)
 
-    /* "src/misc.pxi":706
+    /* "src/misc.pxi":709
  *     cdef int res
  *     res = sigaction(sig, sa, old_sa)
  *     if res != 0:             # <<<<<<<<<<<<<<
@@ -35588,18 +35609,18 @@ static int __pyx_f_6llfuse_sigaction_p(int __pyx_v_sig, struct sigaction *__pyx_
  */
   }
 
-  /* "src/misc.pxi":709
+  /* "src/misc.pxi":712
  *         raise OSError(errno.errno, 'sigaction failed with '
  *                       + strerror(errno.errno))
  *     return 0             # <<<<<<<<<<<<<<
  * 
- * cdef sigaction_t sa_backup[4]
+ * cdef sigaction_t sa_backup[5]
  */
   __pyx_r = 0;
   goto __pyx_L0;
 
-  /* "src/misc.pxi":702
- *     exit_reason = sig
+  /* "src/misc.pxi":705
+ *     pass
  * 
  * cdef int sigaction_p(int sig, sigaction_t *sa,             # <<<<<<<<<<<<<<
  *                      sigaction_t *old_sa) except -1:
@@ -35618,9 +35639,9 @@ static int __pyx_f_6llfuse_sigaction_p(int __pyx_v_sig, struct sigaction *__pyx_
   return __pyx_r;
 }
 
-/* "src/misc.pxi":712
+/* "src/misc.pxi":715
  * 
- * cdef sigaction_t sa_backup[4]
+ * cdef sigaction_t sa_backup[5]
  * cdef set_signal_handlers():             # <<<<<<<<<<<<<<
  *     cdef sigaction_t sa
  * 
@@ -35633,7 +35654,7 @@ static PyObject *__pyx_f_6llfuse_set_signal_handlers(void) {
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("set_signal_handlers", 0);
 
-  /* "src/misc.pxi":715
+  /* "src/misc.pxi":718
  *     cdef sigaction_t sa
  * 
  *     sigemptyset(&sa.sa_mask)             # <<<<<<<<<<<<<<
@@ -35642,7 +35663,7 @@ static PyObject *__pyx_f_6llfuse_set_signal_handlers(void) {
  */
   sigemptyset((&__pyx_v_sa.sa_mask));
 
-  /* "src/misc.pxi":716
+  /* "src/misc.pxi":719
  * 
  *     sigemptyset(&sa.sa_mask)
  *     sa.sa_sigaction = &signal_handler             # <<<<<<<<<<<<<<
@@ -35651,7 +35672,7 @@ static PyObject *__pyx_f_6llfuse_set_signal_handlers(void) {
  */
   __pyx_v_sa.sa_sigaction = (&__pyx_f_6llfuse_signal_handler);
 
-  /* "src/misc.pxi":717
+  /* "src/misc.pxi":720
  *     sigemptyset(&sa.sa_mask)
  *     sa.sa_sigaction = &signal_handler
  *     sa.sa_flags = SA_SIGINFO             # <<<<<<<<<<<<<<
@@ -35660,63 +35681,90 @@ static PyObject *__pyx_f_6llfuse_set_signal_handlers(void) {
  */
   __pyx_v_sa.sa_flags = SA_SIGINFO;
 
-  /* "src/misc.pxi":718
+  /* "src/misc.pxi":721
  *     sa.sa_sigaction = &signal_handler
  *     sa.sa_flags = SA_SIGINFO
  *     sigaction_p(signal.SIGTERM, &sa, &sa_backup[0])             # <<<<<<<<<<<<<<
  *     sigaction_p(signal.SIGINT, &sa, &sa_backup[1])
  *     sigaction_p(signal.SIGHUP, &sa, &sa_backup[2])
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGTERM, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[0]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 718, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGTERM, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[0]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 721, __pyx_L1_error)
 
-  /* "src/misc.pxi":719
+  /* "src/misc.pxi":722
  *     sa.sa_flags = SA_SIGINFO
  *     sigaction_p(signal.SIGTERM, &sa, &sa_backup[0])
  *     sigaction_p(signal.SIGINT, &sa, &sa_backup[1])             # <<<<<<<<<<<<<<
  *     sigaction_p(signal.SIGHUP, &sa, &sa_backup[2])
  * 
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGINT, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[1]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 719, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGINT, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[1]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 722, __pyx_L1_error)
 
-  /* "src/misc.pxi":720
+  /* "src/misc.pxi":723
  *     sigaction_p(signal.SIGTERM, &sa, &sa_backup[0])
  *     sigaction_p(signal.SIGINT, &sa, &sa_backup[1])
  *     sigaction_p(signal.SIGHUP, &sa, &sa_backup[2])             # <<<<<<<<<<<<<<
  * 
+ *     # This is used to interrupt system calls without
+ */
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGHUP, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[2]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 723, __pyx_L1_error)
+
+  /* "src/misc.pxi":727
+ *     # This is used to interrupt system calls without
+ *     # doing anything else.
+ *     sa.sa_sigaction = &do_nothing             # <<<<<<<<<<<<<<
+ *     sa.sa_flags = SA_SIGINFO
+ *     sigaction_p(signal.SIGUSR1, &sa, &sa_backup[3])
+ */
+  __pyx_v_sa.sa_sigaction = (&__pyx_f_6llfuse_do_nothing);
+
+  /* "src/misc.pxi":728
+ *     # doing anything else.
+ *     sa.sa_sigaction = &do_nothing
+ *     sa.sa_flags = SA_SIGINFO             # <<<<<<<<<<<<<<
+ *     sigaction_p(signal.SIGUSR1, &sa, &sa_backup[3])
+ * 
+ */
+  __pyx_v_sa.sa_flags = SA_SIGINFO;
+
+  /* "src/misc.pxi":729
+ *     sa.sa_sigaction = &do_nothing
+ *     sa.sa_flags = SA_SIGINFO
+ *     sigaction_p(signal.SIGUSR1, &sa, &sa_backup[3])             # <<<<<<<<<<<<<<
+ * 
  *     sa.sa_handler = signal.SIG_IGN
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGHUP, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[2]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 720, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGUSR1, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[3]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 729, __pyx_L1_error)
 
-  /* "src/misc.pxi":722
- *     sigaction_p(signal.SIGHUP, &sa, &sa_backup[2])
+  /* "src/misc.pxi":731
+ *     sigaction_p(signal.SIGUSR1, &sa, &sa_backup[3])
  * 
  *     sa.sa_handler = signal.SIG_IGN             # <<<<<<<<<<<<<<
  *     sa.sa_flags = 0
- *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[3])
+ *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[4])
  */
   __pyx_v_sa.sa_handler = SIG_IGN;
 
-  /* "src/misc.pxi":723
+  /* "src/misc.pxi":732
  * 
  *     sa.sa_handler = signal.SIG_IGN
  *     sa.sa_flags = 0             # <<<<<<<<<<<<<<
- *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[3])
+ *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[4])
  * 
  */
   __pyx_v_sa.sa_flags = 0;
 
-  /* "src/misc.pxi":724
+  /* "src/misc.pxi":733
  *     sa.sa_handler = signal.SIG_IGN
  *     sa.sa_flags = 0
- *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[3])             # <<<<<<<<<<<<<<
+ *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[4])             # <<<<<<<<<<<<<<
  * 
  * cdef restore_signal_handlers():
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGPIPE, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[3]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 724, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGPIPE, (&__pyx_v_sa), (&(__pyx_v_6llfuse_sa_backup[4]))); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 733, __pyx_L1_error)
 
-  /* "src/misc.pxi":712
+  /* "src/misc.pxi":715
  * 
- * cdef sigaction_t sa_backup[4]
+ * cdef sigaction_t sa_backup[5]
  * cdef set_signal_handlers():             # <<<<<<<<<<<<<<
  *     cdef sigaction_t sa
  * 
@@ -35734,8 +35782,8 @@ static PyObject *__pyx_f_6llfuse_set_signal_handlers(void) {
   return __pyx_r;
 }
 
-/* "src/misc.pxi":726
- *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[3])
+/* "src/misc.pxi":735
+ *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[4])
  * 
  * cdef restore_signal_handlers():             # <<<<<<<<<<<<<<
  *     sigaction_p(signal.SIGTERM, &sa_backup[0], NULL)
@@ -35748,44 +35796,53 @@ static PyObject *__pyx_f_6llfuse_restore_signal_handlers(void) {
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("restore_signal_handlers", 0);
 
-  /* "src/misc.pxi":727
+  /* "src/misc.pxi":736
  * 
  * cdef restore_signal_handlers():
  *     sigaction_p(signal.SIGTERM, &sa_backup[0], NULL)             # <<<<<<<<<<<<<<
  *     sigaction_p(signal.SIGINT, &sa_backup[1], NULL)
  *     sigaction_p(signal.SIGHUP, &sa_backup[2], NULL)
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGTERM, (&(__pyx_v_6llfuse_sa_backup[0])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 727, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGTERM, (&(__pyx_v_6llfuse_sa_backup[0])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 736, __pyx_L1_error)
 
-  /* "src/misc.pxi":728
+  /* "src/misc.pxi":737
  * cdef restore_signal_handlers():
  *     sigaction_p(signal.SIGTERM, &sa_backup[0], NULL)
  *     sigaction_p(signal.SIGINT, &sa_backup[1], NULL)             # <<<<<<<<<<<<<<
  *     sigaction_p(signal.SIGHUP, &sa_backup[2], NULL)
- *     sigaction_p(signal.SIGPIPE, &sa_backup[3], NULL)
+ *     sigaction_p(signal.SIGUSR1, &sa_backup[3], NULL)
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGINT, (&(__pyx_v_6llfuse_sa_backup[1])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 728, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGINT, (&(__pyx_v_6llfuse_sa_backup[1])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 737, __pyx_L1_error)
 
-  /* "src/misc.pxi":729
+  /* "src/misc.pxi":738
  *     sigaction_p(signal.SIGTERM, &sa_backup[0], NULL)
  *     sigaction_p(signal.SIGINT, &sa_backup[1], NULL)
  *     sigaction_p(signal.SIGHUP, &sa_backup[2], NULL)             # <<<<<<<<<<<<<<
- *     sigaction_p(signal.SIGPIPE, &sa_backup[3], NULL)
- * 
+ *     sigaction_p(signal.SIGUSR1, &sa_backup[3], NULL)
+ *     sigaction_p(signal.SIGPIPE, &sa_backup[4], NULL)
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGHUP, (&(__pyx_v_6llfuse_sa_backup[2])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 729, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGHUP, (&(__pyx_v_6llfuse_sa_backup[2])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 738, __pyx_L1_error)
 
-  /* "src/misc.pxi":730
+  /* "src/misc.pxi":739
  *     sigaction_p(signal.SIGINT, &sa_backup[1], NULL)
  *     sigaction_p(signal.SIGHUP, &sa_backup[2], NULL)
- *     sigaction_p(signal.SIGPIPE, &sa_backup[3], NULL)             # <<<<<<<<<<<<<<
+ *     sigaction_p(signal.SIGUSR1, &sa_backup[3], NULL)             # <<<<<<<<<<<<<<
+ *     sigaction_p(signal.SIGPIPE, &sa_backup[4], NULL)
+ * 
+ */
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGUSR1, (&(__pyx_v_6llfuse_sa_backup[3])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 739, __pyx_L1_error)
+
+  /* "src/misc.pxi":740
+ *     sigaction_p(signal.SIGHUP, &sa_backup[2], NULL)
+ *     sigaction_p(signal.SIGUSR1, &sa_backup[3], NULL)
+ *     sigaction_p(signal.SIGPIPE, &sa_backup[4], NULL)             # <<<<<<<<<<<<<<
  * 
  * cdef void* calloc_or_raise(size_t nmemb, size_t size) except NULL:
  */
-  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGPIPE, (&(__pyx_v_6llfuse_sa_backup[3])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 730, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_sigaction_p(SIGPIPE, (&(__pyx_v_6llfuse_sa_backup[4])), NULL); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(2, 740, __pyx_L1_error)
 
-  /* "src/misc.pxi":726
- *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[3])
+  /* "src/misc.pxi":735
+ *     sigaction_p(signal.SIGPIPE, &sa, &sa_backup[4])
  * 
  * cdef restore_signal_handlers():             # <<<<<<<<<<<<<<
  *     sigaction_p(signal.SIGTERM, &sa_backup[0], NULL)
@@ -35804,8 +35861,8 @@ static PyObject *__pyx_f_6llfuse_restore_signal_handlers(void) {
   return __pyx_r;
 }
 
-/* "src/misc.pxi":732
- *     sigaction_p(signal.SIGPIPE, &sa_backup[3], NULL)
+/* "src/misc.pxi":742
+ *     sigaction_p(signal.SIGPIPE, &sa_backup[4], NULL)
  * 
  * cdef void* calloc_or_raise(size_t nmemb, size_t size) except NULL:             # <<<<<<<<<<<<<<
  *     cdef void* mem
@@ -35819,7 +35876,7 @@ static void *__pyx_f_6llfuse_calloc_or_raise(size_t __pyx_v_nmemb, size_t __pyx_
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("calloc_or_raise", 0);
 
-  /* "src/misc.pxi":734
+  /* "src/misc.pxi":744
  * cdef void* calloc_or_raise(size_t nmemb, size_t size) except NULL:
  *     cdef void* mem
  *     mem = stdlib.calloc(nmemb, size)             # <<<<<<<<<<<<<<
@@ -35828,7 +35885,7 @@ static void *__pyx_f_6llfuse_calloc_or_raise(size_t __pyx_v_nmemb, size_t __pyx_
  */
   __pyx_v_mem = calloc(__pyx_v_nmemb, __pyx_v_size);
 
-  /* "src/misc.pxi":735
+  /* "src/misc.pxi":745
  *     cdef void* mem
  *     mem = stdlib.calloc(nmemb, size)
  *     if mem is NULL:             # <<<<<<<<<<<<<<
@@ -35838,15 +35895,15 @@ static void *__pyx_f_6llfuse_calloc_or_raise(size_t __pyx_v_nmemb, size_t __pyx_
   __pyx_t_1 = ((__pyx_v_mem == NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "src/misc.pxi":736
+    /* "src/misc.pxi":746
  *     mem = stdlib.calloc(nmemb, size)
  *     if mem is NULL:
  *         raise MemoryError()             # <<<<<<<<<<<<<<
  *     return mem
  */
-    PyErr_NoMemory(); __PYX_ERR(2, 736, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(2, 746, __pyx_L1_error)
 
-    /* "src/misc.pxi":735
+    /* "src/misc.pxi":745
  *     cdef void* mem
  *     mem = stdlib.calloc(nmemb, size)
  *     if mem is NULL:             # <<<<<<<<<<<<<<
@@ -35855,7 +35912,7 @@ static void *__pyx_f_6llfuse_calloc_or_raise(size_t __pyx_v_nmemb, size_t __pyx_
  */
   }
 
-  /* "src/misc.pxi":737
+  /* "src/misc.pxi":747
  *     if mem is NULL:
  *         raise MemoryError()
  *     return mem             # <<<<<<<<<<<<<<
@@ -35863,8 +35920,8 @@ static void *__pyx_f_6llfuse_calloc_or_raise(size_t __pyx_v_nmemb, size_t __pyx_
   __pyx_r = __pyx_v_mem;
   goto __pyx_L0;
 
-  /* "src/misc.pxi":732
- *     sigaction_p(signal.SIGPIPE, &sa_backup[3], NULL)
+  /* "src/misc.pxi":742
+ *     sigaction_p(signal.SIGPIPE, &sa_backup[4], NULL)
  * 
  * cdef void* calloc_or_raise(size_t nmemb, size_t size) except NULL:             # <<<<<<<<<<<<<<
  *     cdef void* mem
@@ -37609,9 +37666,9 @@ static PyObject *__pyx_pf_6llfuse_6getxattr(CYTHON_UNUSED PyObject *__pyx_self, 
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":218
- * default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',
- *                              'no_splice_read', 'splice_write', 'splice_move'))
+/* "src/fuse_api.pxi":223
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * 
  * def init(ops, mountpoint, options=default_options):             # <<<<<<<<<<<<<<
  *     '''Initialize and mount FUSE file system
  * 
@@ -37650,7 +37707,7 @@ static PyObject *__pyx_pw_6llfuse_9init(PyObject *__pyx_self, PyObject *__pyx_ar
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mountpoint)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("init", 0, 2, 3, 1); __PYX_ERR(3, 218, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("init", 0, 2, 3, 1); __PYX_ERR(3, 223, __pyx_L3_error)
         }
         case  2:
         if (kw_args > 0) {
@@ -37659,7 +37716,7 @@ static PyObject *__pyx_pw_6llfuse_9init(PyObject *__pyx_self, PyObject *__pyx_ar
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "init") < 0)) __PYX_ERR(3, 218, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "init") < 0)) __PYX_ERR(3, 223, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -37676,7 +37733,7 @@ static PyObject *__pyx_pw_6llfuse_9init(PyObject *__pyx_self, PyObject *__pyx_ar
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("init", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 218, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("init", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 223, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("llfuse.init", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -37702,51 +37759,51 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   char *__pyx_t_7;
   __Pyx_RefNannySetupContext("init", 0);
 
-  /* "src/fuse_api.pxi":240
+  /* "src/fuse_api.pxi":245
  *     '''
  * 
  *     log.debug('Initializing llfuse')             # <<<<<<<<<<<<<<
  *     cdef fuse_args f_args
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 240, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 240, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__66, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 240, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__66, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":243
+  /* "src/fuse_api.pxi":248
  *     cdef fuse_args f_args
  * 
  *     if not isinstance(mountpoint, str_t):             # <<<<<<<<<<<<<<
  *         raise TypeError('*mountpoint_* argument must be of type str')
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_str_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 243, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_str_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 248, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyObject_IsInstance(__pyx_v_mountpoint, __pyx_t_1); if (unlikely(__pyx_t_3 == -1)) __PYX_ERR(3, 243, __pyx_L1_error)
+  __pyx_t_3 = PyObject_IsInstance(__pyx_v_mountpoint, __pyx_t_1); if (unlikely(__pyx_t_3 == -1)) __PYX_ERR(3, 248, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_4 = ((!(__pyx_t_3 != 0)) != 0);
   if (__pyx_t_4) {
 
-    /* "src/fuse_api.pxi":244
+    /* "src/fuse_api.pxi":249
  * 
  *     if not isinstance(mountpoint, str_t):
  *         raise TypeError('*mountpoint_* argument must be of type str')             # <<<<<<<<<<<<<<
  * 
  *     global operations
  */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__67, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 244, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__67, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 249, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(3, 244, __pyx_L1_error)
+    __PYX_ERR(3, 249, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":243
+    /* "src/fuse_api.pxi":248
  *     cdef fuse_args f_args
  * 
  *     if not isinstance(mountpoint, str_t):             # <<<<<<<<<<<<<<
@@ -37755,19 +37812,19 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   }
 
-  /* "src/fuse_api.pxi":252
+  /* "src/fuse_api.pxi":257
  *     global channel
  * 
  *     mountpoint_b = str2bytes(os.path.abspath(mountpoint))             # <<<<<<<<<<<<<<
  *     operations = ops
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 252, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_path); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 252, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_path); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_abspath); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 252, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_abspath); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_t_5 = NULL;
@@ -37781,13 +37838,13 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
     }
   }
   if (!__pyx_t_5) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_mountpoint); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 252, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_mountpoint); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 257, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_v_mountpoint};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 252, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 257, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -37795,25 +37852,25 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_v_mountpoint};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 252, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 257, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(3, 252, __pyx_L1_error)
+      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(3, 257, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
       __Pyx_INCREF(__pyx_v_mountpoint);
       __Pyx_GIVEREF(__pyx_v_mountpoint);
       PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_v_mountpoint);
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 252, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 257, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __pyx_f_6llfuse_str2bytes(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 252, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_6llfuse_str2bytes(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 257, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_XGOTREF(__pyx_v_6llfuse_mountpoint_b);
@@ -37821,7 +37878,7 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":253
+  /* "src/fuse_api.pxi":258
  * 
  *     mountpoint_b = str2bytes(os.path.abspath(mountpoint))
  *     operations = ops             # <<<<<<<<<<<<<<
@@ -37833,45 +37890,45 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __Pyx_DECREF_SET(__pyx_v_6llfuse_operations, __pyx_v_ops);
   __Pyx_GIVEREF(__pyx_v_ops);
 
-  /* "src/fuse_api.pxi":255
+  /* "src/fuse_api.pxi":260
  *     operations = ops
  * 
  *     make_fuse_args(options, &f_args)             # <<<<<<<<<<<<<<
  *     log.debug('Calling fuse_mount')
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  */
-  __pyx_t_2 = __pyx_f_6llfuse_make_fuse_args(__pyx_v_options, (&__pyx_v_f_args)); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 255, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_6llfuse_make_fuse_args(__pyx_v_options, (&__pyx_v_f_args)); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":256
+  /* "src/fuse_api.pxi":261
  * 
  *     make_fuse_args(options, &f_args)
  *     log.debug('Calling fuse_mount')             # <<<<<<<<<<<<<<
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  *     if not channel:
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 256, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_debug); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 256, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_debug); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__68, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 256, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__68, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":257
+  /* "src/fuse_api.pxi":262
  *     make_fuse_args(options, &f_args)
  *     log.debug('Calling fuse_mount')
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)             # <<<<<<<<<<<<<<
  *     if not channel:
  *         raise RuntimeError('fuse_mount failed')
  */
-  __pyx_t_7 = __Pyx_PyObject_AsString(__pyx_v_6llfuse_mountpoint_b); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(3, 257, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_AsString(__pyx_v_6llfuse_mountpoint_b); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(3, 262, __pyx_L1_error)
   __pyx_v_6llfuse_channel = fuse_mount(((char *)__pyx_t_7), (&__pyx_v_f_args));
 
-  /* "src/fuse_api.pxi":258
+  /* "src/fuse_api.pxi":263
  *     log.debug('Calling fuse_mount')
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  *     if not channel:             # <<<<<<<<<<<<<<
@@ -37881,20 +37938,20 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __pyx_t_4 = ((!(__pyx_v_6llfuse_channel != 0)) != 0);
   if (__pyx_t_4) {
 
-    /* "src/fuse_api.pxi":259
+    /* "src/fuse_api.pxi":264
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  *     if not channel:
  *         raise RuntimeError('fuse_mount failed')             # <<<<<<<<<<<<<<
  * 
  *     log.debug('Calling fuse_lowlevel_new')
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__69, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 259, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__69, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 264, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(3, 259, __pyx_L1_error)
+    __PYX_ERR(3, 264, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":258
+    /* "src/fuse_api.pxi":263
  *     log.debug('Calling fuse_mount')
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  *     if not channel:             # <<<<<<<<<<<<<<
@@ -37903,24 +37960,24 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   }
 
-  /* "src/fuse_api.pxi":261
+  /* "src/fuse_api.pxi":266
  *         raise RuntimeError('fuse_mount failed')
  * 
  *     log.debug('Calling fuse_lowlevel_new')             # <<<<<<<<<<<<<<
  *     init_fuse_ops()
  *     session = fuse_lowlevel_new(&f_args, &fuse_ops, sizeof(fuse_ops), NULL)
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 261, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 266, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_debug); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 261, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_debug); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 266, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__70, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 261, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__70, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 266, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":262
+  /* "src/fuse_api.pxi":267
  * 
  *     log.debug('Calling fuse_lowlevel_new')
  *     init_fuse_ops()             # <<<<<<<<<<<<<<
@@ -37929,7 +37986,7 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   __pyx_f_6llfuse_init_fuse_ops();
 
-  /* "src/fuse_api.pxi":263
+  /* "src/fuse_api.pxi":268
  *     log.debug('Calling fuse_lowlevel_new')
  *     init_fuse_ops()
  *     session = fuse_lowlevel_new(&f_args, &fuse_ops, sizeof(fuse_ops), NULL)             # <<<<<<<<<<<<<<
@@ -37938,7 +37995,7 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   __pyx_v_6llfuse_session = fuse_lowlevel_new((&__pyx_v_f_args), (&__pyx_v_6llfuse_fuse_ops), (sizeof(__pyx_v_6llfuse_fuse_ops)), NULL);
 
-  /* "src/fuse_api.pxi":264
+  /* "src/fuse_api.pxi":269
  *     init_fuse_ops()
  *     session = fuse_lowlevel_new(&f_args, &fuse_ops, sizeof(fuse_ops), NULL)
  *     if not session:             # <<<<<<<<<<<<<<
@@ -37948,30 +38005,30 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __pyx_t_4 = ((!(__pyx_v_6llfuse_session != 0)) != 0);
   if (__pyx_t_4) {
 
-    /* "src/fuse_api.pxi":265
+    /* "src/fuse_api.pxi":270
  *     session = fuse_lowlevel_new(&f_args, &fuse_ops, sizeof(fuse_ops), NULL)
  *     if not session:
  *         fuse_unmount(<char*>mountpoint_b, channel)             # <<<<<<<<<<<<<<
  *         raise RuntimeError("fuse_lowlevel_new() failed")
  * 
  */
-    __pyx_t_7 = __Pyx_PyObject_AsString(__pyx_v_6llfuse_mountpoint_b); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(3, 265, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_AsString(__pyx_v_6llfuse_mountpoint_b); if (unlikely((!__pyx_t_7) && PyErr_Occurred())) __PYX_ERR(3, 270, __pyx_L1_error)
     fuse_unmount(((char *)__pyx_t_7), __pyx_v_6llfuse_channel);
 
-    /* "src/fuse_api.pxi":266
+    /* "src/fuse_api.pxi":271
  *     if not session:
  *         fuse_unmount(<char*>mountpoint_b, channel)
  *         raise RuntimeError("fuse_lowlevel_new() failed")             # <<<<<<<<<<<<<<
  * 
  *     log.debug('Calling fuse_session_add_chan')
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__71, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 266, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__71, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 271, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(3, 266, __pyx_L1_error)
+    __PYX_ERR(3, 271, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":264
+    /* "src/fuse_api.pxi":269
  *     init_fuse_ops()
  *     session = fuse_lowlevel_new(&f_args, &fuse_ops, sizeof(fuse_ops), NULL)
  *     if not session:             # <<<<<<<<<<<<<<
@@ -37980,24 +38037,24 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   }
 
-  /* "src/fuse_api.pxi":268
+  /* "src/fuse_api.pxi":273
  *         raise RuntimeError("fuse_lowlevel_new() failed")
  * 
  *     log.debug('Calling fuse_session_add_chan')             # <<<<<<<<<<<<<<
  *     fuse_session_add_chan(session, channel)
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 268, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_debug); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 268, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_debug); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__72, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 268, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__72, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":269
+  /* "src/fuse_api.pxi":274
  * 
  *     log.debug('Calling fuse_session_add_chan')
  *     fuse_session_add_chan(session, channel)             # <<<<<<<<<<<<<<
@@ -38006,7 +38063,7 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   fuse_session_add_chan(__pyx_v_6llfuse_session, __pyx_v_6llfuse_channel);
 
-  /* "src/fuse_api.pxi":271
+  /* "src/fuse_api.pxi":276
  *     fuse_session_add_chan(session, channel)
  * 
  *     pthread_mutex_init(&exc_info_mutex, NULL)             # <<<<<<<<<<<<<<
@@ -38015,9 +38072,9 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
   pthread_mutex_init((&__pyx_v_6llfuse_exc_info_mutex), NULL);
 
-  /* "src/fuse_api.pxi":218
- * default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',
- *                              'no_splice_read', 'splice_write', 'splice_move'))
+  /* "src/fuse_api.pxi":223
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * 
  * def init(ops, mountpoint, options=default_options):             # <<<<<<<<<<<<<<
  *     '''Initialize and mount FUSE file system
  * 
@@ -38039,7 +38096,7 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":273
+/* "src/fuse_api.pxi":278
  *     pthread_mutex_init(&exc_info_mutex, NULL)
  * 
  * def main(workers=None):             # <<<<<<<<<<<<<<
@@ -38049,7 +38106,7 @@ static PyObject *__pyx_pf_6llfuse_8init(CYTHON_UNUSED PyObject *__pyx_self, PyOb
 
 /* Python wrapper */
 static PyObject *__pyx_pw_6llfuse_11main(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_6llfuse_10main[] = "main(workers=None)\nRun FUSE main loop\n\n    *workers* specifies the number of threads that will process requests\n    concurrently. If *workers* is `None`, llfuse will pick a reasonable\n    number bigger than one.  If *workers* is ``1`` all requests will be\n    processed by the thread calling `main`.\n\n    This function will also start additional threads for internal purposes (even\n    if *workers* is ``1``). These (and all worker threads) are guaranteed to\n    have terminated when `main` returns.\n\n    While this function is running, special signal handlers will be installed\n    for the *SIGTERM*, *SIGINT* (Ctrl-C), *SIGHUP* and *SIGPIPE*\n    signals. *SIGPIPE* will be ignored, while the other three signals will cause\n    request processing to stop and the function to return.  *SIGINT* (Ctrl-C)\n    will thus *not* result in a `KeyboardInterrupt` exception while this\n    function is runnnig.\n\n    When the function returns because the file system has received an unmount\n    request it will return `None`. If it returns because it has received a\n    signal, it will return the signal number.\n    ";
+static char __pyx_doc_6llfuse_10main[] = "main(workers=None)\nRun FUSE main loop\n\n    *workers* specifies the number of threads that will process requests\n    concurrently. If *workers* is `None`, llfuse will pick a reasonable\n    number bigger than one.  If *workers* is ``1`` all requests will be\n    processed by the thread calling `main`.\n\n    This function will also start additional threads for internal purposes (even\n    if *workers* is ``1``). These (and all worker threads) are guaranteed to\n    have terminated when `main` returns.\n\n    While this function is running, special signal handlers will be installed\n    for the *SIGTERM*, *SIGINT* (Ctrl-C), *SIGHUP*, *SIGUSR1* and *SIGPIPE*\n    signals. *SIGPIPE* will be ignored, while the other three signals will cause\n    request processing to stop and the function to return.  *SIGINT* (Ctrl-C)\n    will thus *not* result in a `KeyboardInterrupt` exception while this\n    function is runnning.\n\n    When the function returns because the file system has received an unmount\n    request it will return `None`. If it returns because it has received a\n    signal, it will return the signal number.\n    ";
 static PyMethodDef __pyx_mdef_6llfuse_11main = {"main", (PyCFunction)__pyx_pw_6llfuse_11main, METH_VARARGS|METH_KEYWORDS, __pyx_doc_6llfuse_10main};
 static PyObject *__pyx_pw_6llfuse_11main(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_workers = 0;
@@ -38077,7 +38134,7 @@ static PyObject *__pyx_pw_6llfuse_11main(PyObject *__pyx_self, PyObject *__pyx_a
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "main") < 0)) __PYX_ERR(3, 273, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "main") < 0)) __PYX_ERR(3, 278, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -38090,7 +38147,7 @@ static PyObject *__pyx_pw_6llfuse_11main(PyObject *__pyx_self, PyObject *__pyx_a
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("main", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 273, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("main", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 278, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("llfuse.main", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -38103,7 +38160,7 @@ static PyObject *__pyx_pw_6llfuse_11main(PyObject *__pyx_self, PyObject *__pyx_a
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":315
+/* "src/fuse_api.pxi":320
  *     with contextlib.ExitStack() as on_exit:
  *         set_signal_handlers()
  *         on_exit.callback(lambda: restore_signal_handlers())             # <<<<<<<<<<<<<<
@@ -38131,7 +38188,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self)
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("lambda", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_6llfuse_restore_signal_handlers(); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 315, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_restore_signal_handlers(); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -38148,7 +38205,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self)
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":323
+/* "src/fuse_api.pxi":328
  *         on_exit.callback(_notify_queue.put, None, block=True, timeout=5)
  * 
  *         on_exit.callback(lambda: fuse_session_reset(session))             # <<<<<<<<<<<<<<
@@ -38176,7 +38233,7 @@ static PyObject *__pyx_lambda_funcdef_lambda1(CYTHON_UNUSED PyObject *__pyx_self
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("lambda1", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(fuse_session_reset(__pyx_v_6llfuse_session)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 323, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(fuse_session_reset(__pyx_v_6llfuse_session)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 328, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -38193,7 +38250,7 @@ static PyObject *__pyx_lambda_funcdef_lambda1(CYTHON_UNUSED PyObject *__pyx_self
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":273
+/* "src/fuse_api.pxi":278
  *     pthread_mutex_init(&exc_info_mutex, NULL)
  * 
  * def main(workers=None):             # <<<<<<<<<<<<<<
@@ -38222,7 +38279,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
   __Pyx_RefNannySetupContext("main", 0);
   __Pyx_INCREF(__pyx_v_workers);
 
-  /* "src/fuse_api.pxi":300
+  /* "src/fuse_api.pxi":305
  *     global exit_reason
  * 
  *     if session == NULL:             # <<<<<<<<<<<<<<
@@ -38232,20 +38289,20 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
   __pyx_t_1 = ((__pyx_v_6llfuse_session == NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "src/fuse_api.pxi":301
+    /* "src/fuse_api.pxi":306
  * 
  *     if session == NULL:
  *         raise RuntimeError('Need to call init() before main()')             # <<<<<<<<<<<<<<
  * 
  *     if workers == 0:
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__73, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 301, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_tuple__73, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 306, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(3, 301, __pyx_L1_error)
+    __PYX_ERR(3, 306, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":300
+    /* "src/fuse_api.pxi":305
  *     global exit_reason
  * 
  *     if session == NULL:             # <<<<<<<<<<<<<<
@@ -38254,33 +38311,33 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   }
 
-  /* "src/fuse_api.pxi":303
+  /* "src/fuse_api.pxi":308
  *         raise RuntimeError('Need to call init() before main()')
  * 
  *     if workers == 0:             # <<<<<<<<<<<<<<
  *         raise ValueError('No workers is not a good idea')
  * 
  */
-  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_workers, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 303, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_workers, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(3, 303, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(3, 308, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_1) {
 
-    /* "src/fuse_api.pxi":304
+    /* "src/fuse_api.pxi":309
  * 
  *     if workers == 0:
  *         raise ValueError('No workers is not a good idea')             # <<<<<<<<<<<<<<
  * 
  *     if workers is None:
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__74, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 304, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__74, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 309, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(3, 304, __pyx_L1_error)
+    __PYX_ERR(3, 309, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":303
+    /* "src/fuse_api.pxi":308
  *         raise RuntimeError('Need to call init() before main()')
  * 
  *     if workers == 0:             # <<<<<<<<<<<<<<
@@ -38289,7 +38346,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   }
 
-  /* "src/fuse_api.pxi":306
+  /* "src/fuse_api.pxi":311
  *         raise ValueError('No workers is not a good idea')
  * 
  *     if workers is None:             # <<<<<<<<<<<<<<
@@ -38300,7 +38357,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
   __pyx_t_3 = (__pyx_t_1 != 0);
   if (__pyx_t_3) {
 
-    /* "src/fuse_api.pxi":308
+    /* "src/fuse_api.pxi":313
  *     if workers is None:
  *         # We may add some smartness here later.
  *         workers = 30             # <<<<<<<<<<<<<<
@@ -38310,7 +38367,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
     __Pyx_INCREF(__pyx_int_30);
     __Pyx_DECREF_SET(__pyx_v_workers, __pyx_int_30);
 
-    /* "src/fuse_api.pxi":306
+    /* "src/fuse_api.pxi":311
  *         raise ValueError('No workers is not a good idea')
  * 
  *     if workers is None:             # <<<<<<<<<<<<<<
@@ -38319,7 +38376,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   }
 
-  /* "src/fuse_api.pxi":312
+  /* "src/fuse_api.pxi":317
  *     # SIGKILL cannot be caught, so we can use it as a placeholder
  *     # for "regular exit".
  *     exit_reason = signal.SIGKILL             # <<<<<<<<<<<<<<
@@ -38328,7 +38385,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   __pyx_v_6llfuse_exit_reason = SIGKILL;
 
-  /* "src/fuse_api.pxi":313
+  /* "src/fuse_api.pxi":318
  *     # for "regular exit".
  *     exit_reason = signal.SIGKILL
  *     with contextlib.ExitStack() as on_exit:             # <<<<<<<<<<<<<<
@@ -38336,9 +38393,9 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  *         on_exit.callback(lambda: restore_signal_handlers())
  */
   /*with:*/ {
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_contextlib); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 313, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_contextlib); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 318, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ExitStack); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 313, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_ExitStack); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 318, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -38352,16 +38409,16 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
       }
     }
     if (__pyx_t_4) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 313, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 318, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 313, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 318, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_2, __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(3, 313, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_LookupSpecial(__pyx_t_2, __pyx_n_s_exit); if (unlikely(!__pyx_t_6)) __PYX_ERR(3, 318, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_2, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 313, __pyx_L6_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_2, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 318, __pyx_L6_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_7 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -38374,10 +38431,10 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
       }
     }
     if (__pyx_t_7) {
-      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 313, __pyx_L6_error)
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 318, __pyx_L6_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     } else {
-      __pyx_t_5 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 313, __pyx_L6_error)
+      __pyx_t_5 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 318, __pyx_L6_error)
     }
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -38396,27 +38453,27 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
           __pyx_v_on_exit = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "src/fuse_api.pxi":314
+          /* "src/fuse_api.pxi":319
  *     exit_reason = signal.SIGKILL
  *     with contextlib.ExitStack() as on_exit:
  *         set_signal_handlers()             # <<<<<<<<<<<<<<
  *         on_exit.callback(lambda: restore_signal_handlers())
  * 
  */
-          __pyx_t_4 = __pyx_f_6llfuse_set_signal_handlers(); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 314, __pyx_L10_error)
+          __pyx_t_4 = __pyx_f_6llfuse_set_signal_handlers(); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 319, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-          /* "src/fuse_api.pxi":315
+          /* "src/fuse_api.pxi":320
  *     with contextlib.ExitStack() as on_exit:
  *         set_signal_handlers()
  *         on_exit.callback(lambda: restore_signal_handlers())             # <<<<<<<<<<<<<<
  * 
  *         # Start notification handling thread
  */
-          __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_on_exit, __pyx_n_s_callback); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 315, __pyx_L10_error)
+          __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_on_exit, __pyx_n_s_callback); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 320, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_5 = __Pyx_CyFunction_NewEx(&__pyx_mdef_6llfuse_4main_lambda, 0, __pyx_n_s_main_locals_lambda, NULL, __pyx_n_s_llfuse, __pyx_d, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 315, __pyx_L10_error)
+          __pyx_t_5 = __Pyx_CyFunction_NewEx(&__pyx_mdef_6llfuse_4main_lambda, 0, __pyx_n_s_main_locals_lambda, NULL, __pyx_n_s_llfuse, __pyx_d, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 320, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_5);
           __pyx_t_7 = NULL;
           if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -38429,14 +38486,14 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             }
           }
           if (!__pyx_t_7) {
-            __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 315, __pyx_L10_error)
+            __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 320, __pyx_L10_error)
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             __Pyx_GOTREF(__pyx_t_4);
           } else {
             #if CYTHON_FAST_PYCALL
             if (PyFunction_Check(__pyx_t_2)) {
               PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_5};
-              __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 315, __pyx_L10_error)
+              __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 320, __pyx_L10_error)
               __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -38445,20 +38502,20 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             #if CYTHON_FAST_PYCCALL
             if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
               PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_5};
-              __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 315, __pyx_L10_error)
+              __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 320, __pyx_L10_error)
               __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             } else
             #endif
             {
-              __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 315, __pyx_L10_error)
+              __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 320, __pyx_L10_error)
               __Pyx_GOTREF(__pyx_t_11);
               __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_7); __pyx_t_7 = NULL;
               __Pyx_GIVEREF(__pyx_t_5);
               PyTuple_SET_ITEM(__pyx_t_11, 0+1, __pyx_t_5);
               __pyx_t_5 = 0;
-              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_11, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 315, __pyx_L10_error)
+              __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_11, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 320, __pyx_L10_error)
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
@@ -38466,48 +38523,48 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-          /* "src/fuse_api.pxi":318
+          /* "src/fuse_api.pxi":323
  * 
  *         # Start notification handling thread
  *         t = threading.Thread(target=_notify_loop)             # <<<<<<<<<<<<<<
  *         t.daemon = True
  *         t.start()
  */
-          __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_threading); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 318, __pyx_L10_error)
+          __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_threading); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 323, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_Thread); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 318, __pyx_L10_error)
+          __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_Thread); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 323, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-          __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 318, __pyx_L10_error)
+          __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 323, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_11 = __Pyx_GetModuleGlobalName(__pyx_n_s_notify_loop); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 318, __pyx_L10_error)
+          __pyx_t_11 = __Pyx_GetModuleGlobalName(__pyx_n_s_notify_loop); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 323, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_11);
-          if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_target, __pyx_t_11) < 0) __PYX_ERR(3, 318, __pyx_L10_error)
+          if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_target, __pyx_t_11) < 0) __PYX_ERR(3, 323, __pyx_L10_error)
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
-          __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_empty_tuple, __pyx_t_4); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 318, __pyx_L10_error)
+          __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_empty_tuple, __pyx_t_4); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 323, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_11);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __pyx_v_t = __pyx_t_11;
           __pyx_t_11 = 0;
 
-          /* "src/fuse_api.pxi":319
+          /* "src/fuse_api.pxi":324
  *         # Start notification handling thread
  *         t = threading.Thread(target=_notify_loop)
  *         t.daemon = True             # <<<<<<<<<<<<<<
  *         t.start()
  *         on_exit.callback(_notify_queue.put, None, block=True, timeout=5)
  */
-          if (__Pyx_PyObject_SetAttrStr(__pyx_v_t, __pyx_n_s_daemon, Py_True) < 0) __PYX_ERR(3, 319, __pyx_L10_error)
+          if (__Pyx_PyObject_SetAttrStr(__pyx_v_t, __pyx_n_s_daemon, Py_True) < 0) __PYX_ERR(3, 324, __pyx_L10_error)
 
-          /* "src/fuse_api.pxi":320
+          /* "src/fuse_api.pxi":325
  *         t = threading.Thread(target=_notify_loop)
  *         t.daemon = True
  *         t.start()             # <<<<<<<<<<<<<<
  *         on_exit.callback(_notify_queue.put, None, block=True, timeout=5)
  * 
  */
-          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_t, __pyx_n_s_start); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 320, __pyx_L10_error)
+          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_t, __pyx_n_s_start); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 325, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
           __pyx_t_2 = NULL;
           if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -38520,27 +38577,27 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             }
           }
           if (__pyx_t_2) {
-            __pyx_t_11 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 320, __pyx_L10_error)
+            __pyx_t_11 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 325, __pyx_L10_error)
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           } else {
-            __pyx_t_11 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 320, __pyx_L10_error)
+            __pyx_t_11 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 325, __pyx_L10_error)
           }
           __Pyx_GOTREF(__pyx_t_11);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-          /* "src/fuse_api.pxi":321
+          /* "src/fuse_api.pxi":326
  *         t.daemon = True
  *         t.start()
  *         on_exit.callback(_notify_queue.put, None, block=True, timeout=5)             # <<<<<<<<<<<<<<
  * 
  *         on_exit.callback(lambda: fuse_session_reset(session))
  */
-          __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_v_on_exit, __pyx_n_s_callback); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 321, __pyx_L10_error)
+          __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_v_on_exit, __pyx_n_s_callback); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 326, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_11);
-          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse__notify_queue, __pyx_n_s_put); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 321, __pyx_L10_error)
+          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse__notify_queue, __pyx_n_s_put); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 326, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 321, __pyx_L10_error)
+          __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 326, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_GIVEREF(__pyx_t_4);
           PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
@@ -38548,27 +38605,27 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
           __Pyx_GIVEREF(Py_None);
           PyTuple_SET_ITEM(__pyx_t_2, 1, Py_None);
           __pyx_t_4 = 0;
-          __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 321, __pyx_L10_error)
+          __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 326, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
-          if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_block, Py_True) < 0) __PYX_ERR(3, 321, __pyx_L10_error)
-          if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_timeout, __pyx_int_5) < 0) __PYX_ERR(3, 321, __pyx_L10_error)
-          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_11, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 321, __pyx_L10_error)
+          if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_block, Py_True) < 0) __PYX_ERR(3, 326, __pyx_L10_error)
+          if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_timeout, __pyx_int_5) < 0) __PYX_ERR(3, 326, __pyx_L10_error)
+          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_11, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 326, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-          /* "src/fuse_api.pxi":323
+          /* "src/fuse_api.pxi":328
  *         on_exit.callback(_notify_queue.put, None, block=True, timeout=5)
  * 
  *         on_exit.callback(lambda: fuse_session_reset(session))             # <<<<<<<<<<<<<<
  *         exc_info = None
  *         log.debug('Calling fuse_session_loop')
  */
-          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_on_exit, __pyx_n_s_callback); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 323, __pyx_L10_error)
+          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_on_exit, __pyx_n_s_callback); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 328, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_2 = __Pyx_CyFunction_NewEx(&__pyx_mdef_6llfuse_4main_1lambda1, 0, __pyx_n_s_main_locals_lambda, NULL, __pyx_n_s_llfuse, __pyx_d, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 323, __pyx_L10_error)
+          __pyx_t_2 = __Pyx_CyFunction_NewEx(&__pyx_mdef_6llfuse_4main_1lambda1, 0, __pyx_n_s_main_locals_lambda, NULL, __pyx_n_s_llfuse, __pyx_d, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 328, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_2);
           __pyx_t_11 = NULL;
           if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -38581,14 +38638,14 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             }
           }
           if (!__pyx_t_11) {
-            __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 323, __pyx_L10_error)
+            __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 328, __pyx_L10_error)
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_GOTREF(__pyx_t_5);
           } else {
             #if CYTHON_FAST_PYCALL
             if (PyFunction_Check(__pyx_t_4)) {
               PyObject *__pyx_temp[2] = {__pyx_t_11, __pyx_t_2};
-              __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 323, __pyx_L10_error)
+              __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 328, __pyx_L10_error)
               __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
               __Pyx_GOTREF(__pyx_t_5);
               __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -38597,20 +38654,20 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             #if CYTHON_FAST_PYCCALL
             if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
               PyObject *__pyx_temp[2] = {__pyx_t_11, __pyx_t_2};
-              __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 323, __pyx_L10_error)
+              __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 328, __pyx_L10_error)
               __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
               __Pyx_GOTREF(__pyx_t_5);
               __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             } else
             #endif
             {
-              __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 323, __pyx_L10_error)
+              __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 328, __pyx_L10_error)
               __Pyx_GOTREF(__pyx_t_7);
               __Pyx_GIVEREF(__pyx_t_11); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_11); __pyx_t_11 = NULL;
               __Pyx_GIVEREF(__pyx_t_2);
               PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_2);
               __pyx_t_2 = 0;
-              __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 323, __pyx_L10_error)
+              __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 328, __pyx_L10_error)
               __Pyx_GOTREF(__pyx_t_5);
               __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
             }
@@ -38618,7 +38675,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-          /* "src/fuse_api.pxi":324
+          /* "src/fuse_api.pxi":329
  * 
  *         on_exit.callback(lambda: fuse_session_reset(session))
  *         exc_info = None             # <<<<<<<<<<<<<<
@@ -38630,48 +38687,48 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
           __Pyx_DECREF_SET(__pyx_v_6llfuse_exc_info, Py_None);
           __Pyx_GIVEREF(Py_None);
 
-          /* "src/fuse_api.pxi":325
+          /* "src/fuse_api.pxi":330
  *         on_exit.callback(lambda: fuse_session_reset(session))
  *         exc_info = None
  *         log.debug('Calling fuse_session_loop')             # <<<<<<<<<<<<<<
  *         if workers == 1:
  *             session_loop_single()
  */
-          __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 325, __pyx_L10_error)
+          __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 330, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 325, __pyx_L10_error)
+          __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 330, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_4);
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple__75, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 325, __pyx_L10_error)
+          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple__75, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 330, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-          /* "src/fuse_api.pxi":326
+          /* "src/fuse_api.pxi":331
  *         exc_info = None
  *         log.debug('Calling fuse_session_loop')
  *         if workers == 1:             # <<<<<<<<<<<<<<
  *             session_loop_single()
  *         else:
  */
-          __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_v_workers, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 326, __pyx_L10_error)
+          __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_v_workers, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 331, __pyx_L10_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 326, __pyx_L10_error)
+          __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 331, __pyx_L10_error)
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           if (__pyx_t_3) {
 
-            /* "src/fuse_api.pxi":327
+            /* "src/fuse_api.pxi":332
  *         log.debug('Calling fuse_session_loop')
  *         if workers == 1:
  *             session_loop_single()             # <<<<<<<<<<<<<<
  *         else:
  *             session_loop_mt(workers)
  */
-            __pyx_t_5 = __pyx_f_6llfuse_session_loop_single(); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 327, __pyx_L10_error)
+            __pyx_t_5 = __pyx_f_6llfuse_session_loop_single(); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 332, __pyx_L10_error)
             __Pyx_GOTREF(__pyx_t_5);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-            /* "src/fuse_api.pxi":326
+            /* "src/fuse_api.pxi":331
  *         exc_info = None
  *         log.debug('Calling fuse_session_loop')
  *         if workers == 1:             # <<<<<<<<<<<<<<
@@ -38681,7 +38738,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             goto __pyx_L18;
           }
 
-          /* "src/fuse_api.pxi":329
+          /* "src/fuse_api.pxi":334
  *             session_loop_single()
  *         else:
  *             session_loop_mt(workers)             # <<<<<<<<<<<<<<
@@ -38689,13 +38746,13 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  *     if exc_info:
  */
           /*else*/ {
-            __pyx_t_5 = __pyx_f_6llfuse_session_loop_mt(__pyx_v_workers); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 329, __pyx_L10_error)
+            __pyx_t_5 = __pyx_f_6llfuse_session_loop_mt(__pyx_v_workers); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 334, __pyx_L10_error)
             __Pyx_GOTREF(__pyx_t_5);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           }
           __pyx_L18:;
 
-          /* "src/fuse_api.pxi":313
+          /* "src/fuse_api.pxi":318
  *     # for "regular exit".
  *     exit_reason = signal.SIGKILL
  *     with contextlib.ExitStack() as on_exit:             # <<<<<<<<<<<<<<
@@ -38716,20 +38773,20 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("llfuse.main", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_7) < 0) __PYX_ERR(3, 313, __pyx_L12_except_error)
+          if (__Pyx_GetException(&__pyx_t_5, &__pyx_t_4, &__pyx_t_7) < 0) __PYX_ERR(3, 318, __pyx_L12_except_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_GOTREF(__pyx_t_4);
           __Pyx_GOTREF(__pyx_t_7);
-          __pyx_t_2 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 313, __pyx_L12_except_error)
+          __pyx_t_2 = PyTuple_Pack(3, __pyx_t_5, __pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 318, __pyx_L12_except_error)
           __Pyx_GOTREF(__pyx_t_2);
           __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_2, NULL);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-          if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 313, __pyx_L12_except_error)
+          if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 318, __pyx_L12_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_12);
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-          if (__pyx_t_3 < 0) __PYX_ERR(3, 313, __pyx_L12_except_error)
+          if (__pyx_t_3 < 0) __PYX_ERR(3, 318, __pyx_L12_except_error)
           __pyx_t_1 = ((!(__pyx_t_3 != 0)) != 0);
           if (__pyx_t_1) {
             __Pyx_GIVEREF(__pyx_t_5);
@@ -38737,7 +38794,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
             __Pyx_XGIVEREF(__pyx_t_7);
             __Pyx_ErrRestoreWithState(__pyx_t_5, __pyx_t_4, __pyx_t_7);
             __pyx_t_5 = 0; __pyx_t_4 = 0; __pyx_t_7 = 0; 
-            __PYX_ERR(3, 313, __pyx_L12_except_error)
+            __PYX_ERR(3, 318, __pyx_L12_except_error)
           }
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -38765,7 +38822,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
         if (__pyx_t_6) {
           __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_tuple__76, NULL);
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-          if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 313, __pyx_L1_error)
+          if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 318, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
         }
@@ -38780,34 +38837,34 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
     __pyx_L22:;
   }
 
-  /* "src/fuse_api.pxi":331
+  /* "src/fuse_api.pxi":336
  *             session_loop_mt(workers)
  * 
  *     if exc_info:             # <<<<<<<<<<<<<<
  *         # Re-raise expression from request handler
  *         log.debug('Terminated main loop because request handler raised exception, re-raising..')
  */
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_6llfuse_exc_info); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(3, 331, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_6llfuse_exc_info); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(3, 336, __pyx_L1_error)
   if (__pyx_t_1) {
 
-    /* "src/fuse_api.pxi":333
+    /* "src/fuse_api.pxi":338
  *     if exc_info:
  *         # Re-raise expression from request handler
  *         log.debug('Terminated main loop because request handler raised exception, re-raising..')             # <<<<<<<<<<<<<<
  *         tmp = exc_info
  *         exc_info = None
  */
-    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 333, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 338, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 333, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 338, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple__77, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 333, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_tuple__77, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 338, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "src/fuse_api.pxi":334
+    /* "src/fuse_api.pxi":339
  *         # Re-raise expression from request handler
  *         log.debug('Terminated main loop because request handler raised exception, re-raising..')
  *         tmp = exc_info             # <<<<<<<<<<<<<<
@@ -38817,7 +38874,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
     __Pyx_INCREF(__pyx_v_6llfuse_exc_info);
     __pyx_v_tmp = __pyx_v_6llfuse_exc_info;
 
-    /* "src/fuse_api.pxi":335
+    /* "src/fuse_api.pxi":340
  *         log.debug('Terminated main loop because request handler raised exception, re-raising..')
  *         tmp = exc_info
  *         exc_info = None             # <<<<<<<<<<<<<<
@@ -38829,7 +38886,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
     __Pyx_DECREF_SET(__pyx_v_6llfuse_exc_info, Py_None);
     __Pyx_GIVEREF(Py_None);
 
-    /* "src/fuse_api.pxi":340
+    /* "src/fuse_api.pxi":345
  *         # the 3-parameter version of the raise statement, c.f.
  *         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
  *         if PY_MAJOR_VERSION < 3:             # <<<<<<<<<<<<<<
@@ -38839,26 +38896,26 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
     __pyx_t_1 = ((PY_MAJOR_VERSION < 3) != 0);
     if (__pyx_t_1) {
 
-      /* "src/fuse_api.pxi":341
+      /* "src/fuse_api.pxi":346
  *         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
  *         if PY_MAJOR_VERSION < 3:
  *             raise tmp[0], tmp[1], tmp[2]             # <<<<<<<<<<<<<<
  *         else:
  *             raise tmp[1].with_traceback(tmp[2])
  */
-      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_tmp, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 341, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_tmp, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 346, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 341, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 346, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 341, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 346, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_7, __pyx_t_4, __pyx_t_5, 0);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __PYX_ERR(3, 341, __pyx_L1_error)
+      __PYX_ERR(3, 346, __pyx_L1_error)
 
-      /* "src/fuse_api.pxi":340
+      /* "src/fuse_api.pxi":345
  *         # the 3-parameter version of the raise statement, c.f.
  *         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
  *         if PY_MAJOR_VERSION < 3:             # <<<<<<<<<<<<<<
@@ -38867,7 +38924,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
     }
 
-    /* "src/fuse_api.pxi":343
+    /* "src/fuse_api.pxi":348
  *             raise tmp[0], tmp[1], tmp[2]
  *         else:
  *             raise tmp[1].with_traceback(tmp[2])             # <<<<<<<<<<<<<<
@@ -38875,12 +38932,12 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  *     if exit_reason == signal.SIGKILL:
  */
     /*else*/ {
-      __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 343, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 348, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_with_traceback); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 343, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_with_traceback); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 348, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 343, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 348, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_2 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
@@ -38893,14 +38950,14 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
         }
       }
       if (!__pyx_t_2) {
-        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 343, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 348, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_5);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_7)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_4};
-          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 343, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 348, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -38909,20 +38966,20 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
           PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_4};
-          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 343, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 348, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         } else
         #endif
         {
-          __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 343, __pyx_L1_error)
+          __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 348, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_11);
           __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_2); __pyx_t_2 = NULL;
           __Pyx_GIVEREF(__pyx_t_4);
           PyTuple_SET_ITEM(__pyx_t_11, 0+1, __pyx_t_4);
           __pyx_t_4 = 0;
-          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_11, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 343, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_11, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 348, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         }
@@ -38930,10 +38987,10 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __PYX_ERR(3, 343, __pyx_L1_error)
+      __PYX_ERR(3, 348, __pyx_L1_error)
     }
 
-    /* "src/fuse_api.pxi":331
+    /* "src/fuse_api.pxi":336
  *             session_loop_mt(workers)
  * 
  *     if exc_info:             # <<<<<<<<<<<<<<
@@ -38942,7 +38999,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   }
 
-  /* "src/fuse_api.pxi":345
+  /* "src/fuse_api.pxi":350
  *             raise tmp[1].with_traceback(tmp[2])
  * 
  *     if exit_reason == signal.SIGKILL:             # <<<<<<<<<<<<<<
@@ -38952,7 +39009,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
   __pyx_t_1 = ((__pyx_v_6llfuse_exit_reason == SIGKILL) != 0);
   if (__pyx_t_1) {
 
-    /* "src/fuse_api.pxi":346
+    /* "src/fuse_api.pxi":351
  * 
  *     if exit_reason == signal.SIGKILL:
  *         return None             # <<<<<<<<<<<<<<
@@ -38964,7 +39021,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
     __pyx_r = Py_None;
     goto __pyx_L0;
 
-    /* "src/fuse_api.pxi":345
+    /* "src/fuse_api.pxi":350
  *             raise tmp[1].with_traceback(tmp[2])
  * 
  *     if exit_reason == signal.SIGKILL:             # <<<<<<<<<<<<<<
@@ -38973,7 +39030,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   }
 
-  /* "src/fuse_api.pxi":348
+  /* "src/fuse_api.pxi":353
  *         return None
  *     else:
  *         return exit_reason             # <<<<<<<<<<<<<<
@@ -38982,14 +39039,14 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_6llfuse_exit_reason); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 348, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_6llfuse_exit_reason); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 353, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_r = __pyx_t_5;
     __pyx_t_5 = 0;
     goto __pyx_L0;
   }
 
-  /* "src/fuse_api.pxi":273
+  /* "src/fuse_api.pxi":278
  *     pthread_mutex_init(&exc_info_mutex, NULL)
  * 
  * def main(workers=None):             # <<<<<<<<<<<<<<
@@ -39016,7 +39073,7 @@ static PyObject *__pyx_pf_6llfuse_10main(CYTHON_UNUSED PyObject *__pyx_self, PyO
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":350
+/* "src/fuse_api.pxi":355
  *         return exit_reason
  * 
  * cdef session_loop_single():             # <<<<<<<<<<<<<<
@@ -39042,7 +39099,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_single(void) {
   PyObject *__pyx_t_11 = NULL;
   __Pyx_RefNannySetupContext("session_loop_single", 0);
 
-  /* "src/fuse_api.pxi":354
+  /* "src/fuse_api.pxi":359
  *     cdef size_t size
  * 
  *     size = fuse_chan_bufsize(channel)             # <<<<<<<<<<<<<<
@@ -39051,17 +39108,17 @@ static PyObject *__pyx_f_6llfuse_session_loop_single(void) {
  */
   __pyx_v_size = fuse_chan_bufsize(__pyx_v_6llfuse_channel);
 
-  /* "src/fuse_api.pxi":355
+  /* "src/fuse_api.pxi":360
  * 
  *     size = fuse_chan_bufsize(channel)
  *     mem = calloc_or_raise(1, size)             # <<<<<<<<<<<<<<
  *     try:
  *         session_loop(mem, size)
  */
-  __pyx_t_1 = __pyx_f_6llfuse_calloc_or_raise(1, __pyx_v_size); if (unlikely(__pyx_t_1 == NULL)) __PYX_ERR(3, 355, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_6llfuse_calloc_or_raise(1, __pyx_v_size); if (unlikely(__pyx_t_1 == NULL)) __PYX_ERR(3, 360, __pyx_L1_error)
   __pyx_v_mem = __pyx_t_1;
 
-  /* "src/fuse_api.pxi":356
+  /* "src/fuse_api.pxi":361
  *     size = fuse_chan_bufsize(channel)
  *     mem = calloc_or_raise(1, size)
  *     try:             # <<<<<<<<<<<<<<
@@ -39070,19 +39127,19 @@ static PyObject *__pyx_f_6llfuse_session_loop_single(void) {
  */
   /*try:*/ {
 
-    /* "src/fuse_api.pxi":357
+    /* "src/fuse_api.pxi":362
  *     mem = calloc_or_raise(1, size)
  *     try:
  *         session_loop(mem, size)             # <<<<<<<<<<<<<<
  *     finally:
  *         stdlib.free(mem)
  */
-    __pyx_t_2 = __pyx_f_6llfuse_session_loop(__pyx_v_mem, __pyx_v_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 357, __pyx_L4_error)
+    __pyx_t_2 = __pyx_f_6llfuse_session_loop(__pyx_v_mem, __pyx_v_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 362, __pyx_L4_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
 
-  /* "src/fuse_api.pxi":359
+  /* "src/fuse_api.pxi":364
  *         session_loop(mem, size)
  *     finally:
  *         stdlib.free(mem)             # <<<<<<<<<<<<<<
@@ -39130,7 +39187,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_single(void) {
     __pyx_L5:;
   }
 
-  /* "src/fuse_api.pxi":350
+  /* "src/fuse_api.pxi":355
  *         return exit_reason
  * 
  * cdef session_loop_single():             # <<<<<<<<<<<<<<
@@ -39151,7 +39208,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_single(void) {
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":361
+/* "src/fuse_api.pxi":366
  *         stdlib.free(mem)
  * 
  * cdef session_loop(void* mem, size_t size):             # <<<<<<<<<<<<<<
@@ -39171,7 +39228,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("session_loop", 0);
 
-  /* "src/fuse_api.pxi":368
+  /* "src/fuse_api.pxi":373
  *     cdef fuse_buf buf
  * 
  *     while not fuse_session_exited(session):             # <<<<<<<<<<<<<<
@@ -39182,7 +39239,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
     __pyx_t_1 = ((!(fuse_session_exited(__pyx_v_6llfuse_session) != 0)) != 0);
     if (!__pyx_t_1) break;
 
-    /* "src/fuse_api.pxi":369
+    /* "src/fuse_api.pxi":374
  * 
  *     while not fuse_session_exited(session):
  *         ch = channel             # <<<<<<<<<<<<<<
@@ -39191,7 +39248,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     __pyx_v_ch = __pyx_v_6llfuse_channel;
 
-    /* "src/fuse_api.pxi":370
+    /* "src/fuse_api.pxi":375
  *     while not fuse_session_exited(session):
  *         ch = channel
  *         buf.mem = mem             # <<<<<<<<<<<<<<
@@ -39200,7 +39257,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     __pyx_v_buf.mem = __pyx_v_mem;
 
-    /* "src/fuse_api.pxi":371
+    /* "src/fuse_api.pxi":376
  *         ch = channel
  *         buf.mem = mem
  *         buf.size = size             # <<<<<<<<<<<<<<
@@ -39209,7 +39266,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     __pyx_v_buf.size = __pyx_v_size;
 
-    /* "src/fuse_api.pxi":372
+    /* "src/fuse_api.pxi":377
  *         buf.mem = mem
  *         buf.size = size
  *         buf.pos = 0             # <<<<<<<<<<<<<<
@@ -39218,21 +39275,21 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     __pyx_v_buf.pos = 0;
 
-    /* "src/fuse_api.pxi":373
+    /* "src/fuse_api.pxi":378
  *         buf.size = size
  *         buf.pos = 0
  *         buf.flags = 0             # <<<<<<<<<<<<<<
  *         with nogil:
- *             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+ *             res = fuse_session_receive_buf(session, &buf, &ch)
  */
     __pyx_v_buf.flags = 0;
 
-    /* "src/fuse_api.pxi":374
+    /* "src/fuse_api.pxi":379
  *         buf.pos = 0
  *         buf.flags = 0
  *         with nogil:             # <<<<<<<<<<<<<<
- *             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
  *             res = fuse_session_receive_buf(session, &buf, &ch)
+ * 
  */
     {
         #ifdef WITH_THREAD
@@ -39241,40 +39298,22 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
         #endif
         /*try:*/ {
 
-          /* "src/fuse_api.pxi":375
+          /* "src/fuse_api.pxi":380
  *         buf.flags = 0
  *         with nogil:
- *             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);             # <<<<<<<<<<<<<<
- *             res = fuse_session_receive_buf(session, &buf, &ch)
- *             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
- */
-          pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-
-          /* "src/fuse_api.pxi":376
- *         with nogil:
- *             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
  *             res = fuse_session_receive_buf(session, &buf, &ch)             # <<<<<<<<<<<<<<
- *             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
- * 
- */
-          __pyx_v_res = fuse_session_receive_buf(__pyx_v_6llfuse_session, (&__pyx_v_buf), (&__pyx_v_ch));
-
-          /* "src/fuse_api.pxi":377
- *             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
- *             res = fuse_session_receive_buf(session, &buf, &ch)
- *             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);             # <<<<<<<<<<<<<<
  * 
  *         if res == -errno.EINTR:
  */
-          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+          __pyx_v_res = fuse_session_receive_buf(__pyx_v_6llfuse_session, (&__pyx_v_buf), (&__pyx_v_ch));
         }
 
-        /* "src/fuse_api.pxi":374
+        /* "src/fuse_api.pxi":379
  *         buf.pos = 0
  *         buf.flags = 0
  *         with nogil:             # <<<<<<<<<<<<<<
- *             pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
  *             res = fuse_session_receive_buf(session, &buf, &ch)
+ * 
  */
         /*finally:*/ {
           /*normal exit:*/{
@@ -39287,8 +39326,8 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
         }
     }
 
-    /* "src/fuse_api.pxi":379
- *             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+    /* "src/fuse_api.pxi":382
+ *             res = fuse_session_receive_buf(session, &buf, &ch)
  * 
  *         if res == -errno.EINTR:             # <<<<<<<<<<<<<<
  *             continue
@@ -39297,7 +39336,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
     __pyx_t_1 = ((__pyx_v_res == (-EINTR)) != 0);
     if (__pyx_t_1) {
 
-      /* "src/fuse_api.pxi":380
+      /* "src/fuse_api.pxi":383
  * 
  *         if res == -errno.EINTR:
  *             continue             # <<<<<<<<<<<<<<
@@ -39306,8 +39345,8 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
       goto __pyx_L3_continue;
 
-      /* "src/fuse_api.pxi":379
- *             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+      /* "src/fuse_api.pxi":382
+ *             res = fuse_session_receive_buf(session, &buf, &ch)
  * 
  *         if res == -errno.EINTR:             # <<<<<<<<<<<<<<
  *             continue
@@ -39315,7 +39354,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     }
 
-    /* "src/fuse_api.pxi":381
+    /* "src/fuse_api.pxi":384
  *         if res == -errno.EINTR:
  *             continue
  *         elif res < 0:             # <<<<<<<<<<<<<<
@@ -39325,37 +39364,37 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
     __pyx_t_1 = ((__pyx_v_res < 0) != 0);
     if (__pyx_t_1) {
 
-      /* "src/fuse_api.pxi":382
+      /* "src/fuse_api.pxi":385
  *             continue
  *         elif res < 0:
  *             raise OSError(-res, 'fuse_session_receive_buf failed with '             # <<<<<<<<<<<<<<
  *                           + strerror(-res))
  *         elif res == 0:
  */
-      __pyx_t_2 = __Pyx_PyInt_From_int((-__pyx_v_res)); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 382, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyInt_From_int((-__pyx_v_res)); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 385, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
 
-      /* "src/fuse_api.pxi":383
+      /* "src/fuse_api.pxi":386
  *         elif res < 0:
  *             raise OSError(-res, 'fuse_session_receive_buf failed with '
  *                           + strerror(-res))             # <<<<<<<<<<<<<<
  *         elif res == 0:
  *             break
  */
-      __pyx_t_3 = __pyx_f_6llfuse_strerror((-__pyx_v_res)); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 383, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_6llfuse_strerror((-__pyx_v_res)); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 386, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyNumber_Add(__pyx_kp_u_fuse_session_receive_buf_failed, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 383, __pyx_L1_error)
+      __pyx_t_4 = PyNumber_Add(__pyx_kp_u_fuse_session_receive_buf_failed, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 386, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-      /* "src/fuse_api.pxi":382
+      /* "src/fuse_api.pxi":385
  *             continue
  *         elif res < 0:
  *             raise OSError(-res, 'fuse_session_receive_buf failed with '             # <<<<<<<<<<<<<<
  *                           + strerror(-res))
  *         elif res == 0:
  */
-      __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 382, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 385, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
@@ -39363,14 +39402,14 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
       PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
       __pyx_t_2 = 0;
       __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 382, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 385, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_Raise(__pyx_t_4, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __PYX_ERR(3, 382, __pyx_L1_error)
+      __PYX_ERR(3, 385, __pyx_L1_error)
 
-      /* "src/fuse_api.pxi":381
+      /* "src/fuse_api.pxi":384
  *         if res == -errno.EINTR:
  *             continue
  *         elif res < 0:             # <<<<<<<<<<<<<<
@@ -39379,7 +39418,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     }
 
-    /* "src/fuse_api.pxi":384
+    /* "src/fuse_api.pxi":387
  *             raise OSError(-res, 'fuse_session_receive_buf failed with '
  *                           + strerror(-res))
  *         elif res == 0:             # <<<<<<<<<<<<<<
@@ -39389,7 +39428,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
     __pyx_t_1 = ((__pyx_v_res == 0) != 0);
     if (__pyx_t_1) {
 
-      /* "src/fuse_api.pxi":385
+      /* "src/fuse_api.pxi":388
  *                           + strerror(-res))
  *         elif res == 0:
  *             break             # <<<<<<<<<<<<<<
@@ -39398,7 +39437,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
       goto __pyx_L4_break;
 
-      /* "src/fuse_api.pxi":384
+      /* "src/fuse_api.pxi":387
  *             raise OSError(-res, 'fuse_session_receive_buf failed with '
  *                           + strerror(-res))
  *         elif res == 0:             # <<<<<<<<<<<<<<
@@ -39407,7 +39446,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
  */
     }
 
-    /* "src/fuse_api.pxi":387
+    /* "src/fuse_api.pxi":390
  *             break
  * 
  *         fuse_session_process_buf(session, &buf, ch)             # <<<<<<<<<<<<<<
@@ -39419,7 +39458,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
   }
   __pyx_L4_break:;
 
-  /* "src/fuse_api.pxi":361
+  /* "src/fuse_api.pxi":366
  *         stdlib.free(mem)
  * 
  * cdef session_loop(void* mem, size_t size):             # <<<<<<<<<<<<<<
@@ -39442,7 +39481,7 @@ static PyObject *__pyx_f_6llfuse_session_loop(void *__pyx_v_mem, size_t __pyx_v_
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":397
+/* "src/fuse_api.pxi":400
  *     size_t bufsize
  * 
  * cdef void* worker_start(void* data) with gil:             # <<<<<<<<<<<<<<
@@ -39480,7 +39519,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
   #endif
   __Pyx_RefNannySetupContext("worker_start", 0);
 
-  /* "src/fuse_api.pxi":402
+  /* "src/fuse_api.pxi":405
  *     global exc_info
  * 
  *     wd = <worker_data_t*> data             # <<<<<<<<<<<<<<
@@ -39489,16 +39528,16 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  */
   __pyx_v_wd = ((__pyx_t_6llfuse_worker_data_t *)__pyx_v_data);
 
-  /* "src/fuse_api.pxi":404
+  /* "src/fuse_api.pxi":407
  *     wd = <worker_data_t*> data
  * 
  *     t = threading.current_thread()             # <<<<<<<<<<<<<<
  *     t.name = 'fuse-worker-%d' % (wd.thread_no+1,)
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_threading); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 404, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_threading); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_current_thread); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 404, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_current_thread); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -39512,37 +39551,37 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
     }
   }
   if (__pyx_t_2) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 404, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 407, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 404, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 407, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_t = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":405
+  /* "src/fuse_api.pxi":408
  * 
  *     t = threading.current_thread()
  *     t.name = 'fuse-worker-%d' % (wd.thread_no+1,)             # <<<<<<<<<<<<<<
  * 
  *     try:
  */
-  __pyx_t_1 = __Pyx_PyInt_From_long((__pyx_v_wd->thread_no + 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 405, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_long((__pyx_v_wd->thread_no + 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 405, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyUnicode_Format(__pyx_kp_u_fuse_worker_d, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 405, __pyx_L1_error)
+  __pyx_t_1 = PyUnicode_Format(__pyx_kp_u_fuse_worker_d, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_t, __pyx_n_s_name, __pyx_t_1) < 0) __PYX_ERR(3, 405, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_t, __pyx_n_s_name, __pyx_t_1) < 0) __PYX_ERR(3, 408, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":407
+  /* "src/fuse_api.pxi":410
  *     t.name = 'fuse-worker-%d' % (wd.thread_no+1,)
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -39559,18 +39598,18 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
       __Pyx_XGOTREF(__pyx_t_6);
       /*try:*/ {
 
-        /* "src/fuse_api.pxi":408
+        /* "src/fuse_api.pxi":411
  * 
  *     try:
  *         session_loop(wd.buf, wd.bufsize)             # <<<<<<<<<<<<<<
  *     except:
  *         fuse_session_exit(session)
  */
-        __pyx_t_1 = __pyx_f_6llfuse_session_loop(__pyx_v_wd->buf, __pyx_v_wd->bufsize); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 408, __pyx_L6_error)
+        __pyx_t_1 = __pyx_f_6llfuse_session_loop(__pyx_v_wd->buf, __pyx_v_wd->bufsize); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 411, __pyx_L6_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-        /* "src/fuse_api.pxi":407
+        /* "src/fuse_api.pxi":410
  *     t.name = 'fuse-worker-%d' % (wd.thread_no+1,)
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -39588,7 +39627,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "src/fuse_api.pxi":409
+      /* "src/fuse_api.pxi":412
  *     try:
  *         session_loop(wd.buf, wd.bufsize)
  *     except:             # <<<<<<<<<<<<<<
@@ -39597,12 +39636,12 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  */
       /*except:*/ {
         __Pyx_AddTraceback("llfuse.worker_start", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_3, &__pyx_t_2) < 0) __PYX_ERR(3, 409, __pyx_L8_except_error)
+        if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_3, &__pyx_t_2) < 0) __PYX_ERR(3, 412, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_GOTREF(__pyx_t_2);
 
-        /* "src/fuse_api.pxi":410
+        /* "src/fuse_api.pxi":413
  *         session_loop(wd.buf, wd.bufsize)
  *     except:
  *         fuse_session_exit(session)             # <<<<<<<<<<<<<<
@@ -39611,27 +39650,27 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  */
         fuse_session_exit(__pyx_v_6llfuse_session);
 
-        /* "src/fuse_api.pxi":411
+        /* "src/fuse_api.pxi":414
  *     except:
  *         fuse_session_exit(session)
  *         log.error('FUSE worker thread %d terminated with exception, '             # <<<<<<<<<<<<<<
  *                   'aborting processing', wd.thread_id)
  *         res = pthread_mutex_lock(&exc_info_mutex)
  */
-        __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 411, __pyx_L8_except_error)
+        __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 414, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_8);
-        __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_error); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 411, __pyx_L8_except_error)
+        __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_error); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 414, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-        /* "src/fuse_api.pxi":412
+        /* "src/fuse_api.pxi":415
  *         fuse_session_exit(session)
  *         log.error('FUSE worker thread %d terminated with exception, '
  *                   'aborting processing', wd.thread_id)             # <<<<<<<<<<<<<<
  *         res = pthread_mutex_lock(&exc_info_mutex)
  *         if res != 0:
  */
-        __pyx_t_8 = __Pyx_PyInt_From_pthread_t(__pyx_v_wd->thread_id); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 412, __pyx_L8_except_error)
+        __pyx_t_8 = __Pyx_PyInt_From_pthread_t(__pyx_v_wd->thread_id); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 415, __pyx_L8_except_error)
         __Pyx_GOTREF(__pyx_t_8);
         __pyx_t_10 = NULL;
         __pyx_t_11 = 0;
@@ -39648,7 +39687,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[3] = {__pyx_t_10, __pyx_kp_u_FUSE_worker_thread_d_terminated, __pyx_t_8};
-          __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 411, __pyx_L8_except_error)
+          __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 414, __pyx_L8_except_error)
           __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -39657,14 +39696,14 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
           PyObject *__pyx_temp[3] = {__pyx_t_10, __pyx_kp_u_FUSE_worker_thread_d_terminated, __pyx_t_8};
-          __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 411, __pyx_L8_except_error)
+          __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 414, __pyx_L8_except_error)
           __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         } else
         #endif
         {
-          __pyx_t_12 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 411, __pyx_L8_except_error)
+          __pyx_t_12 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 414, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           if (__pyx_t_10) {
             __Pyx_GIVEREF(__pyx_t_10); PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_10); __pyx_t_10 = NULL;
@@ -39675,14 +39714,14 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           __Pyx_GIVEREF(__pyx_t_8);
           PyTuple_SET_ITEM(__pyx_t_12, 1+__pyx_t_11, __pyx_t_8);
           __pyx_t_8 = 0;
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_12, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 411, __pyx_L8_except_error)
+          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_12, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 414, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
         }
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-        /* "src/fuse_api.pxi":413
+        /* "src/fuse_api.pxi":416
  *         log.error('FUSE worker thread %d terminated with exception, '
  *                   'aborting processing', wd.thread_id)
  *         res = pthread_mutex_lock(&exc_info_mutex)             # <<<<<<<<<<<<<<
@@ -39691,7 +39730,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  */
         __pyx_v_res = pthread_mutex_lock((&__pyx_v_6llfuse_exc_info_mutex));
 
-        /* "src/fuse_api.pxi":414
+        /* "src/fuse_api.pxi":417
  *                   'aborting processing', wd.thread_id)
  *         res = pthread_mutex_lock(&exc_info_mutex)
  *         if res != 0:             # <<<<<<<<<<<<<<
@@ -39701,27 +39740,27 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
         __pyx_t_13 = ((__pyx_v_res != 0) != 0);
         if (__pyx_t_13) {
 
-          /* "src/fuse_api.pxi":415
+          /* "src/fuse_api.pxi":418
  *         res = pthread_mutex_lock(&exc_info_mutex)
  *         if res != 0:
  *             log.error('pthread_mutex_lock failed with %s',             # <<<<<<<<<<<<<<
  *                       strerror(res))
  *         if not exc_info:
  */
-          __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 415, __pyx_L8_except_error)
+          __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 418, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_9);
-          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_error); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 415, __pyx_L8_except_error)
+          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_error); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 418, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-          /* "src/fuse_api.pxi":416
+          /* "src/fuse_api.pxi":419
  *         if res != 0:
  *             log.error('pthread_mutex_lock failed with %s',
  *                       strerror(res))             # <<<<<<<<<<<<<<
  *         if not exc_info:
  *             exc_info = sys.exc_info()
  */
-          __pyx_t_9 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 416, __pyx_L8_except_error)
+          __pyx_t_9 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 419, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_9);
           __pyx_t_8 = NULL;
           __pyx_t_11 = 0;
@@ -39738,7 +39777,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_12)) {
             PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_kp_u_pthread_mutex_lock_failed_with_s, __pyx_t_9};
-            __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 415, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 418, __pyx_L8_except_error)
             __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -39747,14 +39786,14 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_12)) {
             PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_kp_u_pthread_mutex_lock_failed_with_s, __pyx_t_9};
-            __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 415, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 418, __pyx_L8_except_error)
             __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           } else
           #endif
           {
-            __pyx_t_10 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 415, __pyx_L8_except_error)
+            __pyx_t_10 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 418, __pyx_L8_except_error)
             __Pyx_GOTREF(__pyx_t_10);
             if (__pyx_t_8) {
               __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
@@ -39765,14 +39804,14 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
             __Pyx_GIVEREF(__pyx_t_9);
             PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_11, __pyx_t_9);
             __pyx_t_9 = 0;
-            __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_10, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 415, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_10, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 418, __pyx_L8_except_error)
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           }
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-          /* "src/fuse_api.pxi":414
+          /* "src/fuse_api.pxi":417
  *                   'aborting processing', wd.thread_id)
  *         res = pthread_mutex_lock(&exc_info_mutex)
  *         if res != 0:             # <<<<<<<<<<<<<<
@@ -39781,27 +39820,27 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  */
         }
 
-        /* "src/fuse_api.pxi":417
+        /* "src/fuse_api.pxi":420
  *             log.error('pthread_mutex_lock failed with %s',
  *                       strerror(res))
  *         if not exc_info:             # <<<<<<<<<<<<<<
  *             exc_info = sys.exc_info()
  *         else:
  */
-        __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_v_6llfuse_exc_info); if (unlikely(__pyx_t_13 < 0)) __PYX_ERR(3, 417, __pyx_L8_except_error)
+        __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_v_6llfuse_exc_info); if (unlikely(__pyx_t_13 < 0)) __PYX_ERR(3, 420, __pyx_L8_except_error)
         __pyx_t_14 = ((!__pyx_t_13) != 0);
         if (__pyx_t_14) {
 
-          /* "src/fuse_api.pxi":418
+          /* "src/fuse_api.pxi":421
  *                       strerror(res))
  *         if not exc_info:
  *             exc_info = sys.exc_info()             # <<<<<<<<<<<<<<
  *         else:
  *             log.exception('Only one exception can be re-raised, the following '
  */
-          __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_sys); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 418, __pyx_L8_except_error)
+          __pyx_t_12 = __Pyx_GetModuleGlobalName(__pyx_n_s_sys); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 421, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_exc_info); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 418, __pyx_L8_except_error)
+          __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_exc_info); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 421, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
           __pyx_t_12 = NULL;
@@ -39815,10 +39854,10 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
             }
           }
           if (__pyx_t_12) {
-            __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_12); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 418, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_12); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 421, __pyx_L8_except_error)
             __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
           } else {
-            __pyx_t_7 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 418, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyObject_CallNoArg(__pyx_t_10); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 421, __pyx_L8_except_error)
           }
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -39827,7 +39866,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           __Pyx_GIVEREF(__pyx_t_7);
           __pyx_t_7 = 0;
 
-          /* "src/fuse_api.pxi":417
+          /* "src/fuse_api.pxi":420
  *             log.error('pthread_mutex_lock failed with %s',
  *                       strerror(res))
  *         if not exc_info:             # <<<<<<<<<<<<<<
@@ -39837,7 +39876,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           goto __pyx_L17;
         }
 
-        /* "src/fuse_api.pxi":420
+        /* "src/fuse_api.pxi":423
  *             exc_info = sys.exc_info()
  *         else:
  *             log.exception('Only one exception can be re-raised, the following '             # <<<<<<<<<<<<<<
@@ -39845,19 +39884,19 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  *         pthread_mutex_unlock(&exc_info_mutex)
  */
         /*else*/ {
-          __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 420, __pyx_L8_except_error)
+          __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 423, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_7);
-          __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_exception); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 420, __pyx_L8_except_error)
+          __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_exception); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 423, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_10);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_tuple__78, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 420, __pyx_L8_except_error)
+          __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_tuple__78, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 423, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
         __pyx_L17:;
 
-        /* "src/fuse_api.pxi":422
+        /* "src/fuse_api.pxi":425
  *             log.exception('Only one exception can be re-raised, the following '
  *                           'exception will be lost:')
  *         pthread_mutex_unlock(&exc_info_mutex)             # <<<<<<<<<<<<<<
@@ -39866,7 +39905,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
  */
         pthread_mutex_unlock((&__pyx_v_6llfuse_exc_info_mutex));
 
-        /* "src/fuse_api.pxi":423
+        /* "src/fuse_api.pxi":426
  *                           'exception will be lost:')
  *         pthread_mutex_unlock(&exc_info_mutex)
  *         if res != 0:             # <<<<<<<<<<<<<<
@@ -39876,27 +39915,27 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
         __pyx_t_14 = ((__pyx_v_res != 0) != 0);
         if (__pyx_t_14) {
 
-          /* "src/fuse_api.pxi":424
+          /* "src/fuse_api.pxi":427
  *         pthread_mutex_unlock(&exc_info_mutex)
  *         if res != 0:
  *             log.error('pthread_mutex_ulock failed with %s',             # <<<<<<<<<<<<<<
  *                       strerror(res))
  * 
  */
-          __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 424, __pyx_L8_except_error)
+          __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 427, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_10);
-          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_error); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 424, __pyx_L8_except_error)
+          __pyx_t_12 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_error); if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 427, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-          /* "src/fuse_api.pxi":425
+          /* "src/fuse_api.pxi":428
  *         if res != 0:
  *             log.error('pthread_mutex_ulock failed with %s',
  *                       strerror(res))             # <<<<<<<<<<<<<<
  * 
  *     finally:
  */
-          __pyx_t_10 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 425, __pyx_L8_except_error)
+          __pyx_t_10 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 428, __pyx_L8_except_error)
           __Pyx_GOTREF(__pyx_t_10);
           __pyx_t_9 = NULL;
           __pyx_t_11 = 0;
@@ -39913,7 +39952,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_12)) {
             PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_kp_u_pthread_mutex_ulock_failed_with, __pyx_t_10};
-            __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 424, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 427, __pyx_L8_except_error)
             __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -39922,14 +39961,14 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_12)) {
             PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_kp_u_pthread_mutex_ulock_failed_with, __pyx_t_10};
-            __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 424, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_12, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 427, __pyx_L8_except_error)
             __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
           } else
           #endif
           {
-            __pyx_t_8 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 424, __pyx_L8_except_error)
+            __pyx_t_8 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 427, __pyx_L8_except_error)
             __Pyx_GOTREF(__pyx_t_8);
             if (__pyx_t_9) {
               __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_9); __pyx_t_9 = NULL;
@@ -39940,14 +39979,14 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
             __Pyx_GIVEREF(__pyx_t_10);
             PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_11, __pyx_t_10);
             __pyx_t_10 = 0;
-            __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_8, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 424, __pyx_L8_except_error)
+            __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_8, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 427, __pyx_L8_except_error)
             __Pyx_GOTREF(__pyx_t_7);
             __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
           }
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-          /* "src/fuse_api.pxi":423
+          /* "src/fuse_api.pxi":426
  *                           'exception will be lost:')
  *         pthread_mutex_unlock(&exc_info_mutex)
  *         if res != 0:             # <<<<<<<<<<<<<<
@@ -39962,7 +40001,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
       }
       __pyx_L8_except_error:;
 
-      /* "src/fuse_api.pxi":407
+      /* "src/fuse_api.pxi":410
  *     t.name = 'fuse-worker-%d' % (wd.thread_no+1,)
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -39985,7 +40024,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
     }
   }
 
-  /* "src/fuse_api.pxi":428
+  /* "src/fuse_api.pxi":431
  * 
  *     finally:
  *         sem_post(wd.sem)             # <<<<<<<<<<<<<<
@@ -40040,7 +40079,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
     __pyx_L5:;
   }
 
-  /* "src/fuse_api.pxi":397
+  /* "src/fuse_api.pxi":400
  *     size_t bufsize
  * 
  * cdef void* worker_start(void* data) with gil:             # <<<<<<<<<<<<<<
@@ -40071,7 +40110,7 @@ static void *__pyx_f_6llfuse_worker_start(void *__pyx_v_data) {
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":430
+/* "src/fuse_api.pxi":433
  *         sem_post(wd.sem)
  * 
  * cdef session_loop_mt(workers):             # <<<<<<<<<<<<<<
@@ -40111,7 +40150,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
   int __pyx_t_20;
   __Pyx_RefNannySetupContext("session_loop_mt", 0);
 
-  /* "src/fuse_api.pxi":437
+  /* "src/fuse_api.pxi":440
  *     cdef sem_t sem
  * 
  *     if sem_init(&sem, 0, 0) != 0:             # <<<<<<<<<<<<<<
@@ -40121,37 +40160,37 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
   __pyx_t_1 = ((sem_init((&__pyx_v_sem), 0, 0) != 0) != 0);
   if (__pyx_t_1) {
 
-    /* "src/fuse_api.pxi":438
+    /* "src/fuse_api.pxi":441
  * 
  *     if sem_init(&sem, 0, 0) != 0:
  *         raise OSError(errno.errno, 'sem_init failed with '             # <<<<<<<<<<<<<<
  *                       + strerror(errno.errno))
  * 
  */
-    __pyx_t_2 = __Pyx_PyInt_From_int(errno); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 438, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_int(errno); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 441, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
 
-    /* "src/fuse_api.pxi":439
+    /* "src/fuse_api.pxi":442
  *     if sem_init(&sem, 0, 0) != 0:
  *         raise OSError(errno.errno, 'sem_init failed with '
  *                       + strerror(errno.errno))             # <<<<<<<<<<<<<<
  * 
  *     sigemptyset(&newset);
  */
-    __pyx_t_3 = __pyx_f_6llfuse_strerror(errno); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 439, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_6llfuse_strerror(errno); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 442, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyNumber_Add(__pyx_kp_u_sem_init_failed_with, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 439, __pyx_L1_error)
+    __pyx_t_4 = PyNumber_Add(__pyx_kp_u_sem_init_failed_with, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 442, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "src/fuse_api.pxi":438
+    /* "src/fuse_api.pxi":441
  * 
  *     if sem_init(&sem, 0, 0) != 0:
  *         raise OSError(errno.errno, 'sem_init failed with '             # <<<<<<<<<<<<<<
  *                       + strerror(errno.errno))
  * 
  */
-    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 438, __pyx_L1_error)
+    __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 441, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
@@ -40159,14 +40198,14 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
     PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
     __pyx_t_2 = 0;
     __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 438, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 441, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_Raise(__pyx_t_4, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __PYX_ERR(3, 438, __pyx_L1_error)
+    __PYX_ERR(3, 441, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":437
+    /* "src/fuse_api.pxi":440
  *     cdef sem_t sem
  * 
  *     if sem_init(&sem, 0, 0) != 0:             # <<<<<<<<<<<<<<
@@ -40175,7 +40214,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   }
 
-  /* "src/fuse_api.pxi":441
+  /* "src/fuse_api.pxi":444
  *                       + strerror(errno.errno))
  * 
  *     sigemptyset(&newset);             # <<<<<<<<<<<<<<
@@ -40184,7 +40223,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   sigemptyset((&__pyx_v_newset));
 
-  /* "src/fuse_api.pxi":442
+  /* "src/fuse_api.pxi":445
  * 
  *     sigemptyset(&newset);
  *     sigaddset(&newset, signal.SIGTERM);             # <<<<<<<<<<<<<<
@@ -40193,7 +40232,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   sigaddset((&__pyx_v_newset), SIGTERM);
 
-  /* "src/fuse_api.pxi":443
+  /* "src/fuse_api.pxi":446
  *     sigemptyset(&newset);
  *     sigaddset(&newset, signal.SIGTERM);
  *     sigaddset(&newset, signal.SIGINT);             # <<<<<<<<<<<<<<
@@ -40202,7 +40241,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   sigaddset((&__pyx_v_newset), SIGINT);
 
-  /* "src/fuse_api.pxi":444
+  /* "src/fuse_api.pxi":447
  *     sigaddset(&newset, signal.SIGTERM);
  *     sigaddset(&newset, signal.SIGINT);
  *     sigaddset(&newset, signal.SIGHUP);             # <<<<<<<<<<<<<<
@@ -40211,7 +40250,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   sigaddset((&__pyx_v_newset), SIGHUP);
 
-  /* "src/fuse_api.pxi":445
+  /* "src/fuse_api.pxi":448
  *     sigaddset(&newset, signal.SIGINT);
  *     sigaddset(&newset, signal.SIGHUP);
  *     sigaddset(&newset, signal.SIGQUIT);             # <<<<<<<<<<<<<<
@@ -40220,7 +40259,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   sigaddset((&__pyx_v_newset), SIGQUIT);
 
-  /* "src/fuse_api.pxi":447
+  /* "src/fuse_api.pxi":450
  *     sigaddset(&newset, signal.SIGQUIT);
  * 
  *     PyEval_InitThreads()             # <<<<<<<<<<<<<<
@@ -40229,7 +40268,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   PyEval_InitThreads();
 
-  /* "src/fuse_api.pxi":448
+  /* "src/fuse_api.pxi":451
  * 
  *     PyEval_InitThreads()
  *     bufsize = fuse_chan_bufsize(channel)             # <<<<<<<<<<<<<<
@@ -40238,18 +40277,18 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   __pyx_v_bufsize = fuse_chan_bufsize(__pyx_v_6llfuse_channel);
 
-  /* "src/fuse_api.pxi":449
+  /* "src/fuse_api.pxi":452
  *     PyEval_InitThreads()
  *     bufsize = fuse_chan_bufsize(channel)
  *     wd = <worker_data_t*> calloc_or_raise(workers, sizeof(worker_data_t))             # <<<<<<<<<<<<<<
  *     try:
  *         for i in range(workers):
  */
-  __pyx_t_5 = __Pyx_PyInt_As_size_t(__pyx_v_workers); if (unlikely((__pyx_t_5 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(3, 449, __pyx_L1_error)
-  __pyx_t_6 = __pyx_f_6llfuse_calloc_or_raise(__pyx_t_5, (sizeof(__pyx_t_6llfuse_worker_data_t))); if (unlikely(__pyx_t_6 == NULL)) __PYX_ERR(3, 449, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_size_t(__pyx_v_workers); if (unlikely((__pyx_t_5 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(3, 452, __pyx_L1_error)
+  __pyx_t_6 = __pyx_f_6llfuse_calloc_or_raise(__pyx_t_5, (sizeof(__pyx_t_6llfuse_worker_data_t))); if (unlikely(__pyx_t_6 == NULL)) __PYX_ERR(3, 452, __pyx_L1_error)
   __pyx_v_wd = ((__pyx_t_6llfuse_worker_data_t *)__pyx_t_6);
 
-  /* "src/fuse_api.pxi":450
+  /* "src/fuse_api.pxi":453
  *     bufsize = fuse_chan_bufsize(channel)
  *     wd = <worker_data_t*> calloc_or_raise(workers, sizeof(worker_data_t))
  *     try:             # <<<<<<<<<<<<<<
@@ -40258,18 +40297,18 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
   /*try:*/ {
 
-    /* "src/fuse_api.pxi":451
+    /* "src/fuse_api.pxi":454
  *     wd = <worker_data_t*> calloc_or_raise(workers, sizeof(worker_data_t))
  *     try:
  *         for i in range(workers):             # <<<<<<<<<<<<<<
  *             wd[i].sem = &sem
  *             wd[i].thread_no = i
  */
-    __pyx_t_7 = __Pyx_PyInt_As_long(__pyx_v_workers); if (unlikely((__pyx_t_7 == (long)-1) && PyErr_Occurred())) __PYX_ERR(3, 451, __pyx_L5_error)
+    __pyx_t_7 = __Pyx_PyInt_As_long(__pyx_v_workers); if (unlikely((__pyx_t_7 == (long)-1) && PyErr_Occurred())) __PYX_ERR(3, 454, __pyx_L5_error)
     for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
       __pyx_v_i = __pyx_t_8;
 
-      /* "src/fuse_api.pxi":452
+      /* "src/fuse_api.pxi":455
  *     try:
  *         for i in range(workers):
  *             wd[i].sem = &sem             # <<<<<<<<<<<<<<
@@ -40278,7 +40317,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
       (__pyx_v_wd[__pyx_v_i]).sem = (&__pyx_v_sem);
 
-      /* "src/fuse_api.pxi":453
+      /* "src/fuse_api.pxi":456
  *         for i in range(workers):
  *             wd[i].sem = &sem
  *             wd[i].thread_no = i             # <<<<<<<<<<<<<<
@@ -40287,7 +40326,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
       (__pyx_v_wd[__pyx_v_i]).thread_no = __pyx_v_i;
 
-      /* "src/fuse_api.pxi":454
+      /* "src/fuse_api.pxi":457
  *             wd[i].sem = &sem
  *             wd[i].thread_no = i
  *             wd[i].bufsize = bufsize             # <<<<<<<<<<<<<<
@@ -40296,27 +40335,27 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
       (__pyx_v_wd[__pyx_v_i]).bufsize = __pyx_v_bufsize;
 
-      /* "src/fuse_api.pxi":455
+      /* "src/fuse_api.pxi":458
  *             wd[i].thread_no = i
  *             wd[i].bufsize = bufsize
  *             wd[i].buf = calloc_or_raise(1, bufsize)             # <<<<<<<<<<<<<<
  * 
- *             # Disable signal reception in new thread
+ *             # Ensure that signals get delivered to main thread
  */
-      __pyx_t_6 = __pyx_f_6llfuse_calloc_or_raise(1, __pyx_v_bufsize); if (unlikely(__pyx_t_6 == NULL)) __PYX_ERR(3, 455, __pyx_L5_error)
+      __pyx_t_6 = __pyx_f_6llfuse_calloc_or_raise(1, __pyx_v_bufsize); if (unlikely(__pyx_t_6 == NULL)) __PYX_ERR(3, 458, __pyx_L5_error)
       (__pyx_v_wd[__pyx_v_i]).buf = __pyx_t_6;
 
-      /* "src/fuse_api.pxi":459
- *             # Disable signal reception in new thread
- *             # (FUSE does the same, probably for a good reason)
+      /* "src/fuse_api.pxi":461
+ * 
+ *             # Ensure that signals get delivered to main thread
  *             pthread_sigmask(SIG_BLOCK, &newset, &oldset)             # <<<<<<<<<<<<<<
  *             res = pthread_create(&wd[i].thread_id, NULL, &worker_start, wd+i)
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
  */
       pthread_sigmask(SIG_BLOCK, (&__pyx_v_newset), (&__pyx_v_oldset));
 
-      /* "src/fuse_api.pxi":460
- *             # (FUSE does the same, probably for a good reason)
+      /* "src/fuse_api.pxi":462
+ *             # Ensure that signals get delivered to main thread
  *             pthread_sigmask(SIG_BLOCK, &newset, &oldset)
  *             res = pthread_create(&wd[i].thread_id, NULL, &worker_start, wd+i)             # <<<<<<<<<<<<<<
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
@@ -40324,7 +40363,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
       __pyx_v_res = pthread_create((&(__pyx_v_wd[__pyx_v_i]).thread_id), NULL, (&__pyx_f_6llfuse_worker_start), (__pyx_v_wd + __pyx_v_i));
 
-      /* "src/fuse_api.pxi":461
+      /* "src/fuse_api.pxi":463
  *             pthread_sigmask(SIG_BLOCK, &newset, &oldset)
  *             res = pthread_create(&wd[i].thread_id, NULL, &worker_start, wd+i)
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)             # <<<<<<<<<<<<<<
@@ -40333,7 +40372,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
       pthread_sigmask(SIG_SETMASK, (&__pyx_v_oldset), NULL);
 
-      /* "src/fuse_api.pxi":462
+      /* "src/fuse_api.pxi":464
  *             res = pthread_create(&wd[i].thread_id, NULL, &worker_start, wd+i)
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
  *             if res != 0:             # <<<<<<<<<<<<<<
@@ -40343,37 +40382,37 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
       __pyx_t_1 = ((__pyx_v_res != 0) != 0);
       if (__pyx_t_1) {
 
-        /* "src/fuse_api.pxi":463
+        /* "src/fuse_api.pxi":465
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
  *             if res != 0:
  *                 raise OSError(res, 'pthread_create failed with '             # <<<<<<<<<<<<<<
  *                               + strerror(res))
  *             wd[i].started = 1
  */
-        __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_res); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 463, __pyx_L5_error)
+        __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_res); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 465, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_4);
 
-        /* "src/fuse_api.pxi":464
+        /* "src/fuse_api.pxi":466
  *             if res != 0:
  *                 raise OSError(res, 'pthread_create failed with '
  *                               + strerror(res))             # <<<<<<<<<<<<<<
  *             wd[i].started = 1
  * 
  */
-        __pyx_t_3 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 464, __pyx_L5_error)
+        __pyx_t_3 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 466, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_2 = PyNumber_Add(__pyx_kp_u_pthread_create_failed_with, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 464, __pyx_L5_error)
+        __pyx_t_2 = PyNumber_Add(__pyx_kp_u_pthread_create_failed_with, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 466, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-        /* "src/fuse_api.pxi":463
+        /* "src/fuse_api.pxi":465
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
  *             if res != 0:
  *                 raise OSError(res, 'pthread_create failed with '             # <<<<<<<<<<<<<<
  *                               + strerror(res))
  *             wd[i].started = 1
  */
-        __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 463, __pyx_L5_error)
+        __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 465, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_GIVEREF(__pyx_t_4);
         PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
@@ -40381,14 +40420,14 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
         PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
         __pyx_t_4 = 0;
         __pyx_t_2 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 463, __pyx_L5_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 465, __pyx_L5_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_Raise(__pyx_t_2, 0, 0, 0);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-        __PYX_ERR(3, 463, __pyx_L5_error)
+        __PYX_ERR(3, 465, __pyx_L5_error)
 
-        /* "src/fuse_api.pxi":462
+        /* "src/fuse_api.pxi":464
  *             res = pthread_create(&wd[i].thread_id, NULL, &worker_start, wd+i)
  *             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
  *             if res != 0:             # <<<<<<<<<<<<<<
@@ -40397,7 +40436,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
       }
 
-      /* "src/fuse_api.pxi":465
+      /* "src/fuse_api.pxi":467
  *                 raise OSError(res, 'pthread_create failed with '
  *                               + strerror(res))
  *             wd[i].started = 1             # <<<<<<<<<<<<<<
@@ -40407,7 +40446,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
       (__pyx_v_wd[__pyx_v_i]).started = 1;
     }
 
-    /* "src/fuse_api.pxi":467
+    /* "src/fuse_api.pxi":469
  *             wd[i].started = 1
  * 
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -40421,7 +40460,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
         #endif
         /*try:*/ {
 
-          /* "src/fuse_api.pxi":468
+          /* "src/fuse_api.pxi":470
  * 
  *         with nogil:
  *             while not fuse_session_exited(session):             # <<<<<<<<<<<<<<
@@ -40432,7 +40471,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
             __pyx_t_1 = ((!(fuse_session_exited(__pyx_v_6llfuse_session) != 0)) != 0);
             if (!__pyx_t_1) break;
 
-            /* "src/fuse_api.pxi":469
+            /* "src/fuse_api.pxi":471
  *         with nogil:
  *             while not fuse_session_exited(session):
  *                 sem_wait(&sem) # also interrupted by signals             # <<<<<<<<<<<<<<
@@ -40443,7 +40482,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
           }
         }
 
-        /* "src/fuse_api.pxi":467
+        /* "src/fuse_api.pxi":469
  *             wd[i].started = 1
  * 
  *         with nogil:             # <<<<<<<<<<<<<<
@@ -40462,94 +40501,69 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
     }
   }
 
-  /* "src/fuse_api.pxi":472
+  /* "src/fuse_api.pxi":474
  * 
  *     finally:
  *         for i in range(workers):             # <<<<<<<<<<<<<<
  *             if wd[i].started:
- *                 with nogil:
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
  */
   /*finally:*/ {
     /*normal exit:*/{
-      __pyx_t_7 = __Pyx_PyInt_As_long(__pyx_v_workers); if (unlikely((__pyx_t_7 == (long)-1) && PyErr_Occurred())) __PYX_ERR(3, 472, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyInt_As_long(__pyx_v_workers); if (unlikely((__pyx_t_7 == (long)-1) && PyErr_Occurred())) __PYX_ERR(3, 474, __pyx_L1_error)
       for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
         __pyx_v_i = __pyx_t_8;
 
-        /* "src/fuse_api.pxi":473
+        /* "src/fuse_api.pxi":475
  *     finally:
  *         for i in range(workers):
  *             if wd[i].started:             # <<<<<<<<<<<<<<
- *                 with nogil:
- *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
  */
         __pyx_t_1 = ((__pyx_v_wd[__pyx_v_i]).started != 0);
         if (__pyx_t_1) {
 
-          /* "src/fuse_api.pxi":474
- *         for i in range(workers):
- *             if wd[i].started:
- *                 with nogil:             # <<<<<<<<<<<<<<
- *                     res = pthread_join(wd[i].thread_id, NULL)
- *                 if res != 0:
- */
-          {
-              #ifdef WITH_THREAD
-              PyThreadState *_save;
-              Py_UNBLOCK_THREADS
-              #endif
-              /*try:*/ {
-
-                /* "src/fuse_api.pxi":475
- *             if wd[i].started:
- *                 with nogil:
- *                     res = pthread_join(wd[i].thread_id, NULL)             # <<<<<<<<<<<<<<
- *                 if res != 0:
- *                     log.error('pthread_join failed with: %s', strerror(res))
- */
-                __pyx_v_res = pthread_join((__pyx_v_wd[__pyx_v_i]).thread_id, NULL);
-              }
-
-              /* "src/fuse_api.pxi":474
- *         for i in range(workers):
- *             if wd[i].started:
- *                 with nogil:             # <<<<<<<<<<<<<<
- *                     res = pthread_join(wd[i].thread_id, NULL)
- *                 if res != 0:
- */
-              /*finally:*/ {
-                /*normal exit:*/{
-                  #ifdef WITH_THREAD
-                  Py_BLOCK_THREADS
-                  #endif
-                  goto __pyx_L22;
-                }
-                __pyx_L22:;
-              }
-          }
-
           /* "src/fuse_api.pxi":476
- *                 with nogil:
- *                     res = pthread_join(wd[i].thread_id, NULL)
- *                 if res != 0:             # <<<<<<<<<<<<<<
- *                     log.error('pthread_join failed with: %s', strerror(res))
- * 
+ *         for i in range(workers):
+ *             if wd[i].started:
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)             # <<<<<<<<<<<<<<
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:
  */
-          __pyx_t_1 = ((__pyx_v_res != 0) != 0);
+          __pyx_v_res = pthread_kill((__pyx_v_wd[__pyx_v_i]).thread_id, SIGUSR1);
+
+          /* "src/fuse_api.pxi":478
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:             # <<<<<<<<<<<<<<
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:
+ */
+          switch (__pyx_v_res) {
+            case 0:
+            case ESRCH:
+            __pyx_t_1 = 0;
+            break;
+            default:
+            __pyx_t_1 = 1;
+            break;
+          }
           if (__pyx_t_1) {
 
-            /* "src/fuse_api.pxi":477
+            /* "src/fuse_api.pxi":479
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:
+ *                     log.error('pthread_kill failed with: %s', strerror(res))             # <<<<<<<<<<<<<<
+ *                 with nogil:
  *                     res = pthread_join(wd[i].thread_id, NULL)
- *                 if res != 0:
- *                     log.error('pthread_join failed with: %s', strerror(res))             # <<<<<<<<<<<<<<
- * 
- *             if wd[i].buf != NULL:
  */
-            __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 477, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 479, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 477, __pyx_L1_error)
+            __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_error); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 479, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_4);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            __pyx_t_3 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 477, __pyx_L1_error)
+            __pyx_t_3 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 479, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
             __pyx_t_9 = NULL;
             __pyx_t_10 = 0;
@@ -40565,8 +40579,8 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
             }
             #if CYTHON_FAST_PYCALL
             if (PyFunction_Check(__pyx_t_4)) {
-              PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_3};
-              __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 477, __pyx_L1_error)
+              PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_kp_u_pthread_kill_failed_with_s, __pyx_t_3};
+              __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 479, __pyx_L1_error)
               __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
               __Pyx_GOTREF(__pyx_t_2);
               __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -40574,33 +40588,157 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
             #endif
             #if CYTHON_FAST_PYCCALL
             if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
-              PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_3};
-              __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 477, __pyx_L1_error)
+              PyObject *__pyx_temp[3] = {__pyx_t_9, __pyx_kp_u_pthread_kill_failed_with_s, __pyx_t_3};
+              __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 479, __pyx_L1_error)
               __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
               __Pyx_GOTREF(__pyx_t_2);
               __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             } else
             #endif
             {
-              __pyx_t_11 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 477, __pyx_L1_error)
+              __pyx_t_11 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 479, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_11);
               if (__pyx_t_9) {
                 __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9); __pyx_t_9 = NULL;
               }
-              __Pyx_INCREF(__pyx_kp_u_pthread_join_failed_with_s);
-              __Pyx_GIVEREF(__pyx_kp_u_pthread_join_failed_with_s);
-              PyTuple_SET_ITEM(__pyx_t_11, 0+__pyx_t_10, __pyx_kp_u_pthread_join_failed_with_s);
+              __Pyx_INCREF(__pyx_kp_u_pthread_kill_failed_with_s);
+              __Pyx_GIVEREF(__pyx_kp_u_pthread_kill_failed_with_s);
+              PyTuple_SET_ITEM(__pyx_t_11, 0+__pyx_t_10, __pyx_kp_u_pthread_kill_failed_with_s);
               __Pyx_GIVEREF(__pyx_t_3);
               PyTuple_SET_ITEM(__pyx_t_11, 1+__pyx_t_10, __pyx_t_3);
               __pyx_t_3 = 0;
-              __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_11, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 477, __pyx_L1_error)
+              __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_11, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 479, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_2);
               __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
             }
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-            /* "src/fuse_api.pxi":476
+            /* "src/fuse_api.pxi":478
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:             # <<<<<<<<<<<<<<
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:
+ */
+          }
+
+          /* "src/fuse_api.pxi":480
+ *                 if res != 0 and res != errno.ESRCH:
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:             # <<<<<<<<<<<<<<
+ *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 if res != 0:
+ */
+          {
+              #ifdef WITH_THREAD
+              PyThreadState *_save;
+              Py_UNBLOCK_THREADS
+              #endif
+              /*try:*/ {
+
+                /* "src/fuse_api.pxi":481
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:
+ *                     res = pthread_join(wd[i].thread_id, NULL)             # <<<<<<<<<<<<<<
+ *                 if res != 0:
+ *                     log.error('pthread_join failed with: %s', strerror(res))
+ */
+                __pyx_v_res = pthread_join((__pyx_v_wd[__pyx_v_i]).thread_id, NULL);
+              }
+
+              /* "src/fuse_api.pxi":480
+ *                 if res != 0 and res != errno.ESRCH:
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:             # <<<<<<<<<<<<<<
+ *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 if res != 0:
+ */
+              /*finally:*/ {
+                /*normal exit:*/{
+                  #ifdef WITH_THREAD
+                  Py_BLOCK_THREADS
+                  #endif
+                  goto __pyx_L23;
+                }
+                __pyx_L23:;
+              }
+          }
+
+          /* "src/fuse_api.pxi":482
+ *                 with nogil:
+ *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 if res != 0:             # <<<<<<<<<<<<<<
+ *                     log.error('pthread_join failed with: %s', strerror(res))
+ * 
+ */
+          __pyx_t_1 = ((__pyx_v_res != 0) != 0);
+          if (__pyx_t_1) {
+
+            /* "src/fuse_api.pxi":483
+ *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 if res != 0:
+ *                     log.error('pthread_join failed with: %s', strerror(res))             # <<<<<<<<<<<<<<
+ * 
+ *             if wd[i].buf != NULL:
+ */
+            __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 483, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_4);
+            __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 483, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_11);
+            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            __pyx_t_4 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 483, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_4);
+            __pyx_t_3 = NULL;
+            __pyx_t_10 = 0;
+            if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_11))) {
+              __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_11);
+              if (likely(__pyx_t_3)) {
+                PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
+                __Pyx_INCREF(__pyx_t_3);
+                __Pyx_INCREF(function);
+                __Pyx_DECREF_SET(__pyx_t_11, function);
+                __pyx_t_10 = 1;
+              }
+            }
+            #if CYTHON_FAST_PYCALL
+            if (PyFunction_Check(__pyx_t_11)) {
+              PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_4};
+              __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_11, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 483, __pyx_L1_error)
+              __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+              __Pyx_GOTREF(__pyx_t_2);
+              __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            } else
+            #endif
+            #if CYTHON_FAST_PYCCALL
+            if (__Pyx_PyFastCFunction_Check(__pyx_t_11)) {
+              PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_4};
+              __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_11, __pyx_temp+1-__pyx_t_10, 2+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 483, __pyx_L1_error)
+              __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+              __Pyx_GOTREF(__pyx_t_2);
+              __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            } else
+            #endif
+            {
+              __pyx_t_9 = PyTuple_New(2+__pyx_t_10); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 483, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_9);
+              if (__pyx_t_3) {
+                __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __pyx_t_3 = NULL;
+              }
+              __Pyx_INCREF(__pyx_kp_u_pthread_join_failed_with_s);
+              __Pyx_GIVEREF(__pyx_kp_u_pthread_join_failed_with_s);
+              PyTuple_SET_ITEM(__pyx_t_9, 0+__pyx_t_10, __pyx_kp_u_pthread_join_failed_with_s);
+              __Pyx_GIVEREF(__pyx_t_4);
+              PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_10, __pyx_t_4);
+              __pyx_t_4 = 0;
+              __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_11, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 483, __pyx_L1_error)
+              __Pyx_GOTREF(__pyx_t_2);
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+            }
+            __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+            __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+            /* "src/fuse_api.pxi":482
  *                 with nogil:
  *                     res = pthread_join(wd[i].thread_id, NULL)
  *                 if res != 0:             # <<<<<<<<<<<<<<
@@ -40609,16 +40747,16 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
           }
 
-          /* "src/fuse_api.pxi":473
+          /* "src/fuse_api.pxi":475
  *     finally:
  *         for i in range(workers):
  *             if wd[i].started:             # <<<<<<<<<<<<<<
- *                 with nogil:
- *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
  */
         }
 
-        /* "src/fuse_api.pxi":479
+        /* "src/fuse_api.pxi":485
  *                     log.error('pthread_join failed with: %s', strerror(res))
  * 
  *             if wd[i].buf != NULL:             # <<<<<<<<<<<<<<
@@ -40628,7 +40766,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
         __pyx_t_1 = (((__pyx_v_wd[__pyx_v_i]).buf != NULL) != 0);
         if (__pyx_t_1) {
 
-          /* "src/fuse_api.pxi":480
+          /* "src/fuse_api.pxi":486
  * 
  *             if wd[i].buf != NULL:
  *                 stdlib.free(wd[i].buf)             # <<<<<<<<<<<<<<
@@ -40637,7 +40775,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
           free((__pyx_v_wd[__pyx_v_i]).buf);
 
-          /* "src/fuse_api.pxi":479
+          /* "src/fuse_api.pxi":485
  *                     log.error('pthread_join failed with: %s', strerror(res))
  * 
  *             if wd[i].buf != NULL:             # <<<<<<<<<<<<<<
@@ -40647,7 +40785,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
         }
       }
 
-      /* "src/fuse_api.pxi":482
+      /* "src/fuse_api.pxi":488
  *                 stdlib.free(wd[i].buf)
  * 
  *         stdlib.free(wd)             # <<<<<<<<<<<<<<
@@ -40676,30 +40814,129 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
       __pyx_t_8 = __pyx_lineno; __pyx_t_10 = __pyx_clineno; __pyx_t_12 = __pyx_filename;
       {
 
-        /* "src/fuse_api.pxi":472
+        /* "src/fuse_api.pxi":474
  * 
  *     finally:
  *         for i in range(workers):             # <<<<<<<<<<<<<<
  *             if wd[i].started:
- *                 with nogil:
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
  */
-        __pyx_t_7 = __Pyx_PyInt_As_long(__pyx_v_workers); if (unlikely((__pyx_t_7 == (long)-1) && PyErr_Occurred())) __PYX_ERR(3, 472, __pyx_L26_error)
+        __pyx_t_7 = __Pyx_PyInt_As_long(__pyx_v_workers); if (unlikely((__pyx_t_7 == (long)-1) && PyErr_Occurred())) __PYX_ERR(3, 474, __pyx_L27_error)
         for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_7; __pyx_t_19+=1) {
           __pyx_v_i = __pyx_t_19;
 
-          /* "src/fuse_api.pxi":473
+          /* "src/fuse_api.pxi":475
  *     finally:
  *         for i in range(workers):
  *             if wd[i].started:             # <<<<<<<<<<<<<<
- *                 with nogil:
- *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
  */
           __pyx_t_1 = ((__pyx_v_wd[__pyx_v_i]).started != 0);
           if (__pyx_t_1) {
 
-            /* "src/fuse_api.pxi":474
+            /* "src/fuse_api.pxi":476
  *         for i in range(workers):
  *             if wd[i].started:
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)             # <<<<<<<<<<<<<<
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:
+ */
+            __pyx_v_res = pthread_kill((__pyx_v_wd[__pyx_v_i]).thread_id, SIGUSR1);
+
+            /* "src/fuse_api.pxi":478
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:             # <<<<<<<<<<<<<<
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:
+ */
+            switch (__pyx_v_res) {
+              case 0:
+              case ESRCH:
+              __pyx_t_1 = 0;
+              break;
+              default:
+              __pyx_t_1 = 1;
+              break;
+            }
+            if (__pyx_t_1) {
+
+              /* "src/fuse_api.pxi":479
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:
+ *                     log.error('pthread_kill failed with: %s', strerror(res))             # <<<<<<<<<<<<<<
+ *                 with nogil:
+ *                     res = pthread_join(wd[i].thread_id, NULL)
+ */
+              __pyx_t_11 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 479, __pyx_L27_error)
+              __Pyx_GOTREF(__pyx_t_11);
+              __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_11, __pyx_n_s_error); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 479, __pyx_L27_error)
+              __Pyx_GOTREF(__pyx_t_9);
+              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+              __pyx_t_11 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 479, __pyx_L27_error)
+              __Pyx_GOTREF(__pyx_t_11);
+              __pyx_t_4 = NULL;
+              __pyx_t_20 = 0;
+              if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_9))) {
+                __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_9);
+                if (likely(__pyx_t_4)) {
+                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
+                  __Pyx_INCREF(__pyx_t_4);
+                  __Pyx_INCREF(function);
+                  __Pyx_DECREF_SET(__pyx_t_9, function);
+                  __pyx_t_20 = 1;
+                }
+              }
+              #if CYTHON_FAST_PYCALL
+              if (PyFunction_Check(__pyx_t_9)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_kp_u_pthread_kill_failed_with_s, __pyx_t_11};
+                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_9, __pyx_temp+1-__pyx_t_20, 2+__pyx_t_20); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 479, __pyx_L27_error)
+                __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+              } else
+              #endif
+              #if CYTHON_FAST_PYCCALL
+              if (__Pyx_PyFastCFunction_Check(__pyx_t_9)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_kp_u_pthread_kill_failed_with_s, __pyx_t_11};
+                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_9, __pyx_temp+1-__pyx_t_20, 2+__pyx_t_20); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 479, __pyx_L27_error)
+                __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+              } else
+              #endif
+              {
+                __pyx_t_3 = PyTuple_New(2+__pyx_t_20); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 479, __pyx_L27_error)
+                __Pyx_GOTREF(__pyx_t_3);
+                if (__pyx_t_4) {
+                  __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4); __pyx_t_4 = NULL;
+                }
+                __Pyx_INCREF(__pyx_kp_u_pthread_kill_failed_with_s);
+                __Pyx_GIVEREF(__pyx_kp_u_pthread_kill_failed_with_s);
+                PyTuple_SET_ITEM(__pyx_t_3, 0+__pyx_t_20, __pyx_kp_u_pthread_kill_failed_with_s);
+                __Pyx_GIVEREF(__pyx_t_11);
+                PyTuple_SET_ITEM(__pyx_t_3, 1+__pyx_t_20, __pyx_t_11);
+                __pyx_t_11 = 0;
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 479, __pyx_L27_error)
+                __Pyx_GOTREF(__pyx_t_2);
+                __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+              }
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+              /* "src/fuse_api.pxi":478
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
+ *                 if res != 0 and res != errno.ESRCH:             # <<<<<<<<<<<<<<
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
+ *                 with nogil:
+ */
+            }
+
+            /* "src/fuse_api.pxi":480
+ *                 if res != 0 and res != errno.ESRCH:
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
  *                 with nogil:             # <<<<<<<<<<<<<<
  *                     res = pthread_join(wd[i].thread_id, NULL)
  *                 if res != 0:
@@ -40711,8 +40948,8 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
                 #endif
                 /*try:*/ {
 
-                  /* "src/fuse_api.pxi":475
- *             if wd[i].started:
+                  /* "src/fuse_api.pxi":481
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
  *                 with nogil:
  *                     res = pthread_join(wd[i].thread_id, NULL)             # <<<<<<<<<<<<<<
  *                 if res != 0:
@@ -40721,9 +40958,9 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
                   __pyx_v_res = pthread_join((__pyx_v_wd[__pyx_v_i]).thread_id, NULL);
                 }
 
-                /* "src/fuse_api.pxi":474
- *         for i in range(workers):
- *             if wd[i].started:
+                /* "src/fuse_api.pxi":480
+ *                 if res != 0 and res != errno.ESRCH:
+ *                     log.error('pthread_kill failed with: %s', strerror(res))
  *                 with nogil:             # <<<<<<<<<<<<<<
  *                     res = pthread_join(wd[i].thread_id, NULL)
  *                 if res != 0:
@@ -40733,13 +40970,13 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
                     #ifdef WITH_THREAD
                     Py_BLOCK_THREADS
                     #endif
-                    goto __pyx_L34;
+                    goto __pyx_L36;
                   }
-                  __pyx_L34:;
+                  __pyx_L36:;
                 }
             }
 
-            /* "src/fuse_api.pxi":476
+            /* "src/fuse_api.pxi":482
  *                 with nogil:
  *                     res = pthread_join(wd[i].thread_id, NULL)
  *                 if res != 0:             # <<<<<<<<<<<<<<
@@ -40749,70 +40986,70 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
             __pyx_t_1 = ((__pyx_v_res != 0) != 0);
             if (__pyx_t_1) {
 
-              /* "src/fuse_api.pxi":477
+              /* "src/fuse_api.pxi":483
  *                     res = pthread_join(wd[i].thread_id, NULL)
  *                 if res != 0:
  *                     log.error('pthread_join failed with: %s', strerror(res))             # <<<<<<<<<<<<<<
  * 
  *             if wd[i].buf != NULL:
  */
-              __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 477, __pyx_L26_error)
-              __Pyx_GOTREF(__pyx_t_4);
-              __pyx_t_11 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_error); if (unlikely(!__pyx_t_11)) __PYX_ERR(3, 477, __pyx_L26_error)
-              __Pyx_GOTREF(__pyx_t_11);
-              __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-              __pyx_t_4 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 477, __pyx_L26_error)
-              __Pyx_GOTREF(__pyx_t_4);
-              __pyx_t_3 = NULL;
+              __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 483, __pyx_L27_error)
+              __Pyx_GOTREF(__pyx_t_9);
+              __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_error); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 483, __pyx_L27_error)
+              __Pyx_GOTREF(__pyx_t_3);
+              __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+              __pyx_t_9 = __pyx_f_6llfuse_strerror(__pyx_v_res); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 483, __pyx_L27_error)
+              __Pyx_GOTREF(__pyx_t_9);
+              __pyx_t_11 = NULL;
               __pyx_t_20 = 0;
-              if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_11))) {
-                __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_11);
-                if (likely(__pyx_t_3)) {
-                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_11);
-                  __Pyx_INCREF(__pyx_t_3);
+              if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+                __pyx_t_11 = PyMethod_GET_SELF(__pyx_t_3);
+                if (likely(__pyx_t_11)) {
+                  PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+                  __Pyx_INCREF(__pyx_t_11);
                   __Pyx_INCREF(function);
-                  __Pyx_DECREF_SET(__pyx_t_11, function);
+                  __Pyx_DECREF_SET(__pyx_t_3, function);
                   __pyx_t_20 = 1;
                 }
               }
               #if CYTHON_FAST_PYCALL
-              if (PyFunction_Check(__pyx_t_11)) {
-                PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_4};
-                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_11, __pyx_temp+1-__pyx_t_20, 2+__pyx_t_20); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 477, __pyx_L26_error)
-                __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+              if (PyFunction_Check(__pyx_t_3)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_11, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_9};
+                __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_20, 2+__pyx_t_20); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 483, __pyx_L27_error)
+                __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
                 __Pyx_GOTREF(__pyx_t_2);
-                __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
               } else
               #endif
               #if CYTHON_FAST_PYCCALL
-              if (__Pyx_PyFastCFunction_Check(__pyx_t_11)) {
-                PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_4};
-                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_11, __pyx_temp+1-__pyx_t_20, 2+__pyx_t_20); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 477, __pyx_L26_error)
-                __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+              if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
+                PyObject *__pyx_temp[3] = {__pyx_t_11, __pyx_kp_u_pthread_join_failed_with_s, __pyx_t_9};
+                __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_20, 2+__pyx_t_20); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 483, __pyx_L27_error)
+                __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
                 __Pyx_GOTREF(__pyx_t_2);
-                __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+                __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
               } else
               #endif
               {
-                __pyx_t_9 = PyTuple_New(2+__pyx_t_20); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 477, __pyx_L26_error)
-                __Pyx_GOTREF(__pyx_t_9);
-                if (__pyx_t_3) {
-                  __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __pyx_t_3 = NULL;
+                __pyx_t_4 = PyTuple_New(2+__pyx_t_20); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 483, __pyx_L27_error)
+                __Pyx_GOTREF(__pyx_t_4);
+                if (__pyx_t_11) {
+                  __Pyx_GIVEREF(__pyx_t_11); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_11); __pyx_t_11 = NULL;
                 }
                 __Pyx_INCREF(__pyx_kp_u_pthread_join_failed_with_s);
                 __Pyx_GIVEREF(__pyx_kp_u_pthread_join_failed_with_s);
-                PyTuple_SET_ITEM(__pyx_t_9, 0+__pyx_t_20, __pyx_kp_u_pthread_join_failed_with_s);
-                __Pyx_GIVEREF(__pyx_t_4);
-                PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_20, __pyx_t_4);
-                __pyx_t_4 = 0;
-                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_11, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 477, __pyx_L26_error)
+                PyTuple_SET_ITEM(__pyx_t_4, 0+__pyx_t_20, __pyx_kp_u_pthread_join_failed_with_s);
+                __Pyx_GIVEREF(__pyx_t_9);
+                PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_20, __pyx_t_9);
+                __pyx_t_9 = 0;
+                __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_4, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 483, __pyx_L27_error)
                 __Pyx_GOTREF(__pyx_t_2);
-                __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+                __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               }
-              __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+              __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
               __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-              /* "src/fuse_api.pxi":476
+              /* "src/fuse_api.pxi":482
  *                 with nogil:
  *                     res = pthread_join(wd[i].thread_id, NULL)
  *                 if res != 0:             # <<<<<<<<<<<<<<
@@ -40821,16 +41058,16 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
             }
 
-            /* "src/fuse_api.pxi":473
+            /* "src/fuse_api.pxi":475
  *     finally:
  *         for i in range(workers):
  *             if wd[i].started:             # <<<<<<<<<<<<<<
- *                 with nogil:
- *                     res = pthread_join(wd[i].thread_id, NULL)
+ *                 res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+ *                 # Thread may have terminated already
  */
           }
 
-          /* "src/fuse_api.pxi":479
+          /* "src/fuse_api.pxi":485
  *                     log.error('pthread_join failed with: %s', strerror(res))
  * 
  *             if wd[i].buf != NULL:             # <<<<<<<<<<<<<<
@@ -40840,7 +41077,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
           __pyx_t_1 = (((__pyx_v_wd[__pyx_v_i]).buf != NULL) != 0);
           if (__pyx_t_1) {
 
-            /* "src/fuse_api.pxi":480
+            /* "src/fuse_api.pxi":486
  * 
  *             if wd[i].buf != NULL:
  *                 stdlib.free(wd[i].buf)             # <<<<<<<<<<<<<<
@@ -40849,7 +41086,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
  */
             free((__pyx_v_wd[__pyx_v_i]).buf);
 
-            /* "src/fuse_api.pxi":479
+            /* "src/fuse_api.pxi":485
  *                     log.error('pthread_join failed with: %s', strerror(res))
  * 
  *             if wd[i].buf != NULL:             # <<<<<<<<<<<<<<
@@ -40859,7 +41096,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
           }
         }
 
-        /* "src/fuse_api.pxi":482
+        /* "src/fuse_api.pxi":488
  *                 stdlib.free(wd[i].buf)
  * 
  *         stdlib.free(wd)             # <<<<<<<<<<<<<<
@@ -40882,7 +41119,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
       __pyx_t_13 = 0; __pyx_t_14 = 0; __pyx_t_15 = 0; __pyx_t_16 = 0; __pyx_t_17 = 0; __pyx_t_18 = 0;
       __pyx_lineno = __pyx_t_8; __pyx_clineno = __pyx_t_10; __pyx_filename = __pyx_t_12;
       goto __pyx_L1_error;
-      __pyx_L26_error:;
+      __pyx_L27_error:;
       __Pyx_PyThreadState_assign
       if (PY_MAJOR_VERSION >= 3) {
         __Pyx_XGIVEREF(__pyx_t_16);
@@ -40899,7 +41136,7 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
     __pyx_L6:;
   }
 
-  /* "src/fuse_api.pxi":430
+  /* "src/fuse_api.pxi":433
  *         sem_post(wd.sem)
  * 
  * cdef session_loop_mt(workers):             # <<<<<<<<<<<<<<
@@ -40924,17 +41161,17 @@ static PyObject *__pyx_f_6llfuse_session_loop_mt(PyObject *__pyx_v_workers) {
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":485
+/* "src/fuse_api.pxi":491
  * 
  * 
  * def close(unmount=True):             # <<<<<<<<<<<<<<
- *     '''Unmount file system and clean up
+ *     '''Clean up and ensure filesystem is unmounted
  * 
  */
 
 /* Python wrapper */
 static PyObject *__pyx_pw_6llfuse_13close(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_6llfuse_12close[] = "close(unmount=True)\nUnmount file system and clean up\n\n    If *unmount* is False, only clean up operations are peformed, but\n    the file system is not unmounted. As long as the file system\n    process is still running, all requests will hang. Once the process\n    has terminated, these (and all future) requests fail with ESHUTDOWN.\n    ";
+static char __pyx_doc_6llfuse_12close[] = "close(unmount=True)\nClean up and ensure filesystem is unmounted\n\n    If *unmount* is False, only clean up operations are peformed, but the file\n    system is not explicitly unmounted.\n\n    Normally, the filesystem is unmounted by the user calling umount(8) or\n    fusermount(1), which then terminates the FUSE main loop. However, the loop\n    may also terminate as a result of an exception or a signal. In this case the\n    filesystem remains mounted, but any attempt to access it will block (while\n    the filesystem process is still running) or (after the filesystem process\n    has terminated) return an error. If *unmount* is True, this function will\n    ensure that the filesystem is properly unmounted.\n\n    Note: if the connection to the kernel is terminated via the\n    ``/sys/fs/fuse/connections/`` interface, this function will *not* unmount\n    the filesystem even if *unmount* is True.\n    ";
 static PyMethodDef __pyx_mdef_6llfuse_13close = {"close", (PyCFunction)__pyx_pw_6llfuse_13close, METH_VARARGS|METH_KEYWORDS, __pyx_doc_6llfuse_12close};
 static PyObject *__pyx_pw_6llfuse_13close(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_unmount = 0;
@@ -40962,7 +41199,7 @@ static PyObject *__pyx_pw_6llfuse_13close(PyObject *__pyx_self, PyObject *__pyx_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "close") < 0)) __PYX_ERR(3, 485, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "close") < 0)) __PYX_ERR(3, 491, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -40975,7 +41212,7 @@ static PyObject *__pyx_pw_6llfuse_13close(PyObject *__pyx_self, PyObject *__pyx_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("close", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 485, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("close", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 491, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("llfuse.close", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -41001,24 +41238,24 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("close", 0);
 
-  /* "src/fuse_api.pxi":499
+  /* "src/fuse_api.pxi":515
  *     global exc_info
  * 
  *     log.debug('Calling fuse_session_remove_chan')             # <<<<<<<<<<<<<<
  *     fuse_session_remove_chan(channel)
  *     log.debug('Calling fuse_session_destroy')
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 499, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 499, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__79, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 499, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__79, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":500
+  /* "src/fuse_api.pxi":516
  * 
  *     log.debug('Calling fuse_session_remove_chan')
  *     fuse_session_remove_chan(channel)             # <<<<<<<<<<<<<<
@@ -41027,24 +41264,24 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
   fuse_session_remove_chan(__pyx_v_6llfuse_channel);
 
-  /* "src/fuse_api.pxi":501
+  /* "src/fuse_api.pxi":517
  *     log.debug('Calling fuse_session_remove_chan')
  *     fuse_session_remove_chan(channel)
  *     log.debug('Calling fuse_session_destroy')             # <<<<<<<<<<<<<<
  *     fuse_session_destroy(session)
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 501, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 501, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__80, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 501, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__80, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":502
+  /* "src/fuse_api.pxi":518
  *     fuse_session_remove_chan(channel)
  *     log.debug('Calling fuse_session_destroy')
  *     fuse_session_destroy(session)             # <<<<<<<<<<<<<<
@@ -41053,44 +41290,44 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
   fuse_session_destroy(__pyx_v_6llfuse_session);
 
-  /* "src/fuse_api.pxi":504
+  /* "src/fuse_api.pxi":520
  *     fuse_session_destroy(session)
  * 
  *     if unmount:             # <<<<<<<<<<<<<<
  *         log.debug('Calling fuse_unmount')
  *         fuse_unmount(<char*>mountpoint_b, channel)
  */
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_v_unmount); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 504, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_v_unmount); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 520, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "src/fuse_api.pxi":505
+    /* "src/fuse_api.pxi":521
  * 
  *     if unmount:
  *         log.debug('Calling fuse_unmount')             # <<<<<<<<<<<<<<
  *         fuse_unmount(<char*>mountpoint_b, channel)
  *     else:
  */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 505, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_log); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 521, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 505, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_debug); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 521, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__81, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 505, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__81, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 521, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "src/fuse_api.pxi":506
+    /* "src/fuse_api.pxi":522
  *     if unmount:
  *         log.debug('Calling fuse_unmount')
  *         fuse_unmount(<char*>mountpoint_b, channel)             # <<<<<<<<<<<<<<
  *     else:
  *         fuse_chan_destroy(channel)
  */
-    __pyx_t_4 = __Pyx_PyObject_AsString(__pyx_v_6llfuse_mountpoint_b); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(3, 506, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_AsString(__pyx_v_6llfuse_mountpoint_b); if (unlikely((!__pyx_t_4) && PyErr_Occurred())) __PYX_ERR(3, 522, __pyx_L1_error)
     fuse_unmount(((char *)__pyx_t_4), __pyx_v_6llfuse_channel);
 
-    /* "src/fuse_api.pxi":504
+    /* "src/fuse_api.pxi":520
  *     fuse_session_destroy(session)
  * 
  *     if unmount:             # <<<<<<<<<<<<<<
@@ -41100,7 +41337,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
     goto __pyx_L3;
   }
 
-  /* "src/fuse_api.pxi":508
+  /* "src/fuse_api.pxi":524
  *         fuse_unmount(<char*>mountpoint_b, channel)
  *     else:
  *         fuse_chan_destroy(channel)             # <<<<<<<<<<<<<<
@@ -41112,7 +41349,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
   }
   __pyx_L3:;
 
-  /* "src/fuse_api.pxi":510
+  /* "src/fuse_api.pxi":526
  *         fuse_chan_destroy(channel)
  * 
  *     mountpoint_b = None             # <<<<<<<<<<<<<<
@@ -41124,7 +41361,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
   __Pyx_DECREF_SET(__pyx_v_6llfuse_mountpoint_b, Py_None);
   __Pyx_GIVEREF(Py_None);
 
-  /* "src/fuse_api.pxi":511
+  /* "src/fuse_api.pxi":527
  * 
  *     mountpoint_b = None
  *     session = NULL             # <<<<<<<<<<<<<<
@@ -41133,7 +41370,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
   __pyx_v_6llfuse_session = NULL;
 
-  /* "src/fuse_api.pxi":512
+  /* "src/fuse_api.pxi":528
  *     mountpoint_b = None
  *     session = NULL
  *     channel = NULL             # <<<<<<<<<<<<<<
@@ -41142,17 +41379,17 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
   __pyx_v_6llfuse_channel = NULL;
 
-  /* "src/fuse_api.pxi":515
+  /* "src/fuse_api.pxi":531
  * 
  *     # destroy handler may have given us an exception
  *     if exc_info:             # <<<<<<<<<<<<<<
  *         tmp = exc_info
  *         exc_info = None
  */
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_v_6llfuse_exc_info); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 515, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_v_6llfuse_exc_info); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 531, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "src/fuse_api.pxi":516
+    /* "src/fuse_api.pxi":532
  *     # destroy handler may have given us an exception
  *     if exc_info:
  *         tmp = exc_info             # <<<<<<<<<<<<<<
@@ -41162,7 +41399,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
     __Pyx_INCREF(__pyx_v_6llfuse_exc_info);
     __pyx_v_tmp = __pyx_v_6llfuse_exc_info;
 
-    /* "src/fuse_api.pxi":517
+    /* "src/fuse_api.pxi":533
  *     if exc_info:
  *         tmp = exc_info
  *         exc_info = None             # <<<<<<<<<<<<<<
@@ -41174,7 +41411,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
     __Pyx_DECREF_SET(__pyx_v_6llfuse_exc_info, Py_None);
     __Pyx_GIVEREF(Py_None);
 
-    /* "src/fuse_api.pxi":522
+    /* "src/fuse_api.pxi":538
  *         # the 3-parameter version of the raise statement, c.f.
  *         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
  *         if PY_MAJOR_VERSION < 3:             # <<<<<<<<<<<<<<
@@ -41184,26 +41421,26 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
     __pyx_t_3 = ((PY_MAJOR_VERSION < 3) != 0);
     if (__pyx_t_3) {
 
-      /* "src/fuse_api.pxi":523
+      /* "src/fuse_api.pxi":539
  *         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
  *         if PY_MAJOR_VERSION < 3:
  *             raise tmp[0], tmp[1], tmp[2]             # <<<<<<<<<<<<<<
  *         else:
  *             raise tmp[1].with_traceback(tmp[2])
  */
-      __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_tmp, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 523, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_tmp, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 539, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 523, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 539, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 523, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 539, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_1, __pyx_t_2, __pyx_t_5, 0);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __PYX_ERR(3, 523, __pyx_L1_error)
+      __PYX_ERR(3, 539, __pyx_L1_error)
 
-      /* "src/fuse_api.pxi":522
+      /* "src/fuse_api.pxi":538
  *         # the 3-parameter version of the raise statement, c.f.
  *         # https://github.com/cython/cython/commit/a6195f1a44ab21f5aa4b2a1b1842dd93115a3f42
  *         if PY_MAJOR_VERSION < 3:             # <<<<<<<<<<<<<<
@@ -41212,7 +41449,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
     }
 
-    /* "src/fuse_api.pxi":525
+    /* "src/fuse_api.pxi":541
  *             raise tmp[0], tmp[1], tmp[2]
  *         else:
  *             raise tmp[1].with_traceback(tmp[2])             # <<<<<<<<<<<<<<
@@ -41220,12 +41457,12 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  * def invalidate_inode(fuse_ino_t inode, attr_only=False):
  */
     /*else*/ {
-      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 525, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_tmp, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 541, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_with_traceback); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 525, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_with_traceback); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 541, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 525, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_tmp, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 541, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __pyx_t_6 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -41238,14 +41475,14 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
         }
       }
       if (!__pyx_t_6) {
-        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 525, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 541, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_5);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_1)) {
           PyObject *__pyx_temp[2] = {__pyx_t_6, __pyx_t_2};
-          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 525, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 541, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -41254,20 +41491,20 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
           PyObject *__pyx_temp[2] = {__pyx_t_6, __pyx_t_2};
-          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 525, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 541, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         } else
         #endif
         {
-          __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 525, __pyx_L1_error)
+          __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 541, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_7);
           __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_6); __pyx_t_6 = NULL;
           __Pyx_GIVEREF(__pyx_t_2);
           PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_2);
           __pyx_t_2 = 0;
-          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 525, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_7, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 541, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         }
@@ -41275,10 +41512,10 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __PYX_ERR(3, 525, __pyx_L1_error)
+      __PYX_ERR(3, 541, __pyx_L1_error)
     }
 
-    /* "src/fuse_api.pxi":515
+    /* "src/fuse_api.pxi":531
  * 
  *     # destroy handler may have given us an exception
  *     if exc_info:             # <<<<<<<<<<<<<<
@@ -41287,11 +41524,11 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
  */
   }
 
-  /* "src/fuse_api.pxi":485
+  /* "src/fuse_api.pxi":491
  * 
  * 
  * def close(unmount=True):             # <<<<<<<<<<<<<<
- *     '''Unmount file system and clean up
+ *     '''Clean up and ensure filesystem is unmounted
  * 
  */
 
@@ -41313,7 +41550,7 @@ static PyObject *__pyx_pf_6llfuse_12close(CYTHON_UNUSED PyObject *__pyx_self, Py
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":527
+/* "src/fuse_api.pxi":543
  *             raise tmp[1].with_traceback(tmp[2])
  * 
  * def invalidate_inode(fuse_ino_t inode, attr_only=False):             # <<<<<<<<<<<<<<
@@ -41356,7 +41593,7 @@ static PyObject *__pyx_pw_6llfuse_15invalidate_inode(PyObject *__pyx_self, PyObj
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "invalidate_inode") < 0)) __PYX_ERR(3, 527, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "invalidate_inode") < 0)) __PYX_ERR(3, 543, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -41366,12 +41603,12 @@ static PyObject *__pyx_pw_6llfuse_15invalidate_inode(PyObject *__pyx_self, PyObj
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_inode = __Pyx_PyInt_As_fuse_ino_t(values[0]); if (unlikely((__pyx_v_inode == ((fuse_ino_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 527, __pyx_L3_error)
+    __pyx_v_inode = __Pyx_PyInt_As_fuse_ino_t(values[0]); if (unlikely((__pyx_v_inode == ((fuse_ino_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 543, __pyx_L3_error)
     __pyx_v_attr_only = values[1];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("invalidate_inode", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 527, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("invalidate_inode", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 543, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("llfuse.invalidate_inode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -41395,20 +41632,20 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
   PyObject *__pyx_t_5 = NULL;
   __Pyx_RefNannySetupContext("invalidate_inode", 0);
 
-  /* "src/fuse_api.pxi":537
+  /* "src/fuse_api.pxi":553
  * 
  *     cdef NotifyRequest req
  *     req = NotifyRequest.__new__(NotifyRequest)             # <<<<<<<<<<<<<<
  *     req.kind = NOTIFY_INVAL_INODE
  *     req.ino = inode
  */
-  __pyx_t_1 = __pyx_tp_new_6llfuse_NotifyRequest(((PyTypeObject *)__pyx_ptype_6llfuse_NotifyRequest), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 537, __pyx_L1_error)
+  __pyx_t_1 = __pyx_tp_new_6llfuse_NotifyRequest(((PyTypeObject *)__pyx_ptype_6llfuse_NotifyRequest), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 553, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_6llfuse_NotifyRequest)))) __PYX_ERR(3, 537, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_6llfuse_NotifyRequest)))) __PYX_ERR(3, 553, __pyx_L1_error)
   __pyx_v_req = ((struct __pyx_obj_6llfuse_NotifyRequest *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":538
+  /* "src/fuse_api.pxi":554
  *     cdef NotifyRequest req
  *     req = NotifyRequest.__new__(NotifyRequest)
  *     req.kind = NOTIFY_INVAL_INODE             # <<<<<<<<<<<<<<
@@ -41417,7 +41654,7 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
  */
   __pyx_v_req->kind = NOTIFY_INVAL_INODE;
 
-  /* "src/fuse_api.pxi":539
+  /* "src/fuse_api.pxi":555
  *     req = NotifyRequest.__new__(NotifyRequest)
  *     req.kind = NOTIFY_INVAL_INODE
  *     req.ino = inode             # <<<<<<<<<<<<<<
@@ -41426,24 +41663,24 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
  */
   __pyx_v_req->ino = __pyx_v_inode;
 
-  /* "src/fuse_api.pxi":540
+  /* "src/fuse_api.pxi":556
  *     req.kind = NOTIFY_INVAL_INODE
  *     req.ino = inode
  *     req.attr_only = bool(attr_only)             # <<<<<<<<<<<<<<
  *     _notify_queue.put(req)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_attr_only); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(3, 540, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_attr_only); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(3, 556, __pyx_L1_error)
   __pyx_v_req->attr_only = (!(!__pyx_t_2));
 
-  /* "src/fuse_api.pxi":541
+  /* "src/fuse_api.pxi":557
  *     req.ino = inode
  *     req.attr_only = bool(attr_only)
  *     _notify_queue.put(req)             # <<<<<<<<<<<<<<
  * 
  * def invalidate_entry(fuse_ino_t inode_p, bytes name):
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse__notify_queue, __pyx_n_s_put); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 541, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse__notify_queue, __pyx_n_s_put); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 557, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -41456,13 +41693,13 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, ((PyObject *)__pyx_v_req)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 541, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, ((PyObject *)__pyx_v_req)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, ((PyObject *)__pyx_v_req)};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 541, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -41470,19 +41707,19 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, ((PyObject *)__pyx_v_req)};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 541, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 541, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 557, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_INCREF(((PyObject *)__pyx_v_req));
       __Pyx_GIVEREF(((PyObject *)__pyx_v_req));
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, ((PyObject *)__pyx_v_req));
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 541, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -41490,7 +41727,7 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":527
+  /* "src/fuse_api.pxi":543
  *             raise tmp[1].with_traceback(tmp[2])
  * 
  * def invalidate_inode(fuse_ino_t inode, attr_only=False):             # <<<<<<<<<<<<<<
@@ -41515,7 +41752,7 @@ static PyObject *__pyx_pf_6llfuse_14invalidate_inode(CYTHON_UNUSED PyObject *__p
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":543
+/* "src/fuse_api.pxi":559
  *     _notify_queue.put(req)
  * 
  * def invalidate_entry(fuse_ino_t inode_p, bytes name):             # <<<<<<<<<<<<<<
@@ -41553,11 +41790,11 @@ static PyObject *__pyx_pw_6llfuse_17invalidate_entry(PyObject *__pyx_self, PyObj
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_name)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("invalidate_entry", 1, 2, 2, 1); __PYX_ERR(3, 543, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("invalidate_entry", 1, 2, 2, 1); __PYX_ERR(3, 559, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "invalidate_entry") < 0)) __PYX_ERR(3, 543, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "invalidate_entry") < 0)) __PYX_ERR(3, 559, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -41565,18 +41802,18 @@ static PyObject *__pyx_pw_6llfuse_17invalidate_entry(PyObject *__pyx_self, PyObj
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_inode_p = __Pyx_PyInt_As_fuse_ino_t(values[0]); if (unlikely((__pyx_v_inode_p == ((fuse_ino_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 543, __pyx_L3_error)
+    __pyx_v_inode_p = __Pyx_PyInt_As_fuse_ino_t(values[0]); if (unlikely((__pyx_v_inode_p == ((fuse_ino_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 559, __pyx_L3_error)
     __pyx_v_name = ((PyObject*)values[1]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("invalidate_entry", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 543, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("invalidate_entry", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 559, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("llfuse.invalidate_entry", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyBytes_Type), 1, "name", 1))) __PYX_ERR(3, 543, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyBytes_Type), 1, "name", 1))) __PYX_ERR(3, 559, __pyx_L1_error)
   __pyx_r = __pyx_pf_6llfuse_16invalidate_entry(__pyx_self, __pyx_v_inode_p, __pyx_v_name);
 
   /* function exit code */
@@ -41598,20 +41835,20 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("invalidate_entry", 0);
 
-  /* "src/fuse_api.pxi":553
+  /* "src/fuse_api.pxi":569
  * 
  *     cdef NotifyRequest req
  *     req = NotifyRequest.__new__(NotifyRequest)             # <<<<<<<<<<<<<<
  *     req.kind = NOTIFY_INVAL_ENTRY
  *     req.ino = inode_p
  */
-  __pyx_t_1 = __pyx_tp_new_6llfuse_NotifyRequest(((PyTypeObject *)__pyx_ptype_6llfuse_NotifyRequest), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 553, __pyx_L1_error)
+  __pyx_t_1 = __pyx_tp_new_6llfuse_NotifyRequest(((PyTypeObject *)__pyx_ptype_6llfuse_NotifyRequest), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 569, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_6llfuse_NotifyRequest)))) __PYX_ERR(3, 553, __pyx_L1_error)
+  if (!(likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_6llfuse_NotifyRequest)))) __PYX_ERR(3, 569, __pyx_L1_error)
   __pyx_v_req = ((struct __pyx_obj_6llfuse_NotifyRequest *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":554
+  /* "src/fuse_api.pxi":570
  *     cdef NotifyRequest req
  *     req = NotifyRequest.__new__(NotifyRequest)
  *     req.kind = NOTIFY_INVAL_ENTRY             # <<<<<<<<<<<<<<
@@ -41620,7 +41857,7 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
  */
   __pyx_v_req->kind = NOTIFY_INVAL_ENTRY;
 
-  /* "src/fuse_api.pxi":555
+  /* "src/fuse_api.pxi":571
  *     req = NotifyRequest.__new__(NotifyRequest)
  *     req.kind = NOTIFY_INVAL_ENTRY
  *     req.ino = inode_p             # <<<<<<<<<<<<<<
@@ -41629,7 +41866,7 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
  */
   __pyx_v_req->ino = __pyx_v_inode_p;
 
-  /* "src/fuse_api.pxi":556
+  /* "src/fuse_api.pxi":572
  *     req.kind = NOTIFY_INVAL_ENTRY
  *     req.ino = inode_p
  *     req.name = name             # <<<<<<<<<<<<<<
@@ -41642,14 +41879,14 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
   __Pyx_DECREF(__pyx_v_req->name);
   __pyx_v_req->name = __pyx_v_name;
 
-  /* "src/fuse_api.pxi":557
+  /* "src/fuse_api.pxi":573
  *     req.ino = inode_p
  *     req.name = name
  *     _notify_queue.put(req)             # <<<<<<<<<<<<<<
  * 
  * def get_ino_t_bits():
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse__notify_queue, __pyx_n_s_put); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 557, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_6llfuse__notify_queue, __pyx_n_s_put); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 573, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -41662,13 +41899,13 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, ((PyObject *)__pyx_v_req)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, ((PyObject *)__pyx_v_req)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 573, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, ((PyObject *)__pyx_v_req)};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 573, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -41676,19 +41913,19 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, ((PyObject *)__pyx_v_req)};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 573, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 557, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 573, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3); __pyx_t_3 = NULL;
       __Pyx_INCREF(((PyObject *)__pyx_v_req));
       __Pyx_GIVEREF(((PyObject *)__pyx_v_req));
       PyTuple_SET_ITEM(__pyx_t_4, 0+1, ((PyObject *)__pyx_v_req));
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 557, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 573, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -41696,7 +41933,7 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "src/fuse_api.pxi":543
+  /* "src/fuse_api.pxi":559
  *     _notify_queue.put(req)
  * 
  * def invalidate_entry(fuse_ino_t inode_p, bytes name):             # <<<<<<<<<<<<<<
@@ -41721,7 +41958,7 @@ static PyObject *__pyx_pf_6llfuse_16invalidate_entry(CYTHON_UNUSED PyObject *__p
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":559
+/* "src/fuse_api.pxi":575
  *     _notify_queue.put(req)
  * 
  * def get_ino_t_bits():             # <<<<<<<<<<<<<<
@@ -41753,7 +41990,7 @@ static PyObject *__pyx_pf_6llfuse_18get_ino_t_bits(CYTHON_UNUSED PyObject *__pyx
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("get_ino_t_bits", 0);
 
-  /* "src/fuse_api.pxi":565
+  /* "src/fuse_api.pxi":581
  *     `OverflowError`.
  *     '''
  *     return min(sizeof(ino_t), sizeof(fuse_ino_t)) * 8             # <<<<<<<<<<<<<<
@@ -41768,13 +42005,13 @@ static PyObject *__pyx_pf_6llfuse_18get_ino_t_bits(CYTHON_UNUSED PyObject *__pyx
   } else {
     __pyx_t_3 = __pyx_t_2;
   }
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t((__pyx_t_3 * 8)); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 565, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_FromSize_t((__pyx_t_3 * 8)); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 581, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "src/fuse_api.pxi":559
+  /* "src/fuse_api.pxi":575
  *     _notify_queue.put(req)
  * 
  * def get_ino_t_bits():             # <<<<<<<<<<<<<<
@@ -41793,7 +42030,7 @@ static PyObject *__pyx_pf_6llfuse_18get_ino_t_bits(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":567
+/* "src/fuse_api.pxi":583
  *     return min(sizeof(ino_t), sizeof(fuse_ino_t)) * 8
  * 
  * def get_off_t_bits():             # <<<<<<<<<<<<<<
@@ -41822,7 +42059,7 @@ static PyObject *__pyx_pf_6llfuse_20get_off_t_bits(CYTHON_UNUSED PyObject *__pyx
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("get_off_t_bits", 0);
 
-  /* "src/fuse_api.pxi":573
+  /* "src/fuse_api.pxi":589
  *     result in `OverflowError`.
  *     '''
  *     return sizeof(off_t) * 8             # <<<<<<<<<<<<<<
@@ -41830,13 +42067,13 @@ static PyObject *__pyx_pf_6llfuse_20get_off_t_bits(CYTHON_UNUSED PyObject *__pyx
  * def notify_store(inode, offset, data):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((sizeof(off_t)) * 8)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 573, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((sizeof(off_t)) * 8)); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 589, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "src/fuse_api.pxi":567
+  /* "src/fuse_api.pxi":583
  *     return min(sizeof(ino_t), sizeof(fuse_ino_t)) * 8
  * 
  * def get_off_t_bits():             # <<<<<<<<<<<<<<
@@ -41855,7 +42092,7 @@ static PyObject *__pyx_pf_6llfuse_20get_off_t_bits(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":575
+/* "src/fuse_api.pxi":591
  *     return sizeof(off_t) * 8
  * 
  * def notify_store(inode, offset, data):             # <<<<<<<<<<<<<<
@@ -41895,16 +42132,16 @@ static PyObject *__pyx_pw_6llfuse_23notify_store(PyObject *__pyx_self, PyObject 
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_offset)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("notify_store", 1, 3, 3, 1); __PYX_ERR(3, 575, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("notify_store", 1, 3, 3, 1); __PYX_ERR(3, 591, __pyx_L3_error)
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_data)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("notify_store", 1, 3, 3, 2); __PYX_ERR(3, 575, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("notify_store", 1, 3, 3, 2); __PYX_ERR(3, 591, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "notify_store") < 0)) __PYX_ERR(3, 575, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "notify_store") < 0)) __PYX_ERR(3, 591, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -41919,7 +42156,7 @@ static PyObject *__pyx_pw_6llfuse_23notify_store(PyObject *__pyx_self, PyObject 
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("notify_store", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 575, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("notify_store", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(3, 591, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("llfuse.notify_store", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -41952,16 +42189,16 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
   PyObject *__pyx_t_9 = NULL;
   __Pyx_RefNannySetupContext("notify_store", 0);
 
-  /* "src/fuse_api.pxi":593
+  /* "src/fuse_api.pxi":609
  *     cdef fuse_buf *buf
  * 
  *     PyObject_GetBuffer(data, &pybuf, PyBUF_CONTIG_RO)             # <<<<<<<<<<<<<<
  *     bufvec.count = 1
  *     bufvec.idx = 0
  */
-  __pyx_t_1 = PyObject_GetBuffer(__pyx_v_data, (&__pyx_v_pybuf), PyBUF_CONTIG_RO); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(3, 593, __pyx_L1_error)
+  __pyx_t_1 = PyObject_GetBuffer(__pyx_v_data, (&__pyx_v_pybuf), PyBUF_CONTIG_RO); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(3, 609, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":594
+  /* "src/fuse_api.pxi":610
  * 
  *     PyObject_GetBuffer(data, &pybuf, PyBUF_CONTIG_RO)
  *     bufvec.count = 1             # <<<<<<<<<<<<<<
@@ -41970,7 +42207,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_bufvec.count = 1;
 
-  /* "src/fuse_api.pxi":595
+  /* "src/fuse_api.pxi":611
  *     PyObject_GetBuffer(data, &pybuf, PyBUF_CONTIG_RO)
  *     bufvec.count = 1
  *     bufvec.idx = 0             # <<<<<<<<<<<<<<
@@ -41979,7 +42216,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_bufvec.idx = 0;
 
-  /* "src/fuse_api.pxi":596
+  /* "src/fuse_api.pxi":612
  *     bufvec.count = 1
  *     bufvec.idx = 0
  *     bufvec.off = 0             # <<<<<<<<<<<<<<
@@ -41988,7 +42225,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   __pyx_v_bufvec.off = 0;
 
-  /* "src/fuse_api.pxi":598
+  /* "src/fuse_api.pxi":614
  *     bufvec.off = 0
  * 
  *     buf = bufvec.buf             # <<<<<<<<<<<<<<
@@ -41998,7 +42235,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_2 = __pyx_v_bufvec.buf;
   __pyx_v_buf = __pyx_t_2;
 
-  /* "src/fuse_api.pxi":599
+  /* "src/fuse_api.pxi":615
  * 
  *     buf = bufvec.buf
  *     buf[0].flags = 0             # <<<<<<<<<<<<<<
@@ -42007,7 +42244,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   (__pyx_v_buf[0]).flags = 0;
 
-  /* "src/fuse_api.pxi":600
+  /* "src/fuse_api.pxi":616
  *     buf = bufvec.buf
  *     buf[0].flags = 0
  *     buf[0].mem = pybuf.buf             # <<<<<<<<<<<<<<
@@ -42017,7 +42254,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_3 = __pyx_v_pybuf.buf;
   (__pyx_v_buf[0]).mem = __pyx_t_3;
 
-  /* "src/fuse_api.pxi":601
+  /* "src/fuse_api.pxi":617
  *     buf[0].flags = 0
  *     buf[0].mem = pybuf.buf
  *     buf[0].size = <size_t> pybuf.len # guaranteed positive             # <<<<<<<<<<<<<<
@@ -42026,27 +42263,27 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   (__pyx_v_buf[0]).size = ((size_t)__pyx_v_pybuf.len);
 
-  /* "src/fuse_api.pxi":603
+  /* "src/fuse_api.pxi":619
  *     buf[0].size = <size_t> pybuf.len # guaranteed positive
  * 
  *     ino = inode             # <<<<<<<<<<<<<<
  *     off = offset
  *     with nogil:
  */
-  __pyx_t_4 = __Pyx_PyInt_As_fuse_ino_t(__pyx_v_inode); if (unlikely((__pyx_t_4 == ((fuse_ino_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 603, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_fuse_ino_t(__pyx_v_inode); if (unlikely((__pyx_t_4 == ((fuse_ino_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 619, __pyx_L1_error)
   __pyx_v_ino = __pyx_t_4;
 
-  /* "src/fuse_api.pxi":604
+  /* "src/fuse_api.pxi":620
  * 
  *     ino = inode
  *     off = offset             # <<<<<<<<<<<<<<
  *     with nogil:
  *         ret = fuse_lowlevel_notify_store(channel, ino, off, &bufvec, 0)
  */
-  __pyx_t_5 = __Pyx_PyInt_As_off_t(__pyx_v_offset); if (unlikely((__pyx_t_5 == ((off_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 604, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_off_t(__pyx_v_offset); if (unlikely((__pyx_t_5 == ((off_t)-1)) && PyErr_Occurred())) __PYX_ERR(3, 620, __pyx_L1_error)
   __pyx_v_off = __pyx_t_5;
 
-  /* "src/fuse_api.pxi":605
+  /* "src/fuse_api.pxi":621
  *     ino = inode
  *     off = offset
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -42060,7 +42297,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
       #endif
       /*try:*/ {
 
-        /* "src/fuse_api.pxi":606
+        /* "src/fuse_api.pxi":622
  *     off = offset
  *     with nogil:
  *         ret = fuse_lowlevel_notify_store(channel, ino, off, &bufvec, 0)             # <<<<<<<<<<<<<<
@@ -42070,7 +42307,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
         __pyx_v_ret = fuse_lowlevel_notify_store(__pyx_v_6llfuse_channel, __pyx_v_ino, __pyx_v_off, (&__pyx_v_bufvec), 0);
       }
 
-      /* "src/fuse_api.pxi":605
+      /* "src/fuse_api.pxi":621
  *     ino = inode
  *     off = offset
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -42088,7 +42325,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
       }
   }
 
-  /* "src/fuse_api.pxi":608
+  /* "src/fuse_api.pxi":624
  *         ret = fuse_lowlevel_notify_store(channel, ino, off, &bufvec, 0)
  * 
  *     PyBuffer_Release(&pybuf)             # <<<<<<<<<<<<<<
@@ -42097,7 +42334,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   PyBuffer_Release((&__pyx_v_pybuf));
 
-  /* "src/fuse_api.pxi":609
+  /* "src/fuse_api.pxi":625
  * 
  *     PyBuffer_Release(&pybuf)
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -42107,21 +42344,21 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_6 = ((__pyx_v_ret != 0) != 0);
   if (__pyx_t_6) {
 
-    /* "src/fuse_api.pxi":610
+    /* "src/fuse_api.pxi":626
  *     PyBuffer_Release(&pybuf)
  *     if ret != 0:
  *         raise OSError(-ret, 'fuse_lowlevel_notify_store returned: ' + strerror(-ret))             # <<<<<<<<<<<<<<
  * 
  * def get_sup_groups(pid):
  */
-    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 610, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int((-__pyx_v_ret)); if (unlikely(!__pyx_t_7)) __PYX_ERR(3, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __pyx_f_6llfuse_strerror((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 610, __pyx_L1_error)
+    __pyx_t_8 = __pyx_f_6llfuse_strerror((-__pyx_v_ret)); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_9 = PyNumber_Add(__pyx_kp_u_fuse_lowlevel_notify_store_retur, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 610, __pyx_L1_error)
+    __pyx_t_9 = PyNumber_Add(__pyx_kp_u_fuse_lowlevel_notify_store_retur, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 610, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_7);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7);
@@ -42129,14 +42366,14 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
     PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_9);
     __pyx_t_7 = 0;
     __pyx_t_9 = 0;
-    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_8, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 610, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_builtin_OSError, __pyx_t_8, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(3, 626, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_Raise(__pyx_t_9, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-    __PYX_ERR(3, 610, __pyx_L1_error)
+    __PYX_ERR(3, 626, __pyx_L1_error)
 
-    /* "src/fuse_api.pxi":609
+    /* "src/fuse_api.pxi":625
  * 
  *     PyBuffer_Release(&pybuf)
  *     if ret != 0:             # <<<<<<<<<<<<<<
@@ -42145,7 +42382,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
  */
   }
 
-  /* "src/fuse_api.pxi":575
+  /* "src/fuse_api.pxi":591
  *     return sizeof(off_t) * 8
  * 
  * def notify_store(inode, offset, data):             # <<<<<<<<<<<<<<
@@ -42168,7 +42405,7 @@ static PyObject *__pyx_pf_6llfuse_22notify_store(CYTHON_UNUSED PyObject *__pyx_s
   return __pyx_r;
 }
 
-/* "src/fuse_api.pxi":612
+/* "src/fuse_api.pxi":628
  *         raise OSError(-ret, 'fuse_lowlevel_notify_store returned: ' + strerror(-ret))
  * 
  * def get_sup_groups(pid):             # <<<<<<<<<<<<<<
@@ -42214,7 +42451,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
   int __pyx_t_14;
   __Pyx_RefNannySetupContext("get_sup_groups", 0);
 
-  /* "src/fuse_api.pxi":622
+  /* "src/fuse_api.pxi":638
  *     '''
  * 
  *     with open('/proc/%d/status' % pid, 'r') as fh:             # <<<<<<<<<<<<<<
@@ -42222,9 +42459,9 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
  *             if line.startswith('Groups:'):
  */
   /*with:*/ {
-    __pyx_t_1 = PyUnicode_Format(__pyx_kp_u_proc_d_status, __pyx_v_pid); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 622, __pyx_L1_error)
+    __pyx_t_1 = PyUnicode_Format(__pyx_kp_u_proc_d_status, __pyx_v_pid); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 638, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 622, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 638, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -42232,12 +42469,12 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
     __Pyx_GIVEREF(__pyx_n_u_r);
     PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_n_u_r);
     __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_open, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 622, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_open, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 638, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_3 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 622, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_exit); if (unlikely(!__pyx_t_3)) __PYX_ERR(3, 638, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 622, __pyx_L3_error)
+    __pyx_t_4 = __Pyx_PyObject_LookupSpecial(__pyx_t_1, __pyx_n_s_enter); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 638, __pyx_L3_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -42250,10 +42487,10 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 622, __pyx_L3_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 638, __pyx_L3_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 622, __pyx_L3_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 638, __pyx_L3_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -42272,7 +42509,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
           __pyx_v_fh = __pyx_t_4;
           __pyx_t_4 = 0;
 
-          /* "src/fuse_api.pxi":623
+          /* "src/fuse_api.pxi":639
  * 
  *     with open('/proc/%d/status' % pid, 'r') as fh:
  *         for line in fh:             # <<<<<<<<<<<<<<
@@ -42283,26 +42520,26 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
             __pyx_t_4 = __pyx_v_fh; __Pyx_INCREF(__pyx_t_4); __pyx_t_9 = 0;
             __pyx_t_10 = NULL;
           } else {
-            __pyx_t_9 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_fh); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 623, __pyx_L7_error)
+            __pyx_t_9 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_fh); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 639, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_10 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 623, __pyx_L7_error)
+            __pyx_t_10 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 639, __pyx_L7_error)
           }
           for (;;) {
             if (likely(!__pyx_t_10)) {
               if (likely(PyList_CheckExact(__pyx_t_4))) {
                 if (__pyx_t_9 >= PyList_GET_SIZE(__pyx_t_4)) break;
                 #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-                __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 623, __pyx_L7_error)
+                __pyx_t_1 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 639, __pyx_L7_error)
                 #else
-                __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 623, __pyx_L7_error)
+                __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 639, __pyx_L7_error)
                 __Pyx_GOTREF(__pyx_t_1);
                 #endif
               } else {
                 if (__pyx_t_9 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
                 #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-                __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 623, __pyx_L7_error)
+                __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 639, __pyx_L7_error)
                 #else
-                __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 623, __pyx_L7_error)
+                __pyx_t_1 = PySequence_ITEM(__pyx_t_4, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 639, __pyx_L7_error)
                 __Pyx_GOTREF(__pyx_t_1);
                 #endif
               }
@@ -42312,7 +42549,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
                 PyObject* exc_type = PyErr_Occurred();
                 if (exc_type) {
                   if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-                  else __PYX_ERR(3, 623, __pyx_L7_error)
+                  else __PYX_ERR(3, 639, __pyx_L7_error)
                 }
                 break;
               }
@@ -42321,23 +42558,23 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
             __Pyx_XDECREF_SET(__pyx_v_line, __pyx_t_1);
             __pyx_t_1 = 0;
 
-            /* "src/fuse_api.pxi":624
+            /* "src/fuse_api.pxi":640
  *     with open('/proc/%d/status' % pid, 'r') as fh:
  *         for line in fh:
  *             if line.startswith('Groups:'):             # <<<<<<<<<<<<<<
  *                 break
  *         else:
  */
-            __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_line, __pyx_n_s_startswith); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 624, __pyx_L7_error)
+            __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_line, __pyx_n_s_startswith); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 640, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
-            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__82, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 624, __pyx_L7_error)
+            __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__82, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 640, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_t_11 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(3, 624, __pyx_L7_error)
+            __pyx_t_11 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(3, 640, __pyx_L7_error)
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             if (__pyx_t_11) {
 
-              /* "src/fuse_api.pxi":625
+              /* "src/fuse_api.pxi":641
  *         for line in fh:
  *             if line.startswith('Groups:'):
  *                 break             # <<<<<<<<<<<<<<
@@ -42346,7 +42583,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
  */
               goto __pyx_L16_break;
 
-              /* "src/fuse_api.pxi":624
+              /* "src/fuse_api.pxi":640
  *     with open('/proc/%d/status' % pid, 'r') as fh:
  *         for line in fh:
  *             if line.startswith('Groups:'):             # <<<<<<<<<<<<<<
@@ -42355,7 +42592,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
  */
             }
 
-            /* "src/fuse_api.pxi":623
+            /* "src/fuse_api.pxi":639
  * 
  *     with open('/proc/%d/status' % pid, 'r') as fh:
  *         for line in fh:             # <<<<<<<<<<<<<<
@@ -42365,32 +42602,32 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
           }
           /*else*/ {
 
-            /* "src/fuse_api.pxi":627
+            /* "src/fuse_api.pxi":643
  *                 break
  *         else:
  *             raise RuntimeError("Unable to parse %s" % fh.name)             # <<<<<<<<<<<<<<
  *     gids = set()
  *     for x in line.split()[1:]:
  */
-            __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_fh, __pyx_n_s_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 627, __pyx_L7_error)
+            __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_fh, __pyx_n_s_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 643, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_2);
-            __pyx_t_1 = PyUnicode_Format(__pyx_kp_u_Unable_to_parse_s, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 627, __pyx_L7_error)
+            __pyx_t_1 = PyUnicode_Format(__pyx_kp_u_Unable_to_parse_s, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 643, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-            __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 627, __pyx_L7_error)
+            __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 643, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_2);
             __Pyx_GIVEREF(__pyx_t_1);
             PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
             __pyx_t_1 = 0;
-            __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 627, __pyx_L7_error)
+            __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_RuntimeError, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 643, __pyx_L7_error)
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
             __Pyx_Raise(__pyx_t_1, 0, 0, 0);
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __PYX_ERR(3, 627, __pyx_L7_error)
+            __PYX_ERR(3, 643, __pyx_L7_error)
           }
 
-          /* "src/fuse_api.pxi":623
+          /* "src/fuse_api.pxi":639
  * 
  *     with open('/proc/%d/status' % pid, 'r') as fh:
  *         for line in fh:             # <<<<<<<<<<<<<<
@@ -42400,7 +42637,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
           __pyx_L16_break:;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-          /* "src/fuse_api.pxi":622
+          /* "src/fuse_api.pxi":638
  *     '''
  * 
  *     with open('/proc/%d/status' % pid, 'r') as fh:             # <<<<<<<<<<<<<<
@@ -42420,20 +42657,20 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         /*except:*/ {
           __Pyx_AddTraceback("llfuse.get_sup_groups", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_1, &__pyx_t_2) < 0) __PYX_ERR(3, 622, __pyx_L9_except_error)
+          if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_1, &__pyx_t_2) < 0) __PYX_ERR(3, 638, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_4);
           __Pyx_GOTREF(__pyx_t_1);
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 622, __pyx_L9_except_error)
+          __pyx_t_5 = PyTuple_Pack(3, __pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(3, 638, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_5);
           __pyx_t_12 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 622, __pyx_L9_except_error)
+          if (unlikely(!__pyx_t_12)) __PYX_ERR(3, 638, __pyx_L9_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           __pyx_t_11 = __Pyx_PyObject_IsTrue(__pyx_t_12);
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-          if (__pyx_t_11 < 0) __PYX_ERR(3, 622, __pyx_L9_except_error)
+          if (__pyx_t_11 < 0) __PYX_ERR(3, 638, __pyx_L9_except_error)
           __pyx_t_13 = ((!(__pyx_t_11 != 0)) != 0);
           if (__pyx_t_13) {
             __Pyx_GIVEREF(__pyx_t_4);
@@ -42441,7 +42678,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
             __Pyx_XGIVEREF(__pyx_t_2);
             __Pyx_ErrRestoreWithState(__pyx_t_4, __pyx_t_1, __pyx_t_2);
             __pyx_t_4 = 0; __pyx_t_1 = 0; __pyx_t_2 = 0; 
-            __PYX_ERR(3, 622, __pyx_L9_except_error)
+            __PYX_ERR(3, 638, __pyx_L9_except_error)
           }
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -42469,7 +42706,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
         if (__pyx_t_3) {
           __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__83, NULL);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-          if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 622, __pyx_L1_error)
+          if (unlikely(!__pyx_t_8)) __PYX_ERR(3, 638, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         }
@@ -42484,27 +42721,27 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
     __pyx_L22:;
   }
 
-  /* "src/fuse_api.pxi":628
+  /* "src/fuse_api.pxi":644
  *         else:
  *             raise RuntimeError("Unable to parse %s" % fh.name)
  *     gids = set()             # <<<<<<<<<<<<<<
  *     for x in line.split()[1:]:
  *         gids.add(int(x))
  */
-  __pyx_t_2 = PySet_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 628, __pyx_L1_error)
+  __pyx_t_2 = PySet_New(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 644, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_v_gids = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":629
+  /* "src/fuse_api.pxi":645
  *             raise RuntimeError("Unable to parse %s" % fh.name)
  *     gids = set()
  *     for x in line.split()[1:]:             # <<<<<<<<<<<<<<
  *         gids.add(int(x))
  * 
  */
-  if (unlikely(!__pyx_v_line)) { __Pyx_RaiseUnboundLocalError("line"); __PYX_ERR(3, 629, __pyx_L1_error) }
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_line, __pyx_n_s_split); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 629, __pyx_L1_error)
+  if (unlikely(!__pyx_v_line)) { __Pyx_RaiseUnboundLocalError("line"); __PYX_ERR(3, 645, __pyx_L1_error) }
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_line, __pyx_n_s_split); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 645, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -42517,23 +42754,23 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
     }
   }
   if (__pyx_t_4) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 629, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 645, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 629, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 645, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_t_2, 1, 0, NULL, NULL, &__pyx_slice__84, 1, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 629, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_t_2, 1, 0, NULL, NULL, &__pyx_slice__84, 1, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 645, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (likely(PyList_CheckExact(__pyx_t_1)) || PyTuple_CheckExact(__pyx_t_1)) {
     __pyx_t_2 = __pyx_t_1; __Pyx_INCREF(__pyx_t_2); __pyx_t_9 = 0;
     __pyx_t_10 = NULL;
   } else {
-    __pyx_t_9 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 629, __pyx_L1_error)
+    __pyx_t_9 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 645, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_10 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 629, __pyx_L1_error)
+    __pyx_t_10 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(3, 645, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   for (;;) {
@@ -42541,17 +42778,17 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
       if (likely(PyList_CheckExact(__pyx_t_2))) {
         if (__pyx_t_9 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 629, __pyx_L1_error)
+        __pyx_t_1 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 645, __pyx_L1_error)
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 629, __pyx_L1_error)
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 645, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         #endif
       } else {
         if (__pyx_t_9 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 629, __pyx_L1_error)
+        __pyx_t_1 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_9); __Pyx_INCREF(__pyx_t_1); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(3, 645, __pyx_L1_error)
         #else
-        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 629, __pyx_L1_error)
+        __pyx_t_1 = PySequence_ITEM(__pyx_t_2, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 645, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         #endif
       }
@@ -42561,7 +42798,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(3, 629, __pyx_L1_error)
+          else __PYX_ERR(3, 645, __pyx_L1_error)
         }
         break;
       }
@@ -42570,19 +42807,19 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
     __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "src/fuse_api.pxi":630
+    /* "src/fuse_api.pxi":646
  *     gids = set()
  *     for x in line.split()[1:]:
  *         gids.add(int(x))             # <<<<<<<<<<<<<<
  * 
  *     return gids
  */
-    __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 630, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyNumber_Int(__pyx_v_x); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 646, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_14 = PySet_Add(__pyx_v_gids, __pyx_t_1); if (unlikely(__pyx_t_14 == -1)) __PYX_ERR(3, 630, __pyx_L1_error)
+    __pyx_t_14 = PySet_Add(__pyx_v_gids, __pyx_t_1); if (unlikely(__pyx_t_14 == -1)) __PYX_ERR(3, 646, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "src/fuse_api.pxi":629
+    /* "src/fuse_api.pxi":645
  *             raise RuntimeError("Unable to parse %s" % fh.name)
  *     gids = set()
  *     for x in line.split()[1:]:             # <<<<<<<<<<<<<<
@@ -42592,7 +42829,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":632
+  /* "src/fuse_api.pxi":648
  *         gids.add(int(x))
  * 
  *     return gids             # <<<<<<<<<<<<<<
@@ -42602,7 +42839,7 @@ static PyObject *__pyx_pf_6llfuse_24get_sup_groups(CYTHON_UNUSED PyObject *__pyx
   __pyx_r = __pyx_v_gids;
   goto __pyx_L0;
 
-  /* "src/fuse_api.pxi":612
+  /* "src/fuse_api.pxi":628
  *         raise OSError(-ret, 'fuse_lowlevel_notify_store returned: ' + strerror(-ret))
  * 
  * def get_sup_groups(pid):             # <<<<<<<<<<<<<<
@@ -44038,6 +44275,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_Calling_fuse_session_loop, __pyx_k_Calling_fuse_session_loop, sizeof(__pyx_k_Calling_fuse_session_loop), 0, 1, 0, 0},
   {&__pyx_kp_u_Calling_fuse_session_remove_chan, __pyx_k_Calling_fuse_session_remove_chan, sizeof(__pyx_k_Calling_fuse_session_remove_chan), 0, 1, 0, 0},
   {&__pyx_kp_u_Calling_fuse_unmount, __pyx_k_Calling_fuse_unmount, sizeof(__pyx_k_Calling_fuse_unmount), 0, 1, 0, 0},
+  {&__pyx_n_u_Darwin, __pyx_k_Darwin, sizeof(__pyx_k_Darwin), 0, 1, 0, 1},
   {&__pyx_n_u_ENOATTR, __pyx_k_ENOATTR, sizeof(__pyx_k_ENOATTR), 0, 1, 0, 1},
   {&__pyx_kp_u_Exception_after_kill, __pyx_k_Exception_after_kill, sizeof(__pyx_k_Exception_after_kill), 0, 1, 0, 0},
   {&__pyx_n_s_ExitStack, __pyx_k_ExitStack, sizeof(__pyx_k_ExitStack), 0, 0, 1, 1},
@@ -44303,6 +44541,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_proc_d_status, __pyx_k_proc_d_status, sizeof(__pyx_k_proc_d_status), 0, 1, 0, 0},
   {&__pyx_kp_u_pthread_create_failed_with, __pyx_k_pthread_create_failed_with, sizeof(__pyx_k_pthread_create_failed_with), 0, 1, 0, 0},
   {&__pyx_kp_u_pthread_join_failed_with_s, __pyx_k_pthread_join_failed_with_s, sizeof(__pyx_k_pthread_join_failed_with_s), 0, 1, 0, 0},
+  {&__pyx_kp_u_pthread_kill_failed_with_s, __pyx_k_pthread_kill_failed_with_s, sizeof(__pyx_k_pthread_kill_failed_with_s), 0, 1, 0, 0},
   {&__pyx_kp_u_pthread_mutex_lock_failed_with_s, __pyx_k_pthread_mutex_lock_failed_with_s, sizeof(__pyx_k_pthread_mutex_lock_failed_with_s), 0, 1, 0, 0},
   {&__pyx_kp_u_pthread_mutex_ulock_failed_with, __pyx_k_pthread_mutex_ulock_failed_with, sizeof(__pyx_k_pthread_mutex_ulock_failed_with), 0, 1, 0, 0},
   {&__pyx_n_s_put, __pyx_k_put, sizeof(__pyx_k_put), 0, 0, 1, 1},
@@ -44367,6 +44606,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_timeout, __pyx_k_timeout, sizeof(__pyx_k_timeout), 0, 0, 1, 1},
   {&__pyx_n_s_tmp, __pyx_k_tmp, sizeof(__pyx_k_tmp), 0, 0, 1, 1},
   {&__pyx_n_s_traceback, __pyx_k_traceback, sizeof(__pyx_k_traceback), 0, 0, 1, 1},
+  {&__pyx_n_s_uname, __pyx_k_uname, sizeof(__pyx_k_uname), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_flag_s_o, __pyx_k_unknown_flag_s_o, sizeof(__pyx_k_unknown_flag_s_o), 0, 1, 0, 0},
   {&__pyx_n_s_unlink, __pyx_k_unlink, sizeof(__pyx_k_unlink), 0, 0, 1, 1},
   {&__pyx_n_s_unmount, __pyx_k_unmount, sizeof(__pyx_k_unmount), 0, 0, 1, 1},
@@ -44389,8 +44629,8 @@ static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(2, 146, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(2, 173, __pyx_L1_error)
   __pyx_builtin_OSError = __Pyx_GetBuiltinName(__pyx_n_s_OSError); if (!__pyx_builtin_OSError) __PYX_ERR(2, 676, __pyx_L1_error)
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 736, __pyx_L1_error)
-  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) __PYX_ERR(3, 622, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 746, __pyx_L1_error)
+  __pyx_builtin_open = __Pyx_GetBuiltinName(__pyx_n_s_open); if (!__pyx_builtin_open) __PYX_ERR(3, 638, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -45082,212 +45322,212 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__64);
   __Pyx_GIVEREF(__pyx_tuple__64);
 
-  /* "src/fuse_api.pxi":240
+  /* "src/fuse_api.pxi":245
  *     '''
  * 
  *     log.debug('Initializing llfuse')             # <<<<<<<<<<<<<<
  *     cdef fuse_args f_args
  * 
  */
-  __pyx_tuple__66 = PyTuple_Pack(1, __pyx_kp_u_Initializing_llfuse); if (unlikely(!__pyx_tuple__66)) __PYX_ERR(3, 240, __pyx_L1_error)
+  __pyx_tuple__66 = PyTuple_Pack(1, __pyx_kp_u_Initializing_llfuse); if (unlikely(!__pyx_tuple__66)) __PYX_ERR(3, 245, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__66);
   __Pyx_GIVEREF(__pyx_tuple__66);
 
-  /* "src/fuse_api.pxi":244
+  /* "src/fuse_api.pxi":249
  * 
  *     if not isinstance(mountpoint, str_t):
  *         raise TypeError('*mountpoint_* argument must be of type str')             # <<<<<<<<<<<<<<
  * 
  *     global operations
  */
-  __pyx_tuple__67 = PyTuple_Pack(1, __pyx_kp_u_mountpoint__argument_must_be_of); if (unlikely(!__pyx_tuple__67)) __PYX_ERR(3, 244, __pyx_L1_error)
+  __pyx_tuple__67 = PyTuple_Pack(1, __pyx_kp_u_mountpoint__argument_must_be_of); if (unlikely(!__pyx_tuple__67)) __PYX_ERR(3, 249, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__67);
   __Pyx_GIVEREF(__pyx_tuple__67);
 
-  /* "src/fuse_api.pxi":256
+  /* "src/fuse_api.pxi":261
  * 
  *     make_fuse_args(options, &f_args)
  *     log.debug('Calling fuse_mount')             # <<<<<<<<<<<<<<
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  *     if not channel:
  */
-  __pyx_tuple__68 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_mount); if (unlikely(!__pyx_tuple__68)) __PYX_ERR(3, 256, __pyx_L1_error)
+  __pyx_tuple__68 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_mount); if (unlikely(!__pyx_tuple__68)) __PYX_ERR(3, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__68);
   __Pyx_GIVEREF(__pyx_tuple__68);
 
-  /* "src/fuse_api.pxi":259
+  /* "src/fuse_api.pxi":264
  *     channel = fuse_mount(<char*>mountpoint_b, &f_args)
  *     if not channel:
  *         raise RuntimeError('fuse_mount failed')             # <<<<<<<<<<<<<<
  * 
  *     log.debug('Calling fuse_lowlevel_new')
  */
-  __pyx_tuple__69 = PyTuple_Pack(1, __pyx_kp_u_fuse_mount_failed); if (unlikely(!__pyx_tuple__69)) __PYX_ERR(3, 259, __pyx_L1_error)
+  __pyx_tuple__69 = PyTuple_Pack(1, __pyx_kp_u_fuse_mount_failed); if (unlikely(!__pyx_tuple__69)) __PYX_ERR(3, 264, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__69);
   __Pyx_GIVEREF(__pyx_tuple__69);
 
-  /* "src/fuse_api.pxi":261
+  /* "src/fuse_api.pxi":266
  *         raise RuntimeError('fuse_mount failed')
  * 
  *     log.debug('Calling fuse_lowlevel_new')             # <<<<<<<<<<<<<<
  *     init_fuse_ops()
  *     session = fuse_lowlevel_new(&f_args, &fuse_ops, sizeof(fuse_ops), NULL)
  */
-  __pyx_tuple__70 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_lowlevel_new); if (unlikely(!__pyx_tuple__70)) __PYX_ERR(3, 261, __pyx_L1_error)
+  __pyx_tuple__70 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_lowlevel_new); if (unlikely(!__pyx_tuple__70)) __PYX_ERR(3, 266, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__70);
   __Pyx_GIVEREF(__pyx_tuple__70);
 
-  /* "src/fuse_api.pxi":266
+  /* "src/fuse_api.pxi":271
  *     if not session:
  *         fuse_unmount(<char*>mountpoint_b, channel)
  *         raise RuntimeError("fuse_lowlevel_new() failed")             # <<<<<<<<<<<<<<
  * 
  *     log.debug('Calling fuse_session_add_chan')
  */
-  __pyx_tuple__71 = PyTuple_Pack(1, __pyx_kp_u_fuse_lowlevel_new_failed); if (unlikely(!__pyx_tuple__71)) __PYX_ERR(3, 266, __pyx_L1_error)
+  __pyx_tuple__71 = PyTuple_Pack(1, __pyx_kp_u_fuse_lowlevel_new_failed); if (unlikely(!__pyx_tuple__71)) __PYX_ERR(3, 271, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__71);
   __Pyx_GIVEREF(__pyx_tuple__71);
 
-  /* "src/fuse_api.pxi":268
+  /* "src/fuse_api.pxi":273
  *         raise RuntimeError("fuse_lowlevel_new() failed")
  * 
  *     log.debug('Calling fuse_session_add_chan')             # <<<<<<<<<<<<<<
  *     fuse_session_add_chan(session, channel)
  * 
  */
-  __pyx_tuple__72 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_add_chan); if (unlikely(!__pyx_tuple__72)) __PYX_ERR(3, 268, __pyx_L1_error)
+  __pyx_tuple__72 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_add_chan); if (unlikely(!__pyx_tuple__72)) __PYX_ERR(3, 273, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__72);
   __Pyx_GIVEREF(__pyx_tuple__72);
 
-  /* "src/fuse_api.pxi":301
+  /* "src/fuse_api.pxi":306
  * 
  *     if session == NULL:
  *         raise RuntimeError('Need to call init() before main()')             # <<<<<<<<<<<<<<
  * 
  *     if workers == 0:
  */
-  __pyx_tuple__73 = PyTuple_Pack(1, __pyx_kp_u_Need_to_call_init_before_main); if (unlikely(!__pyx_tuple__73)) __PYX_ERR(3, 301, __pyx_L1_error)
+  __pyx_tuple__73 = PyTuple_Pack(1, __pyx_kp_u_Need_to_call_init_before_main); if (unlikely(!__pyx_tuple__73)) __PYX_ERR(3, 306, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__73);
   __Pyx_GIVEREF(__pyx_tuple__73);
 
-  /* "src/fuse_api.pxi":304
+  /* "src/fuse_api.pxi":309
  * 
  *     if workers == 0:
  *         raise ValueError('No workers is not a good idea')             # <<<<<<<<<<<<<<
  * 
  *     if workers is None:
  */
-  __pyx_tuple__74 = PyTuple_Pack(1, __pyx_kp_u_No_workers_is_not_a_good_idea); if (unlikely(!__pyx_tuple__74)) __PYX_ERR(3, 304, __pyx_L1_error)
+  __pyx_tuple__74 = PyTuple_Pack(1, __pyx_kp_u_No_workers_is_not_a_good_idea); if (unlikely(!__pyx_tuple__74)) __PYX_ERR(3, 309, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__74);
   __Pyx_GIVEREF(__pyx_tuple__74);
 
-  /* "src/fuse_api.pxi":325
+  /* "src/fuse_api.pxi":330
  *         on_exit.callback(lambda: fuse_session_reset(session))
  *         exc_info = None
  *         log.debug('Calling fuse_session_loop')             # <<<<<<<<<<<<<<
  *         if workers == 1:
  *             session_loop_single()
  */
-  __pyx_tuple__75 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_loop); if (unlikely(!__pyx_tuple__75)) __PYX_ERR(3, 325, __pyx_L1_error)
+  __pyx_tuple__75 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_loop); if (unlikely(!__pyx_tuple__75)) __PYX_ERR(3, 330, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__75);
   __Pyx_GIVEREF(__pyx_tuple__75);
 
-  /* "src/fuse_api.pxi":313
+  /* "src/fuse_api.pxi":318
  *     # for "regular exit".
  *     exit_reason = signal.SIGKILL
  *     with contextlib.ExitStack() as on_exit:             # <<<<<<<<<<<<<<
  *         set_signal_handlers()
  *         on_exit.callback(lambda: restore_signal_handlers())
  */
-  __pyx_tuple__76 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__76)) __PYX_ERR(3, 313, __pyx_L1_error)
+  __pyx_tuple__76 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__76)) __PYX_ERR(3, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__76);
   __Pyx_GIVEREF(__pyx_tuple__76);
 
-  /* "src/fuse_api.pxi":333
+  /* "src/fuse_api.pxi":338
  *     if exc_info:
  *         # Re-raise expression from request handler
  *         log.debug('Terminated main loop because request handler raised exception, re-raising..')             # <<<<<<<<<<<<<<
  *         tmp = exc_info
  *         exc_info = None
  */
-  __pyx_tuple__77 = PyTuple_Pack(1, __pyx_kp_u_Terminated_main_loop_because_req); if (unlikely(!__pyx_tuple__77)) __PYX_ERR(3, 333, __pyx_L1_error)
+  __pyx_tuple__77 = PyTuple_Pack(1, __pyx_kp_u_Terminated_main_loop_because_req); if (unlikely(!__pyx_tuple__77)) __PYX_ERR(3, 338, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__77);
   __Pyx_GIVEREF(__pyx_tuple__77);
 
-  /* "src/fuse_api.pxi":420
+  /* "src/fuse_api.pxi":423
  *             exc_info = sys.exc_info()
  *         else:
  *             log.exception('Only one exception can be re-raised, the following '             # <<<<<<<<<<<<<<
  *                           'exception will be lost:')
  *         pthread_mutex_unlock(&exc_info_mutex)
  */
-  __pyx_tuple__78 = PyTuple_Pack(1, __pyx_kp_u_Only_one_exception_can_be_re_rai_2); if (unlikely(!__pyx_tuple__78)) __PYX_ERR(3, 420, __pyx_L1_error)
+  __pyx_tuple__78 = PyTuple_Pack(1, __pyx_kp_u_Only_one_exception_can_be_re_rai_2); if (unlikely(!__pyx_tuple__78)) __PYX_ERR(3, 423, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__78);
   __Pyx_GIVEREF(__pyx_tuple__78);
 
-  /* "src/fuse_api.pxi":499
+  /* "src/fuse_api.pxi":515
  *     global exc_info
  * 
  *     log.debug('Calling fuse_session_remove_chan')             # <<<<<<<<<<<<<<
  *     fuse_session_remove_chan(channel)
  *     log.debug('Calling fuse_session_destroy')
  */
-  __pyx_tuple__79 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_remove_chan); if (unlikely(!__pyx_tuple__79)) __PYX_ERR(3, 499, __pyx_L1_error)
+  __pyx_tuple__79 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_remove_chan); if (unlikely(!__pyx_tuple__79)) __PYX_ERR(3, 515, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__79);
   __Pyx_GIVEREF(__pyx_tuple__79);
 
-  /* "src/fuse_api.pxi":501
+  /* "src/fuse_api.pxi":517
  *     log.debug('Calling fuse_session_remove_chan')
  *     fuse_session_remove_chan(channel)
  *     log.debug('Calling fuse_session_destroy')             # <<<<<<<<<<<<<<
  *     fuse_session_destroy(session)
  * 
  */
-  __pyx_tuple__80 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_destroy); if (unlikely(!__pyx_tuple__80)) __PYX_ERR(3, 501, __pyx_L1_error)
+  __pyx_tuple__80 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_session_destroy); if (unlikely(!__pyx_tuple__80)) __PYX_ERR(3, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__80);
   __Pyx_GIVEREF(__pyx_tuple__80);
 
-  /* "src/fuse_api.pxi":505
+  /* "src/fuse_api.pxi":521
  * 
  *     if unmount:
  *         log.debug('Calling fuse_unmount')             # <<<<<<<<<<<<<<
  *         fuse_unmount(<char*>mountpoint_b, channel)
  *     else:
  */
-  __pyx_tuple__81 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_unmount); if (unlikely(!__pyx_tuple__81)) __PYX_ERR(3, 505, __pyx_L1_error)
+  __pyx_tuple__81 = PyTuple_Pack(1, __pyx_kp_u_Calling_fuse_unmount); if (unlikely(!__pyx_tuple__81)) __PYX_ERR(3, 521, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__81);
   __Pyx_GIVEREF(__pyx_tuple__81);
 
-  /* "src/fuse_api.pxi":624
+  /* "src/fuse_api.pxi":640
  *     with open('/proc/%d/status' % pid, 'r') as fh:
  *         for line in fh:
  *             if line.startswith('Groups:'):             # <<<<<<<<<<<<<<
  *                 break
  *         else:
  */
-  __pyx_tuple__82 = PyTuple_Pack(1, __pyx_kp_u_Groups); if (unlikely(!__pyx_tuple__82)) __PYX_ERR(3, 624, __pyx_L1_error)
+  __pyx_tuple__82 = PyTuple_Pack(1, __pyx_kp_u_Groups); if (unlikely(!__pyx_tuple__82)) __PYX_ERR(3, 640, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__82);
   __Pyx_GIVEREF(__pyx_tuple__82);
 
-  /* "src/fuse_api.pxi":622
+  /* "src/fuse_api.pxi":638
  *     '''
  * 
  *     with open('/proc/%d/status' % pid, 'r') as fh:             # <<<<<<<<<<<<<<
  *         for line in fh:
  *             if line.startswith('Groups:'):
  */
-  __pyx_tuple__83 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__83)) __PYX_ERR(3, 622, __pyx_L1_error)
+  __pyx_tuple__83 = PyTuple_Pack(3, Py_None, Py_None, Py_None); if (unlikely(!__pyx_tuple__83)) __PYX_ERR(3, 638, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__83);
   __Pyx_GIVEREF(__pyx_tuple__83);
 
-  /* "src/fuse_api.pxi":629
+  /* "src/fuse_api.pxi":645
  *             raise RuntimeError("Unable to parse %s" % fh.name)
  *     gids = set()
  *     for x in line.split()[1:]:             # <<<<<<<<<<<<<<
  *         gids.add(int(x))
  * 
  */
-  __pyx_slice__84 = PySlice_New(__pyx_int_1, Py_None, Py_None); if (unlikely(!__pyx_slice__84)) __PYX_ERR(3, 629, __pyx_L1_error)
+  __pyx_slice__84 = PySlice_New(__pyx_int_1, Py_None, Py_None); if (unlikely(!__pyx_slice__84)) __PYX_ERR(3, 645, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__84);
   __Pyx_GIVEREF(__pyx_slice__84);
 
@@ -45734,118 +45974,129 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__156);
   __pyx_codeobj__157 = (PyObject*)__Pyx_PyCode_New(4, 0, 12, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__156, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_getxattr, 117, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__157)) __PYX_ERR(3, 117, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":216
- * #   page instead of copying them.
+  /* "src/fuse_api.pxi":217
  * #
- * default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',             # <<<<<<<<<<<<<<
- *                              'no_splice_read', 'splice_write', 'splice_move'))
- * def init(ops, mountpoint, options=default_options):
+ * if os.uname()[0] == 'Darwin':
+ *     default_options = frozenset(('big_writes', 'default_permissions',             # <<<<<<<<<<<<<<
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * else:
  */
-  __pyx_tuple__158 = PyTuple_Pack(6, __pyx_n_u_big_writes, __pyx_n_u_nonempty, __pyx_n_u_default_permissions, __pyx_n_u_no_splice_read, __pyx_n_u_splice_write, __pyx_n_u_splice_move); if (unlikely(!__pyx_tuple__158)) __PYX_ERR(3, 216, __pyx_L1_error)
+  __pyx_tuple__158 = PyTuple_Pack(5, __pyx_n_u_big_writes, __pyx_n_u_default_permissions, __pyx_n_u_no_splice_read, __pyx_n_u_splice_write, __pyx_n_u_splice_move); if (unlikely(!__pyx_tuple__158)) __PYX_ERR(3, 217, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__158);
   __Pyx_GIVEREF(__pyx_tuple__158);
 
-  /* "src/fuse_api.pxi":218
- * default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',
- *                              'no_splice_read', 'splice_write', 'splice_move'))
+  /* "src/fuse_api.pxi":220
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * else:
+ *     default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',             # <<<<<<<<<<<<<<
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * 
+ */
+  __pyx_tuple__159 = PyTuple_Pack(6, __pyx_n_u_big_writes, __pyx_n_u_nonempty, __pyx_n_u_default_permissions, __pyx_n_u_no_splice_read, __pyx_n_u_splice_write, __pyx_n_u_splice_move); if (unlikely(!__pyx_tuple__159)) __PYX_ERR(3, 220, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__159);
+  __Pyx_GIVEREF(__pyx_tuple__159);
+
+  /* "src/fuse_api.pxi":223
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * 
  * def init(ops, mountpoint, options=default_options):             # <<<<<<<<<<<<<<
  *     '''Initialize and mount FUSE file system
  * 
  */
-  __pyx_tuple__159 = PyTuple_Pack(4, __pyx_n_s_ops, __pyx_n_s_mountpoint, __pyx_n_s_options, __pyx_n_s_f_args); if (unlikely(!__pyx_tuple__159)) __PYX_ERR(3, 218, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__159);
-  __Pyx_GIVEREF(__pyx_tuple__159);
-  __pyx_codeobj__160 = (PyObject*)__Pyx_PyCode_New(3, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__159, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_init, 218, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__160)) __PYX_ERR(3, 218, __pyx_L1_error)
+  __pyx_tuple__160 = PyTuple_Pack(4, __pyx_n_s_ops, __pyx_n_s_mountpoint, __pyx_n_s_options, __pyx_n_s_f_args); if (unlikely(!__pyx_tuple__160)) __PYX_ERR(3, 223, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__160);
+  __Pyx_GIVEREF(__pyx_tuple__160);
+  __pyx_codeobj__161 = (PyObject*)__Pyx_PyCode_New(3, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__160, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_init, 223, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__161)) __PYX_ERR(3, 223, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":273
+  /* "src/fuse_api.pxi":278
  *     pthread_mutex_init(&exc_info_mutex, NULL)
  * 
  * def main(workers=None):             # <<<<<<<<<<<<<<
  *     '''Run FUSE main loop
  * 
  */
-  __pyx_tuple__161 = PyTuple_Pack(4, __pyx_n_s_workers, __pyx_n_s_on_exit, __pyx_n_s_t, __pyx_n_s_tmp); if (unlikely(!__pyx_tuple__161)) __PYX_ERR(3, 273, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__161);
-  __Pyx_GIVEREF(__pyx_tuple__161);
-  __pyx_codeobj__162 = (PyObject*)__Pyx_PyCode_New(1, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__161, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_main_2, 273, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__162)) __PYX_ERR(3, 273, __pyx_L1_error)
+  __pyx_tuple__162 = PyTuple_Pack(4, __pyx_n_s_workers, __pyx_n_s_on_exit, __pyx_n_s_t, __pyx_n_s_tmp); if (unlikely(!__pyx_tuple__162)) __PYX_ERR(3, 278, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__162);
+  __Pyx_GIVEREF(__pyx_tuple__162);
+  __pyx_codeobj__163 = (PyObject*)__Pyx_PyCode_New(1, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__162, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_main_2, 278, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__163)) __PYX_ERR(3, 278, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":485
+  /* "src/fuse_api.pxi":491
  * 
  * 
  * def close(unmount=True):             # <<<<<<<<<<<<<<
- *     '''Unmount file system and clean up
+ *     '''Clean up and ensure filesystem is unmounted
  * 
  */
-  __pyx_tuple__163 = PyTuple_Pack(2, __pyx_n_s_unmount, __pyx_n_s_tmp); if (unlikely(!__pyx_tuple__163)) __PYX_ERR(3, 485, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__163);
-  __Pyx_GIVEREF(__pyx_tuple__163);
-  __pyx_codeobj__164 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__163, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_close, 485, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__164)) __PYX_ERR(3, 485, __pyx_L1_error)
+  __pyx_tuple__164 = PyTuple_Pack(2, __pyx_n_s_unmount, __pyx_n_s_tmp); if (unlikely(!__pyx_tuple__164)) __PYX_ERR(3, 491, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__164);
+  __Pyx_GIVEREF(__pyx_tuple__164);
+  __pyx_codeobj__165 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__164, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_close, 491, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__165)) __PYX_ERR(3, 491, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":527
+  /* "src/fuse_api.pxi":543
  *             raise tmp[1].with_traceback(tmp[2])
  * 
  * def invalidate_inode(fuse_ino_t inode, attr_only=False):             # <<<<<<<<<<<<<<
  *     '''Invalidate cache for *inode*
  * 
  */
-  __pyx_tuple__165 = PyTuple_Pack(3, __pyx_n_s_inode, __pyx_n_s_attr_only, __pyx_n_s_req); if (unlikely(!__pyx_tuple__165)) __PYX_ERR(3, 527, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__165);
-  __Pyx_GIVEREF(__pyx_tuple__165);
-  __pyx_codeobj__166 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__165, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_invalidate_inode, 527, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__166)) __PYX_ERR(3, 527, __pyx_L1_error)
+  __pyx_tuple__166 = PyTuple_Pack(3, __pyx_n_s_inode, __pyx_n_s_attr_only, __pyx_n_s_req); if (unlikely(!__pyx_tuple__166)) __PYX_ERR(3, 543, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__166);
+  __Pyx_GIVEREF(__pyx_tuple__166);
+  __pyx_codeobj__167 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__166, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_invalidate_inode, 543, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__167)) __PYX_ERR(3, 543, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":543
+  /* "src/fuse_api.pxi":559
  *     _notify_queue.put(req)
  * 
  * def invalidate_entry(fuse_ino_t inode_p, bytes name):             # <<<<<<<<<<<<<<
  *     '''Invalidate directory entry
  * 
  */
-  __pyx_tuple__167 = PyTuple_Pack(3, __pyx_n_s_inode_p, __pyx_n_s_name, __pyx_n_s_req); if (unlikely(!__pyx_tuple__167)) __PYX_ERR(3, 543, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__167);
-  __Pyx_GIVEREF(__pyx_tuple__167);
-  __pyx_codeobj__168 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__167, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_invalidate_entry, 543, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__168)) __PYX_ERR(3, 543, __pyx_L1_error)
+  __pyx_tuple__168 = PyTuple_Pack(3, __pyx_n_s_inode_p, __pyx_n_s_name, __pyx_n_s_req); if (unlikely(!__pyx_tuple__168)) __PYX_ERR(3, 559, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__168);
+  __Pyx_GIVEREF(__pyx_tuple__168);
+  __pyx_codeobj__169 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__168, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_invalidate_entry, 559, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__169)) __PYX_ERR(3, 559, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":559
+  /* "src/fuse_api.pxi":575
  *     _notify_queue.put(req)
  * 
  * def get_ino_t_bits():             # <<<<<<<<<<<<<<
  *     '''Return number of bits available for inode numbers
  * 
  */
-  __pyx_codeobj__169 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_get_ino_t_bits, 559, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__169)) __PYX_ERR(3, 559, __pyx_L1_error)
+  __pyx_codeobj__170 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_get_ino_t_bits, 575, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__170)) __PYX_ERR(3, 575, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":567
+  /* "src/fuse_api.pxi":583
  *     return min(sizeof(ino_t), sizeof(fuse_ino_t)) * 8
  * 
  * def get_off_t_bits():             # <<<<<<<<<<<<<<
  *     '''Return number of bytes available for file offsets
  * 
  */
-  __pyx_codeobj__170 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_get_off_t_bits, 567, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__170)) __PYX_ERR(3, 567, __pyx_L1_error)
+  __pyx_codeobj__171 = (PyObject*)__Pyx_PyCode_New(0, 0, 0, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_get_off_t_bits, 583, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__171)) __PYX_ERR(3, 583, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":575
+  /* "src/fuse_api.pxi":591
  *     return sizeof(off_t) * 8
  * 
  * def notify_store(inode, offset, data):             # <<<<<<<<<<<<<<
  *     '''Store data in kernel page cache
  * 
  */
-  __pyx_tuple__171 = PyTuple_Pack(9, __pyx_n_s_inode, __pyx_n_s_offset, __pyx_n_s_data, __pyx_n_s_ret, __pyx_n_s_ino, __pyx_n_s_off, __pyx_n_s_pybuf, __pyx_n_s_bufvec, __pyx_n_s_buf); if (unlikely(!__pyx_tuple__171)) __PYX_ERR(3, 575, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__171);
-  __Pyx_GIVEREF(__pyx_tuple__171);
-  __pyx_codeobj__172 = (PyObject*)__Pyx_PyCode_New(3, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__171, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_notify_store, 575, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__172)) __PYX_ERR(3, 575, __pyx_L1_error)
+  __pyx_tuple__172 = PyTuple_Pack(9, __pyx_n_s_inode, __pyx_n_s_offset, __pyx_n_s_data, __pyx_n_s_ret, __pyx_n_s_ino, __pyx_n_s_off, __pyx_n_s_pybuf, __pyx_n_s_bufvec, __pyx_n_s_buf); if (unlikely(!__pyx_tuple__172)) __PYX_ERR(3, 591, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__172);
+  __Pyx_GIVEREF(__pyx_tuple__172);
+  __pyx_codeobj__173 = (PyObject*)__Pyx_PyCode_New(3, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__172, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_notify_store, 591, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__173)) __PYX_ERR(3, 591, __pyx_L1_error)
 
-  /* "src/fuse_api.pxi":612
+  /* "src/fuse_api.pxi":628
  *         raise OSError(-ret, 'fuse_lowlevel_notify_store returned: ' + strerror(-ret))
  * 
  * def get_sup_groups(pid):             # <<<<<<<<<<<<<<
  *     '''Return supplementary group ids of *pid*
  * 
  */
-  __pyx_tuple__173 = PyTuple_Pack(5, __pyx_n_s_pid, __pyx_n_s_fh, __pyx_n_s_line, __pyx_n_s_gids, __pyx_n_s_x); if (unlikely(!__pyx_tuple__173)) __PYX_ERR(3, 612, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__173);
-  __Pyx_GIVEREF(__pyx_tuple__173);
-  __pyx_codeobj__174 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__173, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_get_sup_groups, 612, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__174)) __PYX_ERR(3, 612, __pyx_L1_error)
+  __pyx_tuple__174 = PyTuple_Pack(5, __pyx_n_s_pid, __pyx_n_s_fh, __pyx_n_s_line, __pyx_n_s_gids, __pyx_n_s_x); if (unlikely(!__pyx_tuple__174)) __PYX_ERR(3, 628, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__174);
+  __Pyx_GIVEREF(__pyx_tuple__174);
+  __pyx_codeobj__175 = (PyObject*)__Pyx_PyCode_New(1, 0, 5, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__174, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_nikratio_in_progress_pytho_3, __pyx_n_s_get_sup_groups, 628, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__175)) __PYX_ERR(3, 628, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -46827,137 +47078,199 @@ PyMODINIT_FUNC PyInit_llfuse(void)
   /* "src/fuse_api.pxi":216
  * #   page instead of copying them.
  * #
- * default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',             # <<<<<<<<<<<<<<
- *                              'no_splice_read', 'splice_write', 'splice_move'))
- * def init(ops, mountpoint, options=default_options):
+ * if os.uname()[0] == 'Darwin':             # <<<<<<<<<<<<<<
+ *     default_options = frozenset(('big_writes', 'default_permissions',
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
  */
-  __pyx_t_1 = __Pyx_PyFrozenSet_New(__pyx_tuple__158); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 216, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_os); if (unlikely(!__pyx_t_4)) __PYX_ERR(3, 216, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_uname); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 216, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  if (__pyx_t_4) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 216, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 216, __pyx_L1_error)
+  }
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_options, __pyx_t_1) < 0) __PYX_ERR(3, 216, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 216, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = (__Pyx_PyUnicode_Equals(__pyx_t_2, __pyx_n_u_Darwin, Py_EQ)); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(3, 216, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__pyx_t_3) {
 
-  /* "src/fuse_api.pxi":218
- * default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',
- *                              'no_splice_read', 'splice_write', 'splice_move'))
+    /* "src/fuse_api.pxi":217
+ * #
+ * if os.uname()[0] == 'Darwin':
+ *     default_options = frozenset(('big_writes', 'default_permissions',             # <<<<<<<<<<<<<<
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * else:
+ */
+    __pyx_t_2 = __Pyx_PyFrozenSet_New(__pyx_tuple__158); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 217, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_options, __pyx_t_2) < 0) __PYX_ERR(3, 217, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+    /* "src/fuse_api.pxi":216
+ * #   page instead of copying them.
+ * #
+ * if os.uname()[0] == 'Darwin':             # <<<<<<<<<<<<<<
+ *     default_options = frozenset(('big_writes', 'default_permissions',
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ */
+    goto __pyx_L3;
+  }
+
+  /* "src/fuse_api.pxi":220
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * else:
+ *     default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',             # <<<<<<<<<<<<<<
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * 
+ */
+  /*else*/ {
+    __pyx_t_2 = __Pyx_PyFrozenSet_New(__pyx_tuple__159); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 220, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_options, __pyx_t_2) < 0) __PYX_ERR(3, 220, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  }
+  __pyx_L3:;
+
+  /* "src/fuse_api.pxi":223
+ *                                  'no_splice_read', 'splice_write', 'splice_move'))
+ * 
  * def init(ops, mountpoint, options=default_options):             # <<<<<<<<<<<<<<
  *     '''Initialize and mount FUSE file system
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_default_options); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 218, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_k__65 = __pyx_t_1;
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_9init, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 218, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_init, __pyx_t_1) < 0) __PYX_ERR(3, 218, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_default_options); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 223, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_k__65 = __pyx_t_2;
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_9init, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 223, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_init, __pyx_t_2) < 0) __PYX_ERR(3, 223, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":273
+  /* "src/fuse_api.pxi":278
  *     pthread_mutex_init(&exc_info_mutex, NULL)
  * 
  * def main(workers=None):             # <<<<<<<<<<<<<<
  *     '''Run FUSE main loop
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_11main, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 273, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_main_2, __pyx_t_1) < 0) __PYX_ERR(3, 273, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_11main, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 278, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_main_2, __pyx_t_2) < 0) __PYX_ERR(3, 278, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":485
+  /* "src/fuse_api.pxi":491
  * 
  * 
  * def close(unmount=True):             # <<<<<<<<<<<<<<
- *     '''Unmount file system and clean up
+ *     '''Clean up and ensure filesystem is unmounted
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_13close, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 485, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_close, __pyx_t_1) < 0) __PYX_ERR(3, 485, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_13close, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 491, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_close, __pyx_t_2) < 0) __PYX_ERR(3, 491, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":527
+  /* "src/fuse_api.pxi":543
  *             raise tmp[1].with_traceback(tmp[2])
  * 
  * def invalidate_inode(fuse_ino_t inode, attr_only=False):             # <<<<<<<<<<<<<<
  *     '''Invalidate cache for *inode*
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_15invalidate_inode, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 527, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_invalidate_inode, __pyx_t_1) < 0) __PYX_ERR(3, 527, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_15invalidate_inode, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 543, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_invalidate_inode, __pyx_t_2) < 0) __PYX_ERR(3, 543, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":543
+  /* "src/fuse_api.pxi":559
  *     _notify_queue.put(req)
  * 
  * def invalidate_entry(fuse_ino_t inode_p, bytes name):             # <<<<<<<<<<<<<<
  *     '''Invalidate directory entry
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_17invalidate_entry, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 543, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_invalidate_entry, __pyx_t_1) < 0) __PYX_ERR(3, 543, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_17invalidate_entry, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 559, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_invalidate_entry, __pyx_t_2) < 0) __PYX_ERR(3, 559, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":559
+  /* "src/fuse_api.pxi":575
  *     _notify_queue.put(req)
  * 
  * def get_ino_t_bits():             # <<<<<<<<<<<<<<
  *     '''Return number of bits available for inode numbers
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_19get_ino_t_bits, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 559, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_ino_t_bits, __pyx_t_1) < 0) __PYX_ERR(3, 559, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_19get_ino_t_bits, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 575, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_ino_t_bits, __pyx_t_2) < 0) __PYX_ERR(3, 575, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":567
+  /* "src/fuse_api.pxi":583
  *     return min(sizeof(ino_t), sizeof(fuse_ino_t)) * 8
  * 
  * def get_off_t_bits():             # <<<<<<<<<<<<<<
  *     '''Return number of bytes available for file offsets
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_21get_off_t_bits, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 567, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_off_t_bits, __pyx_t_1) < 0) __PYX_ERR(3, 567, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_21get_off_t_bits, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 583, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_off_t_bits, __pyx_t_2) < 0) __PYX_ERR(3, 583, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":575
+  /* "src/fuse_api.pxi":591
  *     return sizeof(off_t) * 8
  * 
  * def notify_store(inode, offset, data):             # <<<<<<<<<<<<<<
  *     '''Store data in kernel page cache
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_23notify_store, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 575, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_notify_store, __pyx_t_1) < 0) __PYX_ERR(3, 575, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_23notify_store, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 591, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_notify_store, __pyx_t_2) < 0) __PYX_ERR(3, 591, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "src/fuse_api.pxi":612
+  /* "src/fuse_api.pxi":628
  *         raise OSError(-ret, 'fuse_lowlevel_notify_store returned: ' + strerror(-ret))
  * 
  * def get_sup_groups(pid):             # <<<<<<<<<<<<<<
  *     '''Return supplementary group ids of *pid*
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_25get_sup_groups, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_1)) __PYX_ERR(3, 612, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_sup_groups, __pyx_t_1) < 0) __PYX_ERR(3, 612, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6llfuse_25get_sup_groups, NULL, __pyx_n_s_llfuse); if (unlikely(!__pyx_t_2)) __PYX_ERR(3, 628, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_sup_groups, __pyx_t_2) < 0) __PYX_ERR(3, 628, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "llfuse.pyx":1
  * '''             # <<<<<<<<<<<<<<
  * llfuse.pxy
  * 
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(4, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(4, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(4, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /*--- Wrapped vars code ---*/
 
@@ -49795,6 +50108,37 @@ bad:
     }
 
 /* CIntToPy */
+              static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
+    const long neg_one = (long) -1, const_zero = (long) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(long),
+                                     little, !is_unsigned);
+    }
+}
+
+/* CIntToPy */
               static CYTHON_INLINE PyObject* __Pyx_PyInt_From_fuse_ino_t(fuse_ino_t value) {
     const fuse_ino_t neg_one = (fuse_ino_t) -1, const_zero = (fuse_ino_t) 0;
     const int is_unsigned = neg_one > const_zero;
@@ -50007,37 +50351,6 @@ bad:
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(uint32_t),
-                                     little, !is_unsigned);
-    }
-}
-
-/* CIntToPy */
-              static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
-    const long neg_one = (long) -1, const_zero = (long) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(long),
                                      little, !is_unsigned);
     }
 }

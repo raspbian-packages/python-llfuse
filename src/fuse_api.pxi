@@ -213,8 +213,13 @@ def getxattr(path, name, size_t size_guess=128, namespace='user'):
 #   active, it's expected to improve performance because we move pages from the
 #   page instead of copying them.
 #
-default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',
-                             'no_splice_read', 'splice_write', 'splice_move'))
+if os.uname()[0] == 'Darwin':
+    default_options = frozenset(('big_writes', 'default_permissions',
+                                 'no_splice_read', 'splice_write', 'splice_move'))
+else:
+    default_options = frozenset(('big_writes', 'nonempty', 'default_permissions',
+                                 'no_splice_read', 'splice_write', 'splice_move'))
+
 def init(ops, mountpoint, options=default_options):
     '''Initialize and mount FUSE file system
 
@@ -283,11 +288,11 @@ def main(workers=None):
     have terminated when `main` returns.
 
     While this function is running, special signal handlers will be installed
-    for the *SIGTERM*, *SIGINT* (Ctrl-C), *SIGHUP* and *SIGPIPE*
+    for the *SIGTERM*, *SIGINT* (Ctrl-C), *SIGHUP*, *SIGUSR1* and *SIGPIPE*
     signals. *SIGPIPE* will be ignored, while the other three signals will cause
     request processing to stop and the function to return.  *SIGINT* (Ctrl-C)
     will thus *not* result in a `KeyboardInterrupt` exception while this
-    function is runnnig.
+    function is runnning.
 
     When the function returns because the file system has received an unmount
     request it will return `None`. If it returns because it has received a
@@ -372,9 +377,7 @@ cdef session_loop(void* mem, size_t size):
         buf.pos = 0
         buf.flags = 0
         with nogil:
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
             res = fuse_session_receive_buf(session, &buf, &ch)
-            pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
         if res == -errno.EINTR:
             continue
@@ -454,8 +457,7 @@ cdef session_loop_mt(workers):
             wd[i].bufsize = bufsize
             wd[i].buf = calloc_or_raise(1, bufsize)
 
-            # Disable signal reception in new thread
-            # (FUSE does the same, probably for a good reason)
+            # Ensure that signals get delivered to main thread
             pthread_sigmask(SIG_BLOCK, &newset, &oldset)
             res = pthread_create(&wd[i].thread_id, NULL, &worker_start, wd+i)
             pthread_sigmask(SIG_SETMASK, &oldset, NULL)
@@ -471,6 +473,10 @@ cdef session_loop_mt(workers):
     finally:
         for i in range(workers):
             if wd[i].started:
+                res = pthread_kill(wd[i].thread_id, signal.SIGUSR1)
+                # Thread may have terminated already
+                if res != 0 and res != errno.ESRCH:
+                    log.error('pthread_kill failed with: %s', strerror(res))
                 with nogil:
                     res = pthread_join(wd[i].thread_id, NULL)
                 if res != 0:
@@ -483,12 +489,22 @@ cdef session_loop_mt(workers):
 
 
 def close(unmount=True):
-    '''Unmount file system and clean up
+    '''Clean up and ensure filesystem is unmounted
 
-    If *unmount* is False, only clean up operations are peformed, but
-    the file system is not unmounted. As long as the file system
-    process is still running, all requests will hang. Once the process
-    has terminated, these (and all future) requests fail with ESHUTDOWN.
+    If *unmount* is False, only clean up operations are peformed, but the file
+    system is not explicitly unmounted.
+
+    Normally, the filesystem is unmounted by the user calling umount(8) or
+    fusermount(1), which then terminates the FUSE main loop. However, the loop
+    may also terminate as a result of an exception or a signal. In this case the
+    filesystem remains mounted, but any attempt to access it will block (while
+    the filesystem process is still running) or (after the filesystem process
+    has terminated) return an error. If *unmount* is True, this function will
+    ensure that the filesystem is properly unmounted.
+
+    Note: if the connection to the kernel is terminated via the
+    ``/sys/fs/fuse/connections/`` interface, this function will *not* unmount
+    the filesystem even if *unmount* is True.
     '''
 
     global mountpoint_b

@@ -11,7 +11,6 @@ Include/libc/__init__.py
 Include/libc/dirent.pxd
 Include/libc/sys/__init__.py
 Include/libc/sys/statvfs.pxd
-Include/posix/stat.pxd
 doc/html/.buildinfo
 doc/html/about.html
 doc/html/changes.html
@@ -43,6 +42,7 @@ doc/html/_sources/operations.txt
 doc/html/_sources/util.txt
 doc/html/_static/ajax-loader.gif
 doc/html/_static/basic.css
+doc/html/_static/classic.css
 doc/html/_static/comment-bright.png
 doc/html/_static/comment-close.png
 doc/html/_static/comment.png
@@ -96,6 +96,7 @@ src/xattr.h
 src/llfuse.egg-info/PKG-INFO
 src/llfuse.egg-info/SOURCES.txt
 src/llfuse.egg-info/dependency_links.txt
+src/llfuse.egg-info/requires.txt
 src/llfuse.egg-info/top_level.txt
 src/llfuse.egg-info/zip-safe
 test/conftest.py
