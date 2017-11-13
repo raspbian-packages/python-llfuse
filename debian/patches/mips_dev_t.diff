@@ -1,4 +1,4 @@
-From 962f96aa30c98566c6b214ef31a32268a853824e Mon Sep 17 00:00:00 2001
+From 607834e7265a65e5339f919b84390e3758ad91ac Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 13 Nov 2017 12:31:56 +0000
 Subject: Work around bug in mips+mipsel libc
@@ -24,14 +24,14 @@ Upstream is not interested in this change for obvious reasons.
 
 diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
 new file mode 100644
-index 00000..f9038
+index 00000..45144
 --- /dev/null
 +++ b/Include/posix/stat.pxd
 @@ -0,0 +1,37 @@
 +from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
 +                          nlink_t, off_t, time_t, uid_t)
 +
-+IF UNAME_MACHINE.startswith('mips'):
++IF UNAME_MACHINE in ('mips', 'mipsel'):
 +    cdef extern from "<sys/stat.h>" nogil:
 +        cdef struct struct_stat "stat":
 +            unsigned st_dev

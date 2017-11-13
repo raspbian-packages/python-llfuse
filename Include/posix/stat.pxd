@@ -1,7 +1,7 @@
 from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
                           nlink_t, off_t, time_t, uid_t)
 
-IF UNAME_MACHINE.startswith('mips'):
+IF UNAME_MACHINE in ('mips', 'mipsel'):
     cdef extern from "<sys/stat.h>" nogil:
         cdef struct struct_stat "stat":
             unsigned st_dev
