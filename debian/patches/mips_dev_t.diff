@@ -1,4 +1,4 @@
-From 607834e7265a65e5339f919b84390e3758ad91ac Mon Sep 17 00:00:00 2001
+From 3c38ea65bcb0fe120f7168161bf333a8ea5644e3 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 13 Nov 2017 12:31:56 +0000
 Subject: Work around bug in mips+mipsel libc
@@ -18,10 +18,19 @@ generated C file is suitable for any architecture).
 
 Upstream is not interested in this change for obvious reasons.
 ---
- Include/posix/stat.pxd | 37 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 37 insertions(+)
+ Include/posix/__init__.py |  1 +
+ Include/posix/stat.pxd    | 37 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 38 insertions(+)
+ create mode 100644 Include/posix/__init__.py
  create mode 100644 Include/posix/stat.pxd
 
+diff --git a/Include/posix/__init__.py b/Include/posix/__init__.py
+new file mode 100644
+index 00000..ea305
+--- /dev/null
++++ b/Include/posix/__init__.py
+@@ -0,0 +1 @@
++#empty
 diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
 new file mode 100644
 index 00000..45144
