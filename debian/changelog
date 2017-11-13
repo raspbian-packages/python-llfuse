@@ -1,8 +1,8 @@
-python-llfuse (1.3.2+dfsg-2) UNRELEASED; urgency=medium
+python-llfuse (1.3.2+dfsg-2) unstable; urgency=medium
 
   * Fixed up patches/mips_dev_t.diff (missing file)
 
- -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 13 Nov 2017 13:57:51 +0000
+ -- Nikolaus Rath <Nikolaus@rath.org>  Mon, 13 Nov 2017 14:03:03 +0000
 
 python-llfuse (1.3.2+dfsg-1) unstable; urgency=medium
 
