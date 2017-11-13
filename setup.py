@@ -59,7 +59,7 @@ if DEVELOPER_MODE:
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-LLFUSE_VERSION = '1.3'
+LLFUSE_VERSION = '1.3.2'
 
 def main():
 
@@ -79,6 +79,10 @@ def main():
 
     # We may have unused functions if we compile for older FUSE versions
     compile_args.append('-Wno-unused-function')
+
+    # Nothing wrong with that if you know what you are doing
+    # (which Cython does)
+    compile_args.append('-Wno-implicit-fallthrough')
 
     # Due to platform specific conditions, these are unavoidable
     compile_args.append('-Wno-unused-parameter')
@@ -151,7 +155,8 @@ def main():
           ext_modules=[Extension('llfuse', c_sources,
                                   extra_compile_args=compile_args,
                                   extra_link_args=link_args)],
-          cmdclass={'build_cython': build_cython },
+        cmdclass={'upload_docs': upload_docs,
+                  'build_cython': build_cython },
           command_options={
             'build_sphinx': {
                 'version': ('setup.py', LLFUSE_VERSION),
@@ -191,6 +196,21 @@ def pkg_config(pkg, cflags=True, ldflags=False, min_ver=None):
 
     return cflags.decode('us-ascii').split()
 
+
+class upload_docs(setuptools.Command):
+    user_options = []
+    boolean_options = []
+    description = "Upload documentation"
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        subprocess.check_call(['rsync', '-aHv', '--del', os.path.join(basedir, 'doc', 'html') + '/',
+                               'ebox.rath.org:/srv/www.rath.org/llfuse-docs/'])
 
 class build_cython(setuptools.Command):
     user_options = []
