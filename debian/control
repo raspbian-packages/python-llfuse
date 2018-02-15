@@ -51,7 +51,6 @@ Description: Python bindings for the low-level FUSE API
 
 Package: python-llfuse-dbg
 Section: debug
-Priority: extra
 Architecture: any
 Recommends: python-dbg
 Breaks: python-llfuse (<< 0.40+dfsg-1)
@@ -92,7 +91,6 @@ Description: Python 3 bindings for the low-level FUSE API
 
 Package: python3-llfuse-dbg
 Section: debug
-Priority: extra
 Architecture: any
 Recommends: python-dbg
 Breaks: python3-llfuse (<< 0.40+dfsg-1)
