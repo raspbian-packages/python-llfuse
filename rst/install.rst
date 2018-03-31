@@ -22,9 +22,7 @@ In order to build and run Python-LLFUSE you need the following software:
 
 To run the unit tests, you will need
 
-* The `py.test`_ module, version 2.8.0 or newer
-* The `pytest-catchlog
-  <https://github.com/eisensheng/pytest-catchlog>`_ module
+* The `py.test`_ module, version 3.3.0 or newer
 
 When using Linux, you also need:
 
@@ -63,7 +61,7 @@ Development Version
 ===================
 
 If you have checked out the unstable development version from the
-Mercurial repository, a bit more effort is required. You need to also
+repository ( Mercurial_ or Git_ ), a bit more effort is required. You need to also
 have Cython_ (0.24 or newer) and Sphinx_ (1.1 or newer) installed, and
 the necessary commands are::
 
@@ -86,3 +84,5 @@ the necessary commands are::
 .. _OSXFUSE: http://osxfuse.github.io/
 .. _setuptools: https://pypi.python.org/pypi/setuptools
 .. _contextlib2: https://pypi.python.org/pypi/contextlib2/
+.. _Mercurial: https://bitbucket.org/nikratio/python-llfuse
+.. _Git: https://github.com/python-llfuse/python-llfuse
