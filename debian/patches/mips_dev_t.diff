@@ -1,4 +1,4 @@
-From 607834e7265a65e5339f919b84390e3758ad91ac Mon Sep 17 00:00:00 2001
+From 682419bd9fa2e17b630f5dc68f63b85a13a09ea1 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 13 Nov 2017 12:31:56 +0000
 Subject: Work around bug in mips+mipsel libc
@@ -18,16 +18,25 @@ generated C file is suitable for any architecture).
 
 Upstream is not interested in this change for obvious reasons.
 ---
- Include/posix/stat.pxd | 37 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 37 insertions(+)
+ Include/posix/__init__.py |  1 +
+ Include/posix/stat.pxd    | 85 +++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 86 insertions(+)
+ create mode 100644 Include/posix/__init__.py
  create mode 100644 Include/posix/stat.pxd
 
+diff --git a/Include/posix/__init__.py b/Include/posix/__init__.py
+new file mode 100644
+index 00000..ea305
+--- /dev/null
++++ b/Include/posix/__init__.py
+@@ -0,0 +1 @@
++#empty
 diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
 new file mode 100644
-index 00000..45144
+index 00000..a46f5
 --- /dev/null
 +++ b/Include/posix/stat.pxd
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,85 @@
 +from posix.types cimport (blkcnt_t, blksize_t, dev_t, gid_t, ino_t, mode_t,
 +                          nlink_t, off_t, time_t, uid_t)
 +
@@ -65,3 +74,51 @@ index 00000..45144
 +            time_t  st_mtime
 +            time_t  st_ctime
 +            time_t  st_birthtime
++
++# POSIX prescribes including both <sys/stat.h> and <unistd.h> for these
++cdef extern from "<unistd.h>" nogil:
++    int fchmod(int, mode_t)
++    int chmod(const char *, mode_t)
++
++    int fstat(int, struct_stat *)
++    int lstat(const char *, struct_stat *)
++    int stat(const char *, struct_stat *)
++
++    # Macros for st_mode
++    mode_t S_ISREG(mode_t)
++    mode_t S_ISDIR(mode_t)
++    mode_t S_ISCHR(mode_t)
++    mode_t S_ISBLK(mode_t)
++    mode_t S_ISFIFO(mode_t)
++    mode_t S_ISLNK(mode_t)
++    mode_t S_ISSOCK(mode_t)
++
++    mode_t S_IFMT
++    mode_t S_IFREG
++    mode_t S_IFDIR
++    mode_t S_IFCHR
++    mode_t S_IFBLK
++    mode_t S_IFIFO
++    mode_t S_IFLNK
++    mode_t S_IFSOCK
++
++    # Permissions
++    mode_t S_ISUID
++    mode_t S_ISGID
++    mode_t S_ISVTX
++
++    mode_t S_IRWXU
++    mode_t S_IRUSR
++    mode_t S_IWUSR
++    mode_t S_IXUSR
++
++    mode_t S_IRWXG
++    mode_t S_IRGRP
++    mode_t S_IWGRP
++    mode_t S_IXGRP
++
++    mode_t S_IRWXO
++    mode_t S_IROTH
++    mode_t S_IWOTH
++    mode_t S_IXOTH
++            
