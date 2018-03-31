@@ -1,12 +1,16 @@
-python-llfuse (1.3.2+dfsg-3) UNRELEASED; urgency=medium
+python-llfuse (1.3.3+dfsg-1) UNRELEASED; urgency=medium
 
+  [ Ondřej Nový ]
   * d/control: Set Vcs-* to salsa.debian.org
   * d/copyright: Use https protocol in Format field
   * d/control: Deprecating priority extra as per policy 4.0.1
   * d/changelog: Remove trailing whitespaces
   * d/control: Remove trailing whitespaces
 
- -- Ondřej Nový <onovy@debian.org>  Tue, 13 Feb 2018 10:06:02 +0100
+  [ Nikolaus Rath ]
+  * New upstream release.
+
+ -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 31 Mar 2018 12:49:57 +0100
 
 python-llfuse (1.3.2+dfsg-2) unstable; urgency=medium
 

@@ -105,5 +105,7 @@ test/pytest_checklogs.py
 test/test_api.py
 test/test_examples.py
 test/test_fs.py
+test/travis-install.sh
+test/travis-test.sh
 test/util.py
 util/sphinx_cython.py
