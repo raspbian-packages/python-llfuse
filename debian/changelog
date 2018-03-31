@@ -9,6 +9,8 @@ python-llfuse (1.3.3+dfsg-1) UNRELEASED; urgency=medium
 
   [ Nikolaus Rath ]
   * New upstream release.
+  * Dropped pytest-catchlog dependency, depend on py.test 3.3
+    instead. Closes: #892616.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Sat, 31 Mar 2018 12:49:57 +0100
 
