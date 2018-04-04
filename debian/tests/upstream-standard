@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# Unset proxies. In Ubuntu build environments, a proxy is used to
+# refuse all network access with a 503 error. However, the test
+# cases actually try to connect to a mock service running on
+# localhost.
+unset http_proxy
+unset https_proxt
+
 # Test suite automatically skips over tests that cannot be
 # executed because of insufficient priviliges.
 exec py.test-3 --installed test/

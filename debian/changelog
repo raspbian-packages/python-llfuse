@@ -2,6 +2,7 @@ python-llfuse (1.3.3+dfsg-3) UNRELEASED; urgency=medium
 
   * Get rid of python-catchlog dependency for integration tests
     as well. Closes: #894716.
+  * Disable proxy in integration tests.
 
  -- Nikolaus Rath <Nikolaus@rath.org>  Wed, 04 Apr 2018 09:44:29 +0100
 
