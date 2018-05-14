@@ -1,6 +1,5 @@
 Source: python-llfuse
 Section: python
-X-Python-Version: >= 2.6
 X-Python3-Version: >= 3.0
 Priority: optional
 Uploaders: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
