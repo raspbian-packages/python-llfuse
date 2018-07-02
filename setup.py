@@ -87,9 +87,6 @@ def main():
     # Due to platform specific conditions, these are unavoidable
     compile_args.append('-Wno-unused-parameter')
 
-    # Value-changing conversions should always be explicit.
-    compile_args.append('-Werror=conversion')
-
     # Note that (i > -1) is false if i is unsigned (-1 will be converted to
     # a large positive value). We certainly don't want to do this by
     # accident.

@@ -1,0 +1,25 @@
+From 9948ada63df25f3c5e3a30380a9c3d03a147ffbb Mon Sep 17 00:00:00 2001
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Mon, 2 Jul 2018 16:55:23 +0100
+Subject: Temporarily drop -Werror=conversion
+
+This causes a FTBFS because recent Cython versions introduced
+a new error here.
+---
+ setup.py | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/setup.py b/setup.py
+index c82f4..16f97 100755
+--- a/setup.py
++++ b/setup.py
+@@ -87,9 +87,6 @@ def main():
+     # Due to platform specific conditions, these are unavoidable
+     compile_args.append('-Wno-unused-parameter')
+ 
+-    # Value-changing conversions should always be explicit.
+-    compile_args.append('-Werror=conversion')
+-
+     # Note that (i > -1) is false if i is unsigned (-1 will be converted to
+     # a large positive value). We certainly don't want to do this by
+     # accident.
