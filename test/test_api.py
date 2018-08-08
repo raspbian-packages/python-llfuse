@@ -23,7 +23,6 @@ import errno
 import pytest
 from copy import copy
 from pickle import PicklingError
-import sys
 
 def test_inquire_bits():
     assert 0 < llfuse.get_ino_t_bits() < 256
@@ -67,9 +66,6 @@ def test_entry_res():
     a.st_atime_ns = val*1e9
     assert a.st_atime_ns / 1e9 == val
 
-
-@pytest.mark.skipif(sys.platform.startswith('gnukfreebsd'),
-                    reason='GNU/kFreeBSD does not have xattr support')
 def test_xattr():
     with tempfile.NamedTemporaryFile() as fh:
         key = 'user.new_attribute'

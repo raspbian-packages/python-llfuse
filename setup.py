@@ -87,6 +87,9 @@ def main():
     # Due to platform specific conditions, these are unavoidable
     compile_args.append('-Wno-unused-parameter')
 
+    # Value-changing conversions should always be explicit.
+    compile_args.append('-Werror=conversion')
+
     # Note that (i > -1) is false if i is unsigned (-1 will be converted to
     # a large positive value). We certainly don't want to do this by
     # accident.
@@ -222,7 +225,7 @@ class build_cython(setuptools.Command):
 
     def run(self):
         try:
-            version = subprocess.check_output(['cython3', '--version'],
+            version = subprocess.check_output(['cython', '--version'],
                                               universal_newlines=True,
                                               stderr=subprocess.STDOUT)
         except OSError:
@@ -232,7 +235,7 @@ class build_cython(setuptools.Command):
         if not hit or LooseVersion(hit.group(1)) < "0.24":
             raise SystemExit('Need Cython 0.24 or newer, found ' + version)
 
-        cmd = ['cython3', '-Wextra', '--force', '-3', '--fast-fail',
+        cmd = ['cython', '-Wextra', '--force', '-3', '--fast-fail',
                '--directive', 'embedsignature=True', '--include-dir',
                os.path.join(basedir, 'Include'), '--verbose' ]
         if DEVELOPER_MODE:
