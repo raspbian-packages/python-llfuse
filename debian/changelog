@@ -1,6 +1,11 @@
 python-llfuse (1.3.3+dfsg-5) UNRELEASED; urgency=medium
 
+  [ Ondřej Nový ]
   * Convert git repository from git-dpm to gbp layout
+
+  [ Nikolaus Rath ]
+  * python3-llfuse-dbg: recommend python3-dbg, not python-dbg. Closes:
+    #906080.
 
  -- Ondřej Nový <onovy@debian.org>  Wed, 08 Aug 2018 09:13:53 +0200
 

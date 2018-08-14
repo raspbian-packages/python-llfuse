@@ -88,7 +88,7 @@ Description: Python 3 bindings for the low-level FUSE API
 Package: python3-llfuse-dbg
 Section: debug
 Architecture: any
-Recommends: python-dbg
+Recommends: python3-dbg
 Breaks: python3-llfuse (<< 0.40+dfsg-1)
 Replaces: python3-llfuse (<< 0.40+dfsg-1)
 Depends: python3-llfuse (= ${binary:Version}),
