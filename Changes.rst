@@ -4,6 +4,18 @@
 
 .. currentmodule:: llfuse
 
+Release 1.3.5 (2018-08-30)
+==========================
+
+* Add `handle_signals` option to `llfuse.main`
+* Several fixes to `examples/passthroughfs.py`
+* Now compatible with Python 3.7
+
+Release 1.3.4 (2018-04-29)
+==========================
+
+* No-change rebuild with Cython 0.28.2.
+
 Release 1.3.3 (2018-03-31)
 ==========================
 

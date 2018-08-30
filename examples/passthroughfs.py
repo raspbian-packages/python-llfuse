@@ -226,6 +226,7 @@ class Operations(llfuse.Operations):
         path = os.path.join(parent, name)
         try:
             os.symlink(target, path)
+            os.chown(path, ctx.uid, ctx.gid, follow_symlinks=False)
         except OSError as exc:
             raise FUSEError(exc.errno)
         stat = os.lstat(path)
@@ -250,8 +251,8 @@ class Operations(llfuse.Operations):
         val = self._inode_path_map[inode]
         if isinstance(val, set):
             assert len(val) > 1
-            set.add(path_new)
-            set.remove(path_old)
+            val.add(path_new)
+            val.remove(path_old)
         else:
             assert val == path_old
             self._inode_path_map[inode] = path_new
@@ -344,14 +345,16 @@ class Operations(llfuse.Operations):
         return attr
 
     def statfs(self, ctx):
+        root = self._inode_path_map[llfuse.ROOT_INODE]
         stat_ = llfuse.StatvfsData()
         try:
-            statfs = os.statvfs(self._inode_path_map[llfuse.ROOT_INODE])
+            statfs = os.statvfs(root)
         except OSError as exc:
             raise FUSEError(exc.errno)
         for attr in ('f_bsize', 'f_frsize', 'f_blocks', 'f_bfree', 'f_bavail',
                      'f_files', 'f_ffree', 'f_favail'):
             setattr(stat_, attr, getattr(statfs, attr))
+        stat_.f_namemax = statfs.f_namemax - (len(root)+1)
         return stat_
 
     def open(self, inode, flags, ctx):
@@ -446,7 +449,6 @@ def main():
     log.debug('Mounting...')
     fuse_options = set(llfuse.default_options)
     fuse_options.add('fsname=passthroughfs')
-    fuse_options.add('default_permissions')
     if options.debug_fuse:
         fuse_options.add('debug')
     llfuse.init(operations, options.mountpoint, fuse_options)
