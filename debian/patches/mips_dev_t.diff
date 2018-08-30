@@ -1,4 +1,3 @@
-From 2e7d47f8ef7af24f6bb2cbdf3eee7341044760cb Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Mon, 13 Nov 2017 12:31:56 +0000
 Subject: Work around bug in mips+mipsel libc
@@ -26,14 +25,14 @@ Upstream is not interested in this change for obvious reasons.
 
 diff --git a/Include/posix/__init__.py b/Include/posix/__init__.py
 new file mode 100644
-index 00000..ea305
+index 0000000..ea30561
 --- /dev/null
 +++ b/Include/posix/__init__.py
 @@ -0,0 +1 @@
 +#empty
 diff --git a/Include/posix/stat.pxd b/Include/posix/stat.pxd
 new file mode 100644
-index 00000..a46f5
+index 0000000..a46f510
 --- /dev/null
 +++ b/Include/posix/stat.pxd
 @@ -0,0 +1,85 @@

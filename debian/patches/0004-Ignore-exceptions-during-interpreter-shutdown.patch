@@ -1,4 +1,3 @@
-From 18bfdbc794196e4d6503ab03f0e05ddb5d9912a7 Mon Sep 17 00:00:00 2001
 From: Nikolaus Rath <Nikolaus@rath.org>
 Date: Sat, 21 Jan 2017 16:34:50 -0800
 Subject: Ignore exceptions during interpreter shutdown
@@ -11,7 +10,7 @@ caused by a bug in Python. Closes: #851724.
  1 file changed, 7 insertions(+)
 
 diff --git a/test/conftest.py b/test/conftest.py
-index fa19c..d1e88 100644
+index fa19c6a..d1e885f 100644
 --- a/test/conftest.py
 +++ b/test/conftest.py
 @@ -21,6 +21,13 @@ def register_false_checklog_pos(reg_output):

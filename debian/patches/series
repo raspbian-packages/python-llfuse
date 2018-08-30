@@ -3,4 +3,3 @@ use-local-intersphinx-inventory.patch
 0003-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
 0004-Ignore-exceptions-during-interpreter-shutdown.patch
 mips_dev_t.diff
-0006-Temporarily-drop-Werror-conversion.patch
