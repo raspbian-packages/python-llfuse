@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: python-llfuse
 Upstream-Contact: Nikolaus Rath <Nikolaus@rath.org>
-Source: https://bitbucket.org/nikratio/python-llfuse/
+Source: https://github.com/python-llfuse/python-llfuse
 Files-Excluded: doc/html
 
 Files: *
