@@ -96,6 +96,7 @@ src/xattr.h
 src/llfuse.egg-info/PKG-INFO
 src/llfuse.egg-info/SOURCES.txt
 src/llfuse.egg-info/dependency_links.txt
+src/llfuse.egg-info/requires.txt
 src/llfuse.egg-info/top_level.txt
 src/llfuse.egg-info/zip-safe
 test/conftest.py

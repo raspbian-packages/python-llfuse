@@ -4,6 +4,14 @@
 
 .. currentmodule:: llfuse
 
+Release 1.3.6 (2019-02-14)
+==========================
+
+Python-LLFUSE is no longer actively maintained. Unless you are stuck
+with Python 2.x or libfuse 2.x, we recommended to use the pyfuse3_
+module instead.
+
+
 Release 1.3.5 (2018-08-30)
 ==========================
 
