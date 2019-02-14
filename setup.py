@@ -59,7 +59,7 @@ if DEVELOPER_MODE:
 # to work properly
 sys.path.insert(0, os.path.join(basedir, 'src'))
 
-LLFUSE_VERSION = '1.3.5'
+LLFUSE_VERSION = '1.3.6'
 
 def main():
 
@@ -135,8 +135,7 @@ def main():
           long_description=long_desc,
           author='Nikolaus Rath',
           author_email='Nikolaus@rath.org',
-          url='https://bitbucket.org/nikratio/python-llfuse/',
-          download_url='https://bitbucket.org/nikratio/python-llfuse/downloads',
+          url='https://github.com/python-llfuse/python-llfuse/',
           license='LGPL',
           classifiers=['Development Status :: 4 - Beta',
                        'Intended Audience :: Developers',
