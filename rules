@@ -1,0 +1,53 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DH_VERBOSE=1
+export PYBUILD_NAME=llfuse
+export PYBUILD_TEST_PYTEST=1
+export PYBUILD_TEST_ARGS=--installed "{dir}/test/"
+
+%:
+	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
+
+override_dh_auto_build: build_cython build_sphinx
+	dh_auto_build
+
+build_cython:
+	dh_testdir
+	python3 setup.py build_cython
+	touch $@
+
+build_sphinx:
+	dh_testdir
+ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+	python3 setup.py build_ext --inplace
+	python3 setup.py build_sphinx
+endif
+	touch $@
+
+override_dh_strip:
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip -ppython3-llfuse --dbg-package=python3-llfuse-dbg
+endif
+
+override_dh_auto_clean:
+	# Remove documentation and cython output
+	rm -rf build_cython build_sphinx src/llfuse/capi_*.c doc/
+	find \( \( -name '*.egg-info' -type d \) \
+	     -o \( -name __pycache__  -type d \) \
+	     -o \( -name '*.so' -type f \) \
+	     -o \( -name '*.pyc' -type f \) \
+	     \) -prune -exec rm -rf '{}' +
+	dh_auto_clean
+
+update_intersphinx:
+	wget http://docs.python.org/3/objects.inv -O debian/python.inv
+
+.PHONY: get-orig-source
+get-orig-source:
+	uscan --rename --destdir=$(CURDIR)/.. --repack --force-download \
+	      --download-current-version --compression xz
+
+.PHONY: uscan
+uscan:
+	uscan --rename --destdir=$(CURDIR)/.. --repack --compression xz
