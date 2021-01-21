@@ -1,0 +1,80 @@
+Source: python-llfuse
+Section: python
+Priority: optional
+Uploaders: Debian Python Team <team+python@tracker.debian.org>
+Maintainer: Nikolaus Rath <Nikolaus@rath.org>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               libfuse-dev (>= 2.9.0),
+               libattr1-dev,
+               python3-all-dev,
+               python3-all-dbg,
+               python3-sphinx (>= 1.0.7+dfsg),
+               python3-contextlib2,
+               python3-pytest (>= 3.3.0),
+               pkg-config,
+               fuse [linux-any], fuse4bsd [kfreebsd-any],
+               python3-setuptools,
+               cython3 (>= 0.23)
+Rules-Requires-Root: no
+Standards-Version: 4.5.1
+Homepage: https://github.com/python-llfuse/python-llfuse
+Vcs-Git: https://salsa.debian.org/python-team/packages/python-llfuse.git
+Vcs-Browser: https://salsa.debian.org/python-team/packages/python-llfuse
+
+Package: python3-llfuse
+Architecture: any
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         ${shlibs:Depends}
+Provides: ${python3:Provides}
+Breaks: borgbackup (<= 1.0.0~rc1-3)
+Suggests: python-llfuse-doc
+Multi-Arch: same
+Description: Python 3 bindings for the low-level FUSE API
+ Python-llfuse is a set of Python bindings for the low level FUSE API.
+ This package provides the extension for the Python 3 interpreter. The
+ documentation is contained in the python-llfuse-doc package.
+ .
+ FUSE (Filesystem in USErspace) is a simple interface for userspace
+ programs to export a virtual filesystem to the Linux kernel. FUSE
+ also aims to provide a secure method for non privileged users to
+ create and mount their own filesystem implementations.
+
+Package: python3-llfuse-dbg
+Section: debug
+Architecture: any
+Recommends: python3-dbg
+Breaks: python3-llfuse (<< 0.40+dfsg-1)
+Replaces: python3-llfuse (<< 0.40+dfsg-1)
+Depends: python3-llfuse (= ${binary:Version}),
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: Python 3 bindings for the low-level FUSE API (debugging symbols)
+ Python-llfuse is a set of Python bindings for the low level FUSE API.
+ .
+ FUSE (Filesystem in USErspace) is a simple interface for userspace
+ programs to export a virtual filesystem to the Linux kernel. FUSE
+ also aims to provide a secure method for non privileged users to
+ create and mount their own filesystem implementations.
+ .
+ This package contains the debugging symbols as well as the extension
+ built for the Python 3 debug interpreter.
+
+Package: python-llfuse-doc
+Architecture: all
+Section: doc
+Multi-Arch: foreign
+Recommends: python3-llfuse
+Depends: ${sphinxdoc:Depends},
+         ${shlibs:Depends},
+         ${misc:Depends}
+Description: Python bindings for the low-level FUSE API (documentation)
+ Python-llfuse is a set of Python bindings for the low level FUSE API.
+ This package provides the documentation for both the Python 2 and
+ Python 3 extension (packages python-llfuse and python3-llfuse).
+ .
+ FUSE (Filesystem in USErspace) is a simple interface for userspace
+ programs to export a virtual filesystem to the Linux kernel. FUSE
+ also aims to provide a secure method for non privileged users to
+ create and mount their own filesystem implementations.

@@ -1,0 +1,28 @@
+From: Nikolaus Rath <Nikolaus@rath.org>
+Date: Sat, 21 Nov 2020 11:51:39 +0000
+Subject: Register custom markers.
+Applied-Upstream: https://github.com/python-llfuse/python-llfuse/commit/1635778926a3dd531481ede8102b751e5caa0884
+
+---
+ test/pytest.ini          | 1 +
+ test/pytest_checklogs.py | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/test/pytest.ini b/test/pytest.ini
+index bc4af36..9c38d14 100644
+--- a/test/pytest.ini
++++ b/test/pytest.ini
+@@ -1,2 +1,3 @@
+ [pytest]
+ addopts = --verbose --assert=rewrite --tb=native -x
++markers = uses_fuse
+diff --git a/test/pytest_checklogs.py b/test/pytest_checklogs.py
+index dd560a1..1bb9640 100644
+--- a/test/pytest_checklogs.py
++++ b/test/pytest_checklogs.py
+@@ -114,4 +114,4 @@ def check_output(caplog, capfd, request):
+             if (record.levelno >= logging.WARNING and
+                 not getattr(record, 'checklogs_ignore', False)):
+                 pytest.fail('Logger received warning messages.')
+-    check_test_output(capfd, request)
++    check_test_output(capfd, request.node)

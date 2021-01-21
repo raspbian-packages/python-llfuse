@@ -1,0 +1,6 @@
+0002-Use-cython3-instead-of-cython-command.patch
+0003-Skip-extended-attribute-tests-under-GNU-kFreeBSD.patch
+0004-Ignore-exceptions-during-interpreter-shutdown.patch
+mips_dev_t.diff
+0006-Use-fixtures-instead-of-hooks-for-inspecting-output.patch
+0007-Register-custom-markers.patch
