@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DH_VERBOSE=1
+export PYBUILD_NAME=llfuse
+export PYBUILD_TEST_PYTEST=1
+export PYBUILD_TEST_ARGS=--installed "{dir}/test/"
+
+%:
+	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
+
+override_dh_auto_build: export http_proxy=127.0.0.1:9
+override_dh_auto_build: export https_proxy=127.0.0.1:9
+override_dh_auto_build: build_cython
+	dh_auto_build
+	PYTHONPATH=.:./util python3 -m sphinx -N -bhtml rst/ build/html # HTML generator
+
+build_cython:
+	dh_testdir
+	python3 setup.py build_cython
+	touch $@
+
+override_dh_strip:
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip --dbgsym-migration='python3-llfuse-dbg (<< 1.4.1+dfsg-1~)'
+endif
