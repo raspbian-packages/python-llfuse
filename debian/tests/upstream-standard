@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Test suite automatically skips over tests that cannot be
+# executed because of insufficient priviliges.
+exec py.test-3 --installed test/
